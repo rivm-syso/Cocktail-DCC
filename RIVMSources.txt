@@ -1,0 +1,7 @@
+!
+! The list below specifies the sourceterms known to library libcocktailnuclide.
+! To add a new source term, just create a file in the correct format (see other sourceterm files as examples)
+! and add its reference to the list. New lookup tables will be created automatically at first use.
+!
+!
+./brontermen/Kraus_and_Foster_table2.RIVMSource
