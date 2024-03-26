@@ -1553,6 +1553,8 @@ CONTAINS
             tMin = tMinSug
          ENDIF
 
+         READ(ScratchFile) Orphanage
+
          READ(ScratchFile) RegularizedNuclideSpecs
 
          IF (ALLOCATED(SparseRegularizedMMMatrix%Element)) DEALLOCATE(SparseRegularizedMMMatrix%Element)
@@ -1624,6 +1626,7 @@ CONTAINS
          WRITE(ScratchFile) SparseIsRelated%N
          WRITE(ScratchFile) SparseIsRelated%Element
          WRITE(ScratchFile) tMin
+         WRITE(ScratchFile) Orphanage
          WRITE(ScratchFile) RegularizedNuclideSpecs
          SparseRegularizedMMMatrix = Matrix2SparseMatrix(RegularizedMotherDaughterMatrix)
          WRITE(ScratchFile) SparseRegularizedMMMatrix%N,SparseRegularizedMMMatrix%NMax
@@ -1646,6 +1649,7 @@ CONTAINS
          WRITE(*,'(A,I0,A)') 'SparseMMMatrix             takes : ',SIZEOF(SparseMMMatrix%Element),' bytes'
          WRITE(*,'(A,I0,A)') 'SparseIsRelated            takes : ',SIZEOF(SparseIsRelated%Element),' bytes'
          WRITE(*,'(A,I0,A)') 'tMinSug                    takes : ',SIZEOF(tMinSug),' bytes'
+         WRITE(*,'(A,I0,A)') 'Orphanage                  takes : ',SIZEOF(Orphanage),' bytes'
          WRITE(*,'(A,I0,A)') 'RegularizedNuclideSpecs    takes : ',SIZEOF(RegularizedNuclideSpecs),' bytes'
          WRITE(*,'(A,I0,A)') 'SparseRegularizedMMMatrix  takes : ',SIZEOF(SparseRegularizedMMMatrix%Element),' bytes'
          WRITE(*,'(A,I0,A)') 'SparseRegularizedIsRelated takes : ',SIZEOF(SparseRegularizedIsRelated%Element),' bytes'
