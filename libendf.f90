@@ -1115,6 +1115,12 @@ CONTAINS
                ENDIF ! yield > 0
             ENDIF ! line 2 or 5 and later in the decay chapter
          ENDIF ! not doing bullocks...
+         !
+         ! The Er-145 nuclide has an halflive that should not be possible, or not written this way
+         !
+         IF ((NuclideSpecs(iNuclide)%AtomName .EQ. 'Er') .AND. (NuclideSpecs(iNuclide)%NHadrons .EQ. 145)) THEN
+            NuclideSpecs(iNuclide)%HalfTime = 1e-6_Float
+         ENDIF
       ENDIF ! Inside chapter of decay records
    END SUBROUTINE Parse1DataLine
 
@@ -1681,7 +1687,7 @@ CONTAINS
       Orphanage%NTooUnStable = 0
 
       DO DaughterNuclide = 1,NNuclides
-         Orphanage%IsTooUnstable(DaughterNuclide) = (NuclideSpecs(DaughterNuclide)%HalfTime.LT.Orphanage%tMin)
+         Orphanage%IsTooUnstable(DaughterNuclide) = ((NuclideSpecs(DaughterNuclide)%HalfTime.LT.Orphanage%tMin))
          IF (Orphanage%IsTooUnstable(DaughterNuclide)) THEN
             IF (DebugLevel.GT.0) WRITE(*,'(A,EN20.10,A,EN20.10,A)') 'Handling too fast nuclide '&
                & //TRIM(NuclideSpecs(DaughterNuclide)%NuclideName)//' with halflife ',NuclideSpecs(DaughterNuclide)%HalfTime,&
@@ -1701,28 +1707,32 @@ CONTAINS
                   !
                   ! If a possible mother has been found, then define a new orphan
                   !
-               IF (DaughterNuclide.EQ.HerDaughterNuclide) THEN
-                  NMothers = NMothers + 1
+                  IF (DaughterNuclide.EQ.HerDaughterNuclide) THEN
+                     NMothers = NMothers + 1
 
-                  IF (DebugLevel.GT.0) WRITE(*,'(A,I0,A,F15.10)') &
-                     & 'Found mother '//TRIM(NuclideSpecs(MotherNuclide)%NuclideName)//&
-                     & ' and '//TRIM(NuclideSpecs(DaughterNuclide)%NuclideName)//' is her daughter number ',iDaughter,&
-                     & ' with branching ratio ',NuclideSpecs(MotherNuclide)%DaughterFraction(iDaughter)
+                     IF (DebugLevel.GT.0) WRITE(*,'(A,I0,A,F15.10)') &
+                        & 'Found mother '//TRIM(NuclideSpecs(MotherNuclide)%NuclideName)//&
+                        & ' and '//TRIM(NuclideSpecs(DaughterNuclide)%NuclideName)//' is her daughter number ',iDaughter,&
+                        & ' with branching ratio ',NuclideSpecs(MotherNuclide)%DaughterFraction(iDaughter)
 
-                  IF (Orphanage%NOrphans.EQ.MaxNOrphans) THEN
-                     WRITE(*,'(A,I0,A)') 'Cannot add new orphan after maximum number of ',&
-                        & Orphanage%NOrphans,' orphans! Exiting!!'
-                     CALL EXIT()
-                  ENDIF ! maximum dimension reached
+                     IF (Orphanage%NOrphans.EQ.MaxNOrphans) THEN
+                        WRITE(*,'(A,I0,A)') 'Cannot add new orphan after maximum number of ',&
+                           & Orphanage%NOrphans,' orphans! Exiting!!'
+                        CALL EXIT()
+                     ENDIF ! maximum dimension reached
 
-                  Orphanage%NOrphans = Orphanage%NOrphans + 1
+                     Orphanage%NOrphans = Orphanage%NOrphans + 1
 
-                  Orphanage%Orphan(Orphanage%NOrphans)%Mother   = MotherNuclide
-                  Orphanage%Orphan(Orphanage%NOrphans)%Daughter = DaughterNuclide
-                  Orphanage%Orphan(Orphanage%NOrphans)%yield    = NuclideSpecs(MotherNuclide)%DaughterFraction(iDaughter)
-               ENDIF ! Recognition of daughter by mother
-            ENDDO ! loop over daughters
-         ENDDO ! Loop over candidate mothers
+                     Orphanage%Orphan(Orphanage%NOrphans)%Mother   = MotherNuclide
+                     Orphanage%Orphan(Orphanage%NOrphans)%Daughter = DaughterNuclide
+                     Orphanage%Orphan(Orphanage%NOrphans)%yield    = NuclideSpecs(MotherNuclide)%DaughterFraction(iDaughter)
+                  ENDIF ! Recognition of daughter by mother
+               ENDDO ! loop over daughters
+            ENDDO ! Loop over candidate mothers
+
+            NuclideSpecs(DaughterNuclide)%IsOrphan = .TRUE.
+            Orphanage%NTooUnstable = Orphanage%NTooUnStable + 1
+         ENDIF
 
          IF (DebugLevel.GT.0) THEN
             IF (NMothers.GT.0) THEN
@@ -1734,13 +1744,12 @@ CONTAINS
 
             WRITE(*,'(A)') 'This is all I wanted to say about too fast nuclide '&
                & //TRIM(NuclideSpecs(DaughterNuclide)%NuclideName)
-            ENDIF ! DebugLevel > 0
-         ENDIF ! Halflife of daughter too short
+         ENDIF ! DebugLevel > 0
       ENDDO ! Loop over daughters
-      !
-      ! Show list of orphans
-      !
-      WRITE(*,'(A)') 'List of orphans: '
+         !
+         ! Show list of orphans
+         !
+         WRITE(*,'(A)') 'List of orphans: '
 
       DO iOrphan = 1,Orphanage%NOrphans
          WRITE(*,'(A,I4,A,A,A,A,5X,A,EN20.10,A,F20.10,A)') &
