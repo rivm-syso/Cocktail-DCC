@@ -1119,7 +1119,7 @@ CONTAINS
          ! The Er-145 nuclide has an halflive that should not be possible, or not written this way
          !
          IF ((NuclideSpecs(iNuclide)%AtomName .EQ. 'Er') .AND. (NuclideSpecs(iNuclide)%NHadrons .EQ. 145)) THEN
-            NuclideSpecs(iNuclide)%HalfTime = 1e-6_Float
+            NuclideSpecs(iNuclide)%HalfTime = 1.e-6_Float
          ENDIF
       ENDIF ! Inside chapter of decay records
    END SUBROUTINE Parse1DataLine
