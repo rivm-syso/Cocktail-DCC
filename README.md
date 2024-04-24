@@ -56,6 +56,8 @@ ICRP nuclides, link: http://www.icrp.org/publication.asp?id=ICRP%20Publication%2
 
 DCC from the ICRP-144, doi: https://doi.org/10.1177/0146645320906277
 
+DCC from the ICRP-119, doi: http://dx.doi.org/10.1016/j.ympev.2012.04.018
+
 Supplemented with data from: ICRP, supplemental files, 2020.
 
 # How to build the utilities #
