@@ -14,7 +14,7 @@ MODULE LibENDF
 
    USE libxmath
    USE libutil
-   USE libexponential
+   USE Matrix_Exponential
 
    IMPLICIT NONE
 

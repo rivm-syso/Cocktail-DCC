@@ -7,7 +7,7 @@ PROGRAM NuclideDecay
    USE libutil
    USE libinterval
    USE libendf
-   USE libexponential
+   USE Matrix_Exponential
 
    IMPLICIT NONE
    !

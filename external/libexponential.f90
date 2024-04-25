@@ -5,7 +5,7 @@
 ! Downloaded from http://jblevins.org/mirror/amiller/dmexp.f90
 ! (accessed: 2015-10-19).
 !
-MODULE LibExponential
+MODULE Matrix_Exponential
    ! DMEXP COMPUTES EXP(A) AND STORES IT IN Z WHERE A IS A MATRIX
    ! OF ORDER N.  A IS DESTROYED BY THE ROUTINE.
 
@@ -535,4 +535,4 @@ CONTAINS
       130 ierr = n
       RETURN
    END SUBROUTINE dpslv
-END MODULE LibExponential
+END MODULE Matrix_Exponential
