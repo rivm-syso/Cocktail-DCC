@@ -7,6 +7,7 @@ set(PUFF_PROGRAMS
    testcocktailDCC02
    mature_nuclides
    )
+target_link_libraries(decay matrixexponential)
 
 # The excecutables:
 foreach(prog ${PUFF_PROGRAMS})

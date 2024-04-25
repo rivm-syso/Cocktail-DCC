@@ -16,9 +16,8 @@ MODULE LibExponential
    ! Code converted using TO_F90 by Alan Miller
    ! Date: 2002-12-19  Time: 10:46:30
 
-   USE libxmath
-
    IMPLICIT NONE
+   INTEGER, PARAMETER  :: dp = SELECTED_REAL_KIND(12, 60)
 
    PRIVATE
 
