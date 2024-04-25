@@ -22,10 +22,10 @@ MODULE LibExponential
 
    PRIVATE
 
-   PUBLIC :: MatrixExponential
+   PUBLIC :: dmexp
 
 CONTAINS
-   SUBROUTINE MatrixExponential(a, n, z, ierr)
+   SUBROUTINE dmexp(a, n, z, ierr)
 
       INTEGER, INTENT(IN)     :: n
       REAL (dp), INTENT(OUT)  :: a(:,:)
@@ -167,7 +167,7 @@ CONTAINS
       RETURN
       200 ierr = 2
       RETURN
-   END SUBROUTINE MatrixExponential
+   END SUBROUTINE dmexp
 
 
 

@@ -2254,7 +2254,7 @@ CONTAINS
       !
       ! Exponential
       !
-      CALL MatrixExponential(yDelay,NuclideFamily%NFamily,zDelay,ErrorCode)
+      CALL dmexp(yDelay,NuclideFamily%NFamily,zDelay,ErrorCode)
    END SUBROUTINE MakeEvolutionMatrix
 
 
