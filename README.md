@@ -4,6 +4,9 @@
 **testCocktailDCC02.f90**
 Sample program showing how to use the functionality made available by module libcocktaildcc. Cocktail DCCs for different pathways and activities for 3 nuclides are estimated.
 
+**libcocktaildcc.f90**
+Library to support the use of cocktail DCCs. 
+
 **SourcetermDose06AB.f90**
 This utility reads a source term/nuclide vector at t=0 (blast) from file and returns lookup tables for (regular and cumulative) cocktail DCCs at the agreed set of pinpoints in time. It also generates lookup tables at these pinpoints for the total individual nuclide activities. You can construct cocktail DCCs for particular natures of either the mother nuclide or the daughter nuclide: "any", "noble gas" or "other than noble gas".
 
