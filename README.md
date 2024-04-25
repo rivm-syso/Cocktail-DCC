@@ -38,7 +38,7 @@ Supporting library with extra mathematics not available in FORTRAN intrinsic fun
 Utility. For a given source file (module or main program), this utility returns the list of source files on which this source file is dependent. The list is returned as a text string, where the order of the fine names is put in order of dependency. The aim of the utility is to facilitate compilation of FORTRAN-90 code without a need for the user to specify the names of the source files, let alone order them.
 
 # Supporting library #
-handling reading and saving the pinpoint tables and transitionmatrices.
+handling reading and saving the pinpoint tables and transition matrices.
 
 # Supporting files #
 We use dataset of the ENDF-B-VIII, link: [ENDF/B-VIII.0 Evaluated Nuclear Data Library (bnl.gov)](https://www.nndc.bnl.gov/endf-b8.0/)
