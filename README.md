@@ -26,23 +26,23 @@ This utility creates a string with the needed dependencies in the correct order.
 
 Sample program showing how to use the functionality made available by module libcocktaildcc. Cocktail DCCs for different pathways and activities for 3 nuclides are estimated.
 
-**Libxmath**
+**Libxmath.f90**
 
 Supporting library with calculation options
 
-**Libutil**
+**Libutil.f90**
 
 Supporting library with useful function
 
-**LibInterval**
+**LibInterval.f90**
 
 Supporting library handling the interval calculations
 
-**LibExponential**
+**LibExponential.f90**
 
 Supporting library originally from J Blevins, handling matrix exponential calculations
 
-**Libpinpoint**
+**Libpinpoint.f90**
 
 Supporting library handling reading and saving the pinpoint tables and transitionmatrices.
 
