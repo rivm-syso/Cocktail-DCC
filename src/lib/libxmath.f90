@@ -4,8 +4,6 @@ MODULE LibXMath
    !
    ! ____________________________________________________
    !
-   ! Version: 15 march 2024
-   !
    ! Developed For:
    !
    ! RIVM - National Institute for Public Health and the Environment

@@ -1,10 +1,6 @@
 PROGRAM MatureNuclides
-   !
-   ! Version 5 July 2023 for RIVM
-   !
    ! This utility reads a nuclide vector at t=0 from file and a delay.
    ! It returns the aged cocktail.
-   !
    USE libxmath
    USE libutil
    USE libendf

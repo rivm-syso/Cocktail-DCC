@@ -44,10 +44,7 @@ PROGRAM nuclide_decay
    !
    WRITE(*,'(A)') '==================================================================================================='
    WRITE(*,*)
-   WRITE(*,'(A)') 'This is utility nuclide_decay, version 14 March 2024,'
-   WRITE(*,'(A)') 'based on the ~3800 nuclides from the ENDF dataset.'
-   WRITE(*,*)
-   WRITE(*,'(A)') 'developed for:'
+   WRITE(*,'(A)') 'This utility was developed for:'
    WRITE(*,*)
    WRITE(*,'(A)') 'VLH (Centre for Environmental Safety and Security)'
    WRITE(*,'(A)') 'RIVM (National Institute for Public Health and the Environment)'

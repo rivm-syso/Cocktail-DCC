@@ -1,8 +1,6 @@
 MODULE LibDCC
    ! ____________________________________________________
    !
-   ! Version: 23 November 2022
-   !
    ! Developed For:
    !
    ! VLH   Centre for Environmental Safety and Security

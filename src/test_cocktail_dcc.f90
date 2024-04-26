@@ -1,7 +1,5 @@
 PROGRAM test_cocktail_dcc
    !
-   ! Version: 18 December 2022
-   !
    ! Developed For:
    !
    ! VLH   Centre for Environmental Safety and Security

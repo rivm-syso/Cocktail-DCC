@@ -1,8 +1,6 @@
 MODULE LibCocktailDCC
    ! ____________________________________________________
    !
-   ! Version: 15 March 2024
-   !
    ! Developed For:
    !
    ! VLH   Centre for Environmental Safety and Security

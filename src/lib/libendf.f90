@@ -1,8 +1,6 @@
 MODULE LibENDF
    ! ____________________________________________________
    !
-   ! Version: 11 July 2023
-   !
    ! Developed For:
    !
    ! VLH   Centre for Environmental Safety and Security
