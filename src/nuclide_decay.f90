@@ -1,4 +1,4 @@
-PROGRAM NuclideDecay
+PROGRAM nuclide_decay
    !
    ! This utility constructs the decay matrix for (a vector of) all ENDF nuclides for a given arbitrary delay.
    ! All different delay pinpoints used in the cocktail DCC library are handled in 1 go!
@@ -44,7 +44,7 @@ PROGRAM NuclideDecay
    !
    WRITE(*,'(A)') '==================================================================================================='
    WRITE(*,*)
-   WRITE(*,'(A)') 'This is utility NuclideDecay, version 14 March 2024,'
+   WRITE(*,'(A)') 'This is utility nuclide_decay, version 14 March 2024,'
    WRITE(*,'(A)') 'based on the ~3800 nuclides from the ENDF dataset.'
    WRITE(*,*)
    WRITE(*,'(A)') 'developed for:'
@@ -62,7 +62,7 @@ PROGRAM NuclideDecay
    IF (NArguements.NE.1) THEN
       WRITE(*,'(A)') 'Call:'
       WRITE(*,*)
-      WRITE(*,'(A)') 'NuclideDecay <full/sparse>'
+      WRITE(*,'(A)') 'nuclide_decay <full/sparse>'
       WRITE(*,*)
       WRITE(*,'(A)') 'where:'
       WRITE(*,'(A)') '<full/sparse> can be used to select full (files 31MB) or sparse (files 115kB) format.'
@@ -250,4 +250,4 @@ PROGRAM NuclideDecay
       ENDIF ! halflife > Orphanage%tMin
 
    ENDDO ! loop over nuclides
-END PROGRAM NuclideDecay
+END PROGRAM nuclide_decay

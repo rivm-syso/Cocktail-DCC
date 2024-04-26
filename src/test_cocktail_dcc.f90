@@ -1,4 +1,4 @@
-PROGRAM TestCocktailDCC
+PROGRAM test_cocktail_dcc
    !
    ! Version: 18 December 2022
    !
@@ -104,4 +104,4 @@ PROGRAM TestCocktailDCC
 
    ENDDO
 
-END PROGRAM TestCocktailDCC
+END PROGRAM test_cocktail_dcc

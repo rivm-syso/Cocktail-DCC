@@ -2,9 +2,9 @@
 file(GLOB decay_source_files CONFIGURE_DEPENDS lib/*.f90)
 add_library(decay ${decay_source_files})
 set(PUFF_PROGRAMS
-   NuclideDecay03c
-   SourceTermdose06AC
-   testcocktailDCC02
+   nuclide_decay
+   source_term_dose
+   test_cocktail_dcc
    mature_nuclides
    )
 target_link_libraries(decay matrixexponential)
