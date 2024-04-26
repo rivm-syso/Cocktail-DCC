@@ -4,8 +4,6 @@ MODULE LibUtil
    !
    ! ____________________________________________________
    !
-   ! Version: 15 March 2024
-   !
    ! Developed For:
    ! RIVM - National Institute for Public Health and the Environment
    !

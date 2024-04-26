@@ -1,4 +1,4 @@
-PROGRAM SourceTermDose
+PROGRAM source_term_dose
 !
 ! This utility reads a nuclide vector at t=0 (blast) from file
 ! and returns lookup tables for (regular and cumulative) dose rates at a set of pinpoints in time
@@ -30,7 +30,7 @@ PROGRAM SourceTermDose
    IF (NArguements.NE.4) THEN
       WRITE(*,'(A)') 'Call:'
       WRITE(*,*)
-      WRITE(*,'(A)') 'SourceTermdose06AB.exe <fname> <withdaughters> <Mother nature> <daughter nature>'
+      WRITE(*,'(A)') 'source_term_dose.exe <fname> <withdaughters> <Mother nature> <daughter nature>'
       WRITE(*,*)
       WRITE(*,'(A)') 'where:'
       WRITE(*,'(A)') '<fname> is the name of a file with the nuclide vector at t=0'
@@ -77,4 +77,4 @@ PROGRAM SourceTermDose
    ! Construct cocktails at all pinpoints in time
    !
    CALL GetPinpointCocktails(StartCocktail,WithDaughters)
-END PROGRAM SourceTermDose
+END PROGRAM source_term_dose

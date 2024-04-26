@@ -1,8 +1,6 @@
 MODULE LibCocktailDCC
    ! ____________________________________________________
    !
-   ! Version: 15 March 2024
-   !
    ! Developed For:
    !
    ! VLH   Centre for Environmental Safety and Security
@@ -55,13 +53,13 @@ MODULE LibCocktailDCC
    !
    ! can be used to specify that the activities are given in MBq instead of Bq.
    !
-   ! There is a utility named "SourceTermdose06.exe" that, for a given source term at t=0, can generate lookup tables
+   ! There is a utility named "source_term_dose.exe" that, for a given source term at t=0, can generate lookup tables
    ! for the DCCs and for the individual activities. For each source term, four ASCII format lookup tables are used:
    ! three for the different cocktail DCCs and for the nuclide specific concentration.
    ! These files are assumed to be located in the same directory as the source term file.
    ! Upon first use of module libcocktaildcc, the initialization routine assesses availability of the lookup
    ! tables for each source term in the file RIVMSources.txt and reads them for future use. If for any source term the
-   ! associated lookup tables cannot be found, then a system call is made to utility SourceTermdose06.exe with the aim to
+   ! associated lookup tables cannot be found, then a system call is made to utility source_term_dose.exe with the aim to
    ! add them. This takes about half a minute for 1 source term and needs to be done only once for each new source term.
    ! In this way, one can add support for a new source term by the construction of a correct .RIVMSource file
    ! and specification of its name and location on a new line in file RIVMSources.txt. The lookup tables will be
@@ -130,7 +128,7 @@ MODULE LibCocktailDCC
    !   CHARACTER(*), INTENT(IN) :: MyName = name of the nuclide you want to follow, e.g. 'I-131' or 'Cs137'
    !
    !
-   ! An example of how to use libcocktaildcc can be found in test program testcocktailDCC01.f90.
+   ! An example of how to use libcocktaildcc can be found in test program test_cocktail_dcc.f90.
    !
    USE libxmath
    USE libutil
@@ -255,7 +253,7 @@ CONTAINS
             Commando = 'runlog??.txt'
             WRITE(Commando(7:8),'(I2.2)') NSourceTerms
 
-            UtilityName = './SourceTermdose06AC.exe'
+            UtilityName = './source_term_dose.exe'
 
             IF (.NOT.FileExists(UtilityName)) THEN
                WRITE(*,'(A)') 'Cannot find utility '//TRIM(UtilityName)//' and its auxiliary files... Exiting!'

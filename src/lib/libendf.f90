@@ -1,8 +1,6 @@
 MODULE LibENDF
    ! ____________________________________________________
    !
-   ! Version: 11 July 2023
-   !
    ! Developed For:
    !
    ! VLH   Centre for Environmental Safety and Security
@@ -14,7 +12,7 @@ MODULE LibENDF
 
    USE libxmath
    USE libutil
-   USE libexponential
+   USE Matrix_Exponential
 
    IMPLICIT NONE
 
@@ -2254,7 +2252,7 @@ CONTAINS
       !
       ! Exponential
       !
-      CALL MatrixExponential(yDelay,NuclideFamily%NFamily,zDelay,ErrorCode)
+      CALL dmexp(yDelay,NuclideFamily%NFamily,zDelay,ErrorCode)
    END SUBROUTINE MakeEvolutionMatrix
 
 

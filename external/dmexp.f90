@@ -5,7 +5,7 @@
 ! Downloaded from http://jblevins.org/mirror/amiller/dmexp.f90
 ! (accessed: 2015-10-19).
 !
-MODULE LibExponential
+MODULE Matrix_Exponential
    ! DMEXP COMPUTES EXP(A) AND STORES IT IN Z WHERE A IS A MATRIX
    ! OF ORDER N.  A IS DESTROYED BY THE ROUTINE.
 
@@ -16,16 +16,15 @@ MODULE LibExponential
    ! Code converted using TO_F90 by Alan Miller
    ! Date: 2002-12-19  Time: 10:46:30
 
-   USE libxmath
-
    IMPLICIT NONE
+   INTEGER, PARAMETER  :: dp = SELECTED_REAL_KIND(12, 60)
 
    PRIVATE
 
-   PUBLIC :: MatrixExponential
+   PUBLIC :: dmexp
 
 CONTAINS
-   SUBROUTINE MatrixExponential(a, n, z, ierr)
+   SUBROUTINE dmexp(a, n, z, ierr)
 
       INTEGER, INTENT(IN)     :: n
       REAL (dp), INTENT(OUT)  :: a(:,:)
@@ -167,7 +166,7 @@ CONTAINS
       RETURN
       200 ierr = 2
       RETURN
-   END SUBROUTINE MatrixExponential
+   END SUBROUTINE dmexp
 
 
 
@@ -536,4 +535,4 @@ CONTAINS
       130 ierr = n
       RETURN
    END SUBROUTINE dpslv
-END MODULE LibExponential
+END MODULE Matrix_Exponential
