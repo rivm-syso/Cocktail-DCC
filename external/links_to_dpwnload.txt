@@ -1,0 +1,3 @@
+https://www.nndc.bnl.gov/endf-b8.0/zips/ENDF-B-VIII.0_decay.zip
+
+! this has the decay.list in it and it needs one correction, 'CS-142'  --> 'Cs-142'
