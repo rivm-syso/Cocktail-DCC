@@ -25,8 +25,8 @@ MODULE LibENDF
    & GetNuclideNumber,MassNuc2NucMass,EnsureHyphen,ReadNuclideSpecs,AtomName,&
    & IsRelated,RegularizedIsRelated,ReadNProcessENDFNuclideSpecs
 
-   CHARACTER(DefaultLength) :: ENDFPath = './../ENDF-B-VIII.0_decay/'
-   CHARACTER(DefaultLength) :: ENDFSpontaneousPath = './../ENDFB_spontaneous/'
+   CHARACTER(DefaultLength) :: ENDFPath = './build/external/ENDF-B-VIII.0_decay/'
+   CHARACTER(DefaultLength) :: ENDFSpontaneousPath = './build/external/ENDFB_spontaneous/'
 
    INTEGER, PARAMETER :: MaxAtoms = 118 ! largest atom number available
 

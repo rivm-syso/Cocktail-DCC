@@ -253,7 +253,7 @@ CONTAINS
             Commando = 'runlog??.txt'
             WRITE(Commando(7:8),'(I2.2)') NSourceTerms
 
-            UtilityName = './source_term_dose.exe'
+            UtilityName = './build/src/source_term_dose'
 
             IF (.NOT.FileExists(UtilityName)) THEN
                WRITE(*,'(A)') 'Cannot find utility '//TRIM(UtilityName)//' and its auxiliary files... Exiting!'

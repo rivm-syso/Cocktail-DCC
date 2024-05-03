@@ -113,16 +113,16 @@ MODULE LibDCC
 
    INTEGER, PARAMETER :: NGroundDepths = 9
 
-   CHARACTER(6), PARAMETER, DIMENSION(NGroundDepths) :: GroundDepthName = &
-      & (/'planar',&
-      &   '0p5   ',&
-      &   '1     ',&
-      &   '2p5   ',&
-      &   '5     ',&
-      &   '10    ',&
-      &   '20    ',&
-      &   '50    ',&
-      &   '100   '/)
+   CHARACTER(45), PARAMETER, DIMENSION(NGroundDepths) :: GroundDepthName = &
+      & (/'Planar sources at specific depths/0.5 g.cm-2/',&
+      &   'Exponential sources/0.5 g.cm-2/              ',&
+      &   'Exponential sources/1.0 g.cm-2/              ',&
+      &   'Exponential sources/2.5 g.cm-2/              ',&
+      &   'Exponential sources/5.0 g.cm-2/              ',&
+      &   'Exponential sources/10.0 g.cm-2/             ',&
+      &   'Exponential sources/20.0 g.cm-2/             ',&
+      &   'Exponential sources/50.0 g.cm-2/             ',&
+      &   'Exponential sources/100.0 g.cm-2/            '/)
 
    INTEGER, PARAMETER :: NInhalationDCCs = 8
 
@@ -192,11 +192,11 @@ CONTAINS
          CALL ReadNProcessENDFNuclideSpecs(tMin,RegularizedNuclideSpecs,RegularizedMotherDaughterMatrix)
       ENDIF
 
-      DCCCalcPath = TRIM(ProjectPath)//'../Overige_modellen/'
-      DCCAirSubmersionPath = TRIM(DCCCalcPath)//'DCC_calc/Supplemental/Airsubmersion/'
-      DCCSoilContaminationPath = TRIM(ProjectPath)//'../Overige_modellen/'
-      DCCWaterImmersionPath = TRIM(DCCCalcPath)//'DCC_calc/Supplemental/Waterimmersion/'
-      DCCInhalationPath = TRIM(ProjectPath)//'../Overige_modellen/'
+      DCCCalcPath = TRIM(ProjectPath)//'build/'
+      DCCAirSubmersionPath = TRIM(DCCCalcPath)//'external/Supplemental Files -v4/Air submersion/'
+      DCCSoilContaminationPath = TRIM(DCCCalcPath)//'external/Supplemental Files -v4/Soil contamination/'
+      DCCWaterImmersionPath = TRIM(DCCCalcPath)//'external/Supplemental Files -v4/Water immersion/'
+      DCCInhalationPath = TRIM(ProjectPath)//'resources/'
    END SUBROUTINE InitLibDCC
 
 
@@ -367,20 +367,21 @@ CONTAINS
       ! Read ground DCCs
       !
       CHARACTER(DefaultLength) :: FName,ALine
-      INTEGER :: iLine,jNuclide,iGroundDepth,iAge,DumLine
+      INTEGER :: iLine,jNuclide,iGroundDepth,iAge,DumLine, iSkip
       CHARACTER(10) :: MyNuclideName
       LOGICAL :: IsDashLine
 
       DO iGroundDepth = 1,NGroundDepths
-         FName = 'DCC_ground_'//TRIM(GroundDepthName(iGroundDepth))//'.prn'
+         FName = TRIM(GroundDepthName(iGroundDepth))//'Soil_Nuclide-specific_EffectiveDose.txt'
          FName = TRIM(DCCSoilContaminationPath)//TRIM(FName)
          OPEN(ScratchFile,FILE=FName,FORM='FORMATTED',ACTION='READ')
          !
-         ! Skip header
+         ! Skip header 10 lines
          !
-         READ(ScratchFile,*)
-         READ(ScratchFile,*)
-         iLine = 2
+         do iSkip = 1,10
+            READ(ScratchFile,*)
+         enddo
+         iLine = 10
          !
          ! Read data for all nuclides
          !
@@ -427,7 +428,7 @@ CONTAINS
       CHARACTER(10) :: MyNuclideName
 
       FName = 'CoVeGa_v63_voorRapport_Inhalation.prn'
-      FName = TRIM(DCCSoilContaminationPath)//TRIM(FName)
+      FName = TRIM(DCCInhalationPath)//TRIM(FName)
       OPEN(ScratchFile,FILE=FName,FORM='FORMATTED',ACTION='READ')
       !
       ! Skip header

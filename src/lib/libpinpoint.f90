@@ -65,7 +65,7 @@ CONTAINS
       CALL ReadInhalationDCCs()
       CALL ReadThyroidInhalationDCCs()
 
-      TransitionMatrixPath = TRIM(ProjectPath)//'../matrices/'
+      TransitionMatrixPath = TRIM(ProjectPath)//'/matrices/'
 
       AvailableDelay(0) = 0
       AvailableDelay(1) = 60
