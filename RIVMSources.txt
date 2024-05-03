@@ -4,4 +4,5 @@
 ! and add its reference to the list. New lookup tables will be created automatically at first use.
 !
 !
-./Kraus_and_Foster_table2.RIVMSource
+./resources/Kraus_and_Foster_table2.RIVMSource
+./resources/Axelsson_fullTerm.RIVMSource
