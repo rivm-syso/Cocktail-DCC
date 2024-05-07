@@ -26,7 +26,6 @@ MODULE LibENDF
    & IsRelated,RegularizedIsRelated,ReadNProcessENDFNuclideSpecs
 
    CHARACTER(DefaultLength) :: ENDFPath = './build/endf-src/'
-   CHARACTER(DefaultLength) :: ENDFSpontaneousPath = './build/external/ENDFB_spontaneous/'
 
    INTEGER, PARAMETER :: MaxAtoms = 118 ! largest atom number available
 
@@ -1242,6 +1241,8 @@ CONTAINS
       REAL(Float), DIMENSION(3) :: MyBranchingRatio
 
       INTEGER, PARAMETER :: DebugLevel = 0
+
+      CHARACTER(DefaultLength), parameter :: ENDFSpontaneousPath = './build/external/ENDFB_spontaneous/'
 
       IF (.NOT.FileExists(TRIM(ENDFSpontaneousPath)//TRIM(FName))) THEN
          WRITE(*,'(A)') 'Cannot find file "'//TRIM(FName)//'" for spontaneous fission! Exiting!!'
