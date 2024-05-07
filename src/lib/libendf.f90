@@ -25,8 +25,6 @@ MODULE LibENDF
    & GetNuclideNumber,MassNuc2NucMass,EnsureHyphen,ReadNuclideSpecs,AtomName,&
    & IsRelated,RegularizedIsRelated,ReadNProcessENDFNuclideSpecs
 
-   CHARACTER(DefaultLength) :: ENDFPath = './build/endf-src/'
-
    INTEGER, PARAMETER :: MaxAtoms = 118 ! largest atom number available
 
    CHARACTER(2), DIMENSION(0:MaxAtoms) :: AtomName
@@ -211,6 +209,15 @@ MODULE LibENDF
    TYPE(NuclideFamilyType) :: NuclideFamily
 
 CONTAINS
+   function ENDFPath()
+      use LibUtil, only: env_var
+
+      character(:), allocatable :: ENDFPath
+
+      call env_var('COCKTAIL_DCC_ENDF_DIR', ENDFPath)
+      if (.not. allocated(ENDFPath)) error stop 'need to set environment variable: COCKTAIL_DCC_ENDF_DIR'
+   end function
+
    INTEGER FUNCTION GetAtomNumber(Symbol)
       !
       ! Search for the given name of an atom in the list of known atoms and
@@ -668,7 +675,7 @@ CONTAINS
 
       INTEGER, PARAMETER :: DebugLevel = 0
 
-      FName = TRIM(ENDFPath)//'decay.list'
+      FName = TRIM(ENDFPath()) // '/decay.list'
 
       OPEN(ScratchFile,FILE=FName,FORM='FORMATTED',ACTION='READ')
       !
@@ -1150,7 +1157,7 @@ CONTAINS
       ENDIF
       FName = TRIM(FName)//TRIM(MyTail)
 
-      FName = TRIM(ENDFPath)//TRIM(FName)//'.endf'
+      FName = TRIM(ENDFPath()) // '/' // TRIM(FName)//'.endf'
 
       IF (IsException) WRITE(*,'(A)') 'To match ENDF with ICRP-107, instead of '&
       & //TRIM(NuclideSpecs(iNuclide)%NuclideName)&

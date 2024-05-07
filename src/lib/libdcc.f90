@@ -167,6 +167,8 @@ CONTAINS
       !
       ! Initialize this library
       !
+      use LibUtil, only: env_var
+
       LOGICAL, INTENT(IN) :: UseICRP
 
       character(:), allocatable :: DCCCalcPath
@@ -200,30 +202,6 @@ CONTAINS
       DCCWaterImmersionPath = TRIM(DCCCalcPath) // '/Water immersion/'
       DCCInhalationPath = TRIM(ProjectPath)//'resources/'
    END SUBROUTINE InitLibDCC
-
-   subroutine env_var(name, val)
-      character(*), intent(in) :: name
-      character(:), allocatable, intent(out) :: val
-
-      integer :: n
-      integer :: status
-      logical :: is_in_env
-
-      call get_environment_variable(name, length=n, status=status)
-
-      select case(status)
-       case(1);      is_in_env = .false.  ! environment variable has not been set
-       case(2);      is_in_env = .false.  ! machine does not support environment variables
-       case(0);      is_in_env = .true.
-       case default; error stop 'unknown STATUS from GET_ENVIRONMENT_VARIABLE'
-      end select
-
-      if (is_in_env) then
-         allocate(character(n) :: val)
-         call get_environment_variable(name, value=val, status=status)
-         if (status /= 0) error stop 'inconsistent STATUS from intrinsic GET_ENVIRONMENT_VARIABLE'
-      endif
-   end subroutine
 
    SUBROUTINE ReadTissueDCCs()
       !
