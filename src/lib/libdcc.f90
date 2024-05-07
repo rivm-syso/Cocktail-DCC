@@ -25,7 +25,7 @@ MODULE LibDCC
 
    CHARACTER(DefaultLength) :: ProjectPath = './'
 
-   CHARACTER(DefaultLength) :: DCCCalcPath,DCCAirSubmersionPath,DCCSoilContaminationPath,DCCWaterImmersionPath,&
+   CHARACTER(DefaultLength) :: DCCAirSubmersionPath,DCCSoilContaminationPath,DCCWaterImmersionPath,&
    & DCCInhalationPath
 
    INTEGER, PARAMETER :: InAir = 1
@@ -168,8 +168,9 @@ CONTAINS
       ! Initialize this library
       !
       LOGICAL, INTENT(IN) :: UseICRP
-      REAL(Float) :: tMin
 
+      character(:), allocatable :: DCCCalcPath
+      REAL(Float) :: tMin
       INTEGER, PARAMETER :: DebugLevel = 0
 
       IF (UseICRP) THEN
@@ -192,14 +193,37 @@ CONTAINS
          CALL ReadNProcessENDFNuclideSpecs(tMin,RegularizedNuclideSpecs,RegularizedMotherDaughterMatrix)
       ENDIF
 
-      DCCCalcPath = TRIM(ProjectPath)//'build/'
-      DCCAirSubmersionPath = TRIM(DCCCalcPath)//'external/Supplemental Files -v4/Air submersion/'
-      DCCSoilContaminationPath = TRIM(DCCCalcPath)//'external/Supplemental Files -v4/Soil contamination/'
-      DCCWaterImmersionPath = TRIM(DCCCalcPath)//'external/Supplemental Files -v4/Water immersion/'
+      call env_var('COCKTAIL_DCC_ICRP_SJ_DIR', DCCCalcPath)
+      if (.not. allocated(DCCCalcPath)) error stop 'need to set environment variable: COCKTAIL_DCC_ICRP_SJ_DIR'
+      DCCAirSubmersionPath = TRIM(DCCCalcPath) // '/Air submersion/'
+      DCCSoilContaminationPath = TRIM(DCCCalcPath) // '/Soil contamination/'
+      DCCWaterImmersionPath = TRIM(DCCCalcPath) // '/Water immersion/'
       DCCInhalationPath = TRIM(ProjectPath)//'resources/'
    END SUBROUTINE InitLibDCC
 
+   subroutine env_var(name, val)
+      character(*), intent(in) :: name
+      character(:), allocatable, intent(out) :: val
 
+      integer :: n
+      integer :: status
+      logical :: is_in_env
+
+      call get_environment_variable(name, length=n, status=status)
+
+      select case(status)
+       case(1);      is_in_env = .false.  ! environment variable has not been set
+       case(2);      is_in_env = .false.  ! machine does not support environment variables
+       case(0);      is_in_env = .true.
+       case default; error stop 'unknown STATUS from GET_ENVIRONMENT_VARIABLE'
+      end select
+
+      if (is_in_env) then
+         allocate(character(n) :: val)
+         call get_environment_variable(name, value=val, status=status)
+         if (status /= 0) error stop 'inconsistent STATUS from intrinsic GET_ENVIRONMENT_VARIABLE'
+      endif
+   end subroutine
 
    SUBROUTINE ReadTissueDCCs()
       !

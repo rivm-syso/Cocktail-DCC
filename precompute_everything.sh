@@ -1,6 +1,12 @@
-#!needs to have the ENDF-B-VIII.0_decay.zip unzipped
-#!needs one captial to be transformed to a lower case.
-#the path to where the endf-files are should be readable at: libendf ln28
+#!/usr/bin/env bash
+set -e
+
+rm -rf build
+cmake -S . -B build
+cmake --build build
+
+export COCKTAIL_DCC_ICRP_SJ_DIR='build/icrp_sj-src'
+
 #! if output needs to be somewhere, that could be added in the nuclide_decay.f90 file at line 89.
 ./build/src/nuclide_decay sparse
 
