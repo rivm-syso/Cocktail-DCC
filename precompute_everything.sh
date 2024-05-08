@@ -4,19 +4,10 @@ set -e
 build_dir="${PWD}/build"
 
 rm -rf "${build_dir}"
+rm -rf matrices
 cmake -S . -B "${build_dir}"
 cmake --build "${build_dir}"
-
-export COCKTAIL_DCC_ICRP_SJ_DIR="${build_dir}/_deps/icrp_sj-src"
-export COCKTAIL_DCC_ENDF_DIR="${build_dir}/_deps/endf-src"
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-export COCKTAIL_DCC_SOURCES_DIR="${SCRIPT_DIR}"
-
-#! if output needs to be somewhere, that could be added in the nuclide_decay.f90 file at line 89.
-"${build_dir}/src/nuclide_decay" sparse
-
-#! needs the sj-zip-2-ani-49-2.zip unzipped
-"${build_dir}/src/test_cocktail_dcc"
+cmake --build "${build_dir}" --target precompute_everything
 
 #In libpinpoint ln 68 the location to the matrices is to be set
 #in libdcc ln 195-199 is where the values for DCC values is given

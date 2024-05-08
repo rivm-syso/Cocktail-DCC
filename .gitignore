@@ -1,1 +1,5 @@
 build
+
+matrices
+SparseMatrix_ENDF_*.dat
+ENDFBinFile.dat

@@ -10,6 +10,7 @@ FetchContent_Declare(
   DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 FetchContent_MakeAvailable(icrp_sj)
+set(icrp_sj_SOURCE_DIR ${icrp_sj_SOURCE_DIR} PARENT_SCOPE )
 
 FetchContent_Declare(
   endf
@@ -20,3 +21,4 @@ FetchContent_Declare(
   UPDATE_DISCONNECTED 1
 )
 FetchContent_MakeAvailable(endf)
+set(endf_SOURCE_DIR ${endf_SOURCE_DIR} PARENT_SCOPE )
