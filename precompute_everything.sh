@@ -7,8 +7,8 @@ rm -rf "${build_dir}"
 cmake -S . -B "${build_dir}"
 cmake --build "${build_dir}"
 
-export COCKTAIL_DCC_ICRP_SJ_DIR="${build_dir}/icrp_sj-src"
-export COCKTAIL_DCC_ENDF_DIR="${build_dir}/endf-src/"
+export COCKTAIL_DCC_ICRP_SJ_DIR="${build_dir}/_deps/icrp_sj-src"
+export COCKTAIL_DCC_ENDF_DIR="${build_dir}/_deps/endf-src"
 
 #! if output needs to be somewhere, that could be added in the nuclide_decay.f90 file at line 89.
 "${build_dir}/src/nuclide_decay" sparse
