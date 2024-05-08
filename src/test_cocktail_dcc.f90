@@ -26,10 +26,6 @@ PROGRAM test_cocktail_dcc
    INTEGER, PARAMETER :: SourceTermUKrausFoster2 = 1
    INTEGER, PARAMETER :: SourceTermAxelsson = 2
    !
-   ! Specify the location of the DCC files
-   !
-   RIVMSourcesPath = './'
-   !
    ! Example 1: Show some specific regular and cumulative DCCs for specific times
    !
    WRITE(*,'(A)') 'Some specific cocktail DCCs and cumulative cocktail DCCs:'

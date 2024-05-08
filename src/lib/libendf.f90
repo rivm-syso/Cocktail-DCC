@@ -13,11 +13,11 @@ MODULE LibENDF
    USE libxmath
    USE libutil
    USE Matrix_Exponential
-
+   use LibUtil, only: env_var
    IMPLICIT NONE
 
    PRIVATE
-
+   public :: RIVMSourcesPath
    PUBLIC :: NNuclides,NuclideSpecs,MakeMotherDaughterMatrix,&
    & MotherDaughterMatrix,FindOrphans,RegularizeNuclides,&
    & NuclideType,MaxNuclides,Orphanage,NuclideFamily,&
@@ -210,12 +210,17 @@ MODULE LibENDF
 
 CONTAINS
    function ENDFPath()
-      use LibUtil, only: env_var
-
       character(:), allocatable :: ENDFPath
 
       call env_var('COCKTAIL_DCC_ENDF_DIR', ENDFPath)
       if (.not. allocated(ENDFPath)) error stop 'need to set environment variable: COCKTAIL_DCC_ENDF_DIR'
+   end function
+
+   function RIVMSourcesPath()
+      character(:), allocatable :: RIVMSourcesPath
+
+      call env_var('COCKTAIL_DCC_SOURCES_DIR', RIVMSourcesPath)
+      if (.not. allocated(RIVMSourcesPath)) RIVMSourcesPath = './'
    end function
 
    INTEGER FUNCTION GetAtomNumber(Symbol)
@@ -1515,7 +1520,7 @@ CONTAINS
 
       WRITE(*,'(A)') 'Reading the ENDF database of nuclides...'
 
-      IF (.NOT.FileExists('ICRP-07.NDX')) THEN
+      IF (.NOT.FileExists(RIVMSourcesPath() // '/ICRP-07.NDX')) THEN
          WRITE(*,'(A)') 'Make sure you have file ICRP-07.NDX in the directory where you call this utility! Exiting!!'
          CALL EXIT()
       ENDIF

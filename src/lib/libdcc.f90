@@ -14,7 +14,7 @@ MODULE LibDCC
    USE libxmath
    USE libutil
    USE libendf
-
+   use LibENDF, only: RIVMSourcesPath
    IMPLICIT NONE
 
    PRIVATE
@@ -176,7 +176,7 @@ CONTAINS
       INTEGER, PARAMETER :: DebugLevel = 0
 
       IF (UseICRP) THEN
-         CALL ReadNuclideSpecs('ICRP-07.NDX')
+         CALL ReadNuclideSpecs(RIVMSourcesPath() // '/ICRP-07.NDX')
       ELSE
          !
          ! Set shortest halflife that is admitted to the numerical scheme for solving the Bateman equations.
@@ -472,7 +472,7 @@ CONTAINS
       CHARACTER(10) :: MyNuclideName
       REAL(Float) :: Dum
 
-      FName = 'dccunix.dat'
+      FName = RIVMSourcesPath() // '/dccunix.dat'
       OPEN(ScratchFile,FILE=FName,FORM='FORMATTED',ACTION='READ')
       !
       ! Skip header
