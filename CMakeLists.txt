@@ -4,6 +4,9 @@ project(cocktaildcc LANGUAGES Fortran)
 set(CMAKE_Fortran_EXTENSIONS OFF)
 
 add_subdirectory(external)
+
+include(cmake/CompileOptions.cmake)
+
 add_subdirectory(src)
 
 set(output_dir "$(CMAKE_SOURCE_DIR)/matrices")

@@ -2,12 +2,13 @@
 set -e
 
 build_dir="${PWD}/build"
+build_type=RelWithDebInfo
 
 rm -rf "${build_dir}"
 rm -rf matrices
-cmake -S . -B "${build_dir}"
-cmake --build "${build_dir}"
-cmake --build "${build_dir}" --target precompute_everything
+cmake -S . -B "${build_dir}" -DCMAKE_BUILD_TYPE="${build_type}"
+cmake --build "${build_dir}" --config "${build_type}"
+cmake --build "${build_dir}" --config "${build_type}" --target precompute_everything
 
 #In libpinpoint ln 68 the location to the matrices is to be set
 #in libdcc ln 195-199 is where the values for DCC values is given
