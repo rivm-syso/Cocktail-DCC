@@ -83,10 +83,10 @@ PROGRAM nuclide_decay
       IF (DebugLevel.GT.0) WRITE(*,'(A)') PinPointName(iStartingTime)//'second'
 
       IF (DoFull) THEN
-         FName(iStartingTime) = 'DecayMatrix_ENDF_'//TRIM(PinPointName(iStartingTime))//'.dat'
+         FName(iStartingTime) = TransitionMatrixPath() // '/' // 'DecayMatrix_ENDF_' // TRIM(PinPointName(iStartingTime)) // '.dat'
          WRITE(*,'(A)') 'Going to write fill matrix output to file "'//TRIM(FName(iStartingTime))//'"'
       ELSE
-         FName(iStartingTime) = 'SparseMatrix_ENDF_'//TRIM(PinPointName(iStartingTime))//'.dat'
+         FName(iStartingTime) = TransitionMatrixPath() // '/' // 'SparseMatrix_ENDF_' // TRIM(PinPointName(iStartingTime)) // '.dat'
          WRITE(*,'(A)') 'Going to write sparse matrix output to file "'//TRIM(FName(iStartingTime))//'"'
       ENDIF
    ENDDO ! loop over starting times

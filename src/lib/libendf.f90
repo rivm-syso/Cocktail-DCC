@@ -17,7 +17,7 @@ MODULE LibENDF
    IMPLICIT NONE
 
    PRIVATE
-   public :: RIVMSourcesPath
+   public :: RIVMSourcesPath, TransitionMatrixPath
    PUBLIC :: NNuclides,NuclideSpecs,MakeMotherDaughterMatrix,&
    & MotherDaughterMatrix,FindOrphans,RegularizeNuclides,&
    & NuclideType,MaxNuclides,Orphanage,NuclideFamily,&
@@ -221,6 +221,13 @@ CONTAINS
 
       call env_var('COCKTAIL_DCC_SOURCES_DIR', RIVMSourcesPath)
       if (.not. allocated(RIVMSourcesPath)) RIVMSourcesPath = './'
+   end function
+
+   function TransitionMatrixPath()
+      character(:), allocatable :: TransitionMatrixPath
+
+      call env_var('COCKTAIL_DCC_OUTPUT_DIR', TransitionMatrixPath)
+      if (.not. allocated(TransitionMatrixPath)) TransitionMatrixPath = '.'
    end function
 
    INTEGER FUNCTION GetAtomNumber(Symbol)
@@ -1527,7 +1534,7 @@ CONTAINS
       !
       ! Read all data on nuclides from an earlier run or construct them afresh
       !
-      ENDFBinFileExists = FileExists('ENDFBinFile.dat')
+      ENDFBinFileExists = FileExists(TransitionMatrixPath() // '/ENDFBinFile.dat')
 
       IF (ENDFBinFileExists) THEN
 
@@ -1537,7 +1544,7 @@ CONTAINS
          WRITE(*,'(A)') 'Initialization will go smooth and fast!'
          WRITE(*,'(A)') 'Going to read this preprocessed file ...'
 
-         OPEN(ScratchFile,FILE='ENDFBinFile.dat',FORM='UNFORMATTED',POSITION='REWIND',ACTION='READ')
+         OPEN(ScratchFile,FILE=TransitionMatrixPath() // '/ENDFBinFile.dat',FORM='UNFORMATTED',POSITION='REWIND',ACTION='READ')
 
          READ(ScratchFile) AtomSpecs
          READ(ScratchFile) AtomName
@@ -1624,7 +1631,7 @@ CONTAINS
 
          WRITE(*,'(A)') 'Ready reading and parsting all the ENDF data files!'
 
-         OPEN(ScratchFile,FILE='ENDFBinFile.dat',FORM='UNFORMATTED',POSITION='REWIND',ACTION='WRITE')
+         OPEN(ScratchFile,FILE=TransitionMatrixPath() // '/ENDFBinFile.dat',FORM='UNFORMATTED',POSITION='REWIND',ACTION='WRITE')
 
          WRITE(ScratchFile) AtomSpecs
          WRITE(ScratchFile) AtomName

@@ -256,7 +256,8 @@ CONTAINS
                WRITE(*,'(A)') 'Cannot find utility '//TRIM(UtilityName)//' and its auxiliary files... Exiting!'
                CALL EXIT()
             ENDIF ! utility not found
-            Commando = TRIM(UtilityName)//' '//TRIM(SourceFileName)//' yes 0 0 > '//TRIM(Commando)
+            Commando = TRIM(UtilityName)//' '//TRIM(SourceFileName)//' yes 0 0 > ' &
+            &          // TransitionMatrixPath() // '/' // TRIM(Commando)
             Error = SYSTEM(Commando)
             IF (Error.EQ.0) THEN
                WRITE(*,'(A)') 'Execution of external call "'//TRIM(Commando)//'" went well!'
