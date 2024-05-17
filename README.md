@@ -56,9 +56,14 @@ Supplemented with data from: ICRP, supplemental files, 2020.
 
 # How to build the utilities #
 
-```sh
-./build.sh
+```bash
+./precompute_everything.sh
 ```
+
+*More detail:* the project is configured with `cmake`.
+It has a target `precompute_everything` that creates a `matrices` directory.
+This target is not built by default (i.e., when jut running `cmake --build <build-dir>`),
+because it takes about 6 hours.
 
 # Remarks #
 

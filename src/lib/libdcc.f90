@@ -14,7 +14,7 @@ MODULE LibDCC
    USE libxmath
    USE libutil
    USE libendf
-
+   use LibENDF, only: RIVMSourcesPath
    IMPLICIT NONE
 
    PRIVATE
@@ -25,7 +25,7 @@ MODULE LibDCC
 
    CHARACTER(DefaultLength) :: ProjectPath = './'
 
-   CHARACTER(DefaultLength) :: DCCCalcPath,DCCAirSubmersionPath,DCCSoilContaminationPath,DCCWaterImmersionPath,&
+   CHARACTER(DefaultLength) :: DCCAirSubmersionPath,DCCSoilContaminationPath,DCCWaterImmersionPath,&
    & DCCInhalationPath
 
    INTEGER, PARAMETER :: InAir = 1
@@ -113,16 +113,16 @@ MODULE LibDCC
 
    INTEGER, PARAMETER :: NGroundDepths = 9
 
-   CHARACTER(6), PARAMETER, DIMENSION(NGroundDepths) :: GroundDepthName = &
-      & (/'planar',&
-      &   '0p5   ',&
-      &   '1     ',&
-      &   '2p5   ',&
-      &   '5     ',&
-      &   '10    ',&
-      &   '20    ',&
-      &   '50    ',&
-      &   '100   '/)
+   CHARACTER(45), PARAMETER, DIMENSION(NGroundDepths) :: GroundDepthName = &
+      & (/'Planar sources at specific depths/0.5 g.cm-2/',&
+      &   'Exponential sources/0.5 g.cm-2/              ',&
+      &   'Exponential sources/1.0 g.cm-2/              ',&
+      &   'Exponential sources/2.5 g.cm-2/              ',&
+      &   'Exponential sources/5.0 g.cm-2/              ',&
+      &   'Exponential sources/10.0 g.cm-2/             ',&
+      &   'Exponential sources/20.0 g.cm-2/             ',&
+      &   'Exponential sources/50.0 g.cm-2/             ',&
+      &   'Exponential sources/100.0 g.cm-2/            '/)
 
    INTEGER, PARAMETER :: NInhalationDCCs = 8
 
@@ -167,13 +167,16 @@ CONTAINS
       !
       ! Initialize this library
       !
-      LOGICAL, INTENT(IN) :: UseICRP
-      REAL(Float) :: tMin
+      use LibUtil, only: env_var
 
+      LOGICAL, INTENT(IN) :: UseICRP
+
+      character(:), allocatable :: DCCCalcPath
+      REAL(Float) :: tMin
       INTEGER, PARAMETER :: DebugLevel = 0
 
       IF (UseICRP) THEN
-         CALL ReadNuclideSpecs('ICRP-07.NDX')
+         CALL ReadNuclideSpecs(RIVMSourcesPath() // '/ICRP-07.NDX')
       ELSE
          !
          ! Set shortest halflife that is admitted to the numerical scheme for solving the Bateman equations.
@@ -192,14 +195,13 @@ CONTAINS
          CALL ReadNProcessENDFNuclideSpecs(tMin,RegularizedNuclideSpecs,RegularizedMotherDaughterMatrix)
       ENDIF
 
-      DCCCalcPath = TRIM(ProjectPath)//'../Overige_modellen/'
-      DCCAirSubmersionPath = TRIM(DCCCalcPath)//'DCC_calc/Supplemental/Airsubmersion/'
-      DCCSoilContaminationPath = TRIM(ProjectPath)//'../Overige_modellen/'
-      DCCWaterImmersionPath = TRIM(DCCCalcPath)//'DCC_calc/Supplemental/Waterimmersion/'
-      DCCInhalationPath = TRIM(ProjectPath)//'../Overige_modellen/'
+      call env_var('COCKTAIL_DCC_ICRP_SJ_DIR', DCCCalcPath)
+      if (.not. allocated(DCCCalcPath)) error stop 'need to set environment variable: COCKTAIL_DCC_ICRP_SJ_DIR'
+      DCCAirSubmersionPath = TRIM(DCCCalcPath) // '/Air submersion/'
+      DCCSoilContaminationPath = TRIM(DCCCalcPath) // '/Soil contamination/'
+      DCCWaterImmersionPath = TRIM(DCCCalcPath) // '/Water immersion/'
+      DCCInhalationPath = TRIM(ProjectPath)//'resources/'
    END SUBROUTINE InitLibDCC
-
-
 
    SUBROUTINE ReadTissueDCCs()
       !
@@ -367,20 +369,21 @@ CONTAINS
       ! Read ground DCCs
       !
       CHARACTER(DefaultLength) :: FName,ALine
-      INTEGER :: iLine,jNuclide,iGroundDepth,iAge,DumLine
+      INTEGER :: iLine,jNuclide,iGroundDepth,iAge,DumLine, iSkip
       CHARACTER(10) :: MyNuclideName
       LOGICAL :: IsDashLine
 
       DO iGroundDepth = 1,NGroundDepths
-         FName = 'DCC_ground_'//TRIM(GroundDepthName(iGroundDepth))//'.prn'
+         FName = TRIM(GroundDepthName(iGroundDepth))//'Soil_Nuclide-specific_EffectiveDose.txt'
          FName = TRIM(DCCSoilContaminationPath)//TRIM(FName)
          OPEN(ScratchFile,FILE=FName,FORM='FORMATTED',ACTION='READ')
          !
-         ! Skip header
+         ! Skip header 10 lines
          !
-         READ(ScratchFile,*)
-         READ(ScratchFile,*)
-         iLine = 2
+         do iSkip = 1,10
+            READ(ScratchFile,*)
+         enddo
+         iLine = 10
          !
          ! Read data for all nuclides
          !
@@ -427,7 +430,7 @@ CONTAINS
       CHARACTER(10) :: MyNuclideName
 
       FName = 'CoVeGa_v63_voorRapport_Inhalation.prn'
-      FName = TRIM(DCCSoilContaminationPath)//TRIM(FName)
+      FName = TRIM(DCCInhalationPath)//TRIM(FName)
       OPEN(ScratchFile,FILE=FName,FORM='FORMATTED',ACTION='READ')
       !
       ! Skip header
@@ -469,7 +472,7 @@ CONTAINS
       CHARACTER(10) :: MyNuclideName
       REAL(Float) :: Dum
 
-      FName = 'dccunix.dat'
+      FName = RIVMSourcesPath() // '/dccunix.dat'
       OPEN(ScratchFile,FILE=FName,FORM='FORMATTED',ACTION='READ')
       !
       ! Skip header

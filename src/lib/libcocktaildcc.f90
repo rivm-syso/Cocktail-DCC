@@ -37,9 +37,7 @@ MODULE LibCocktailDCC
    ! This module offers the following functionality:
    !
    ! You can specify the names of the files specifying your source terms in a text file named RIVMSources.txt.
-   ! This file should be located in the following directory (which you can specify in your code):
-   !
-   !   CHARACTER(DefaultLength) :: RIVMSourcesPath
+   ! This file should be located in the COCKTAIL_DCC_SOURCES_DIR directory (environment variable).
    !
    ! The first lines that start with a "!" are considered to be comment lines and are therefore skipped.
    ! All subsequent lines in RIVMSources.txt are assumed to be references to text files containing source terms at t=0.
@@ -138,11 +136,8 @@ MODULE LibCocktailDCC
    IMPLICIT NONE
 
    PRIVATE
-
-   PUBLIC :: GetCocktailDCC,RIVMSourcesPath,PathwayAir,PathwayGround,PathwayInhalation,NPathways,&
+   PUBLIC :: GetCocktailDCC,PathwayAir,PathwayGround,PathwayInhalation,NPathways,&
       & NSourceTerms,SourceTermName,PathwayName, DCCTypeName,iRegularDCC,iCumulativeDCC,GetCocktailNuclide
-
-   CHARACTER(DefaultLength) :: RIVMSourcesPath
 
    INTEGER, PARAMETER :: PathwayAir        = 1
    INTEGER, PARAMETER :: PathwayGround     = 2
@@ -181,6 +176,8 @@ CONTAINS
       ! Read the list of source terms and check availability of lookup tables.
       ! Add missing lookup tables.
       !
+      use LibENDF, only: RIVMSourcesPath
+
       LOGICAL, PARAMETER :: CrashOnError = .FALSE.,DoSilent = .FALSE.
       CHARACTER(DefaultLength) :: ALine,SourceFileName,CheckLookupFileName,Commando,FName,UtilityName
       INTEGER :: TheIndex,Error
@@ -192,7 +189,7 @@ CONTAINS
       WRITE(*,'(A)') 'Going to initialize libcocktailDCC...'
       WRITE(*,*)
 
-      FName = TRIM(RIVMSourcesPath)//'RIVMSources.txt'
+      FName = RIVMSourcesPath() // '/RIVMSources.txt'
 
       IF (.NOT.FileExists(FName)) THEN
          WRITE(*,'(A)') 'Cannot find list of source term files "'//TRIM(FName)//'"'
@@ -253,13 +250,14 @@ CONTAINS
             Commando = 'runlog??.txt'
             WRITE(Commando(7:8),'(I2.2)') NSourceTerms
 
-            UtilityName = './source_term_dose.exe'
+            UtilityName = './build/src/source_term_dose'
 
             IF (.NOT.FileExists(UtilityName)) THEN
                WRITE(*,'(A)') 'Cannot find utility '//TRIM(UtilityName)//' and its auxiliary files... Exiting!'
                CALL EXIT()
             ENDIF ! utility not found
-            Commando = TRIM(UtilityName)//' '//TRIM(SourceFileName)//' yes 0 0 > '//TRIM(Commando)
+            Commando = TRIM(UtilityName)//' '//TRIM(SourceFileName)//' yes 0 0 > ' &
+            &          // TransitionMatrixPath() // '/' // TRIM(Commando)
             Error = SYSTEM(Commando)
             IF (Error.EQ.0) THEN
                WRITE(*,'(A)') 'Execution of external call "'//TRIM(Commando)//'" went well!'

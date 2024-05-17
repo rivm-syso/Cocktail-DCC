@@ -13,20 +13,17 @@ MODULE LibENDF
    USE libxmath
    USE libutil
    USE Matrix_Exponential
-
+   use LibUtil, only: env_var
    IMPLICIT NONE
 
    PRIVATE
-
+   public :: RIVMSourcesPath, TransitionMatrixPath
    PUBLIC :: NNuclides,NuclideSpecs,MakeMotherDaughterMatrix,&
    & MotherDaughterMatrix,FindOrphans,RegularizeNuclides,&
    & NuclideType,MaxNuclides,Orphanage,NuclideFamily,&
    & CollectProgeny,ListTransitions,MakeEvolutionMatrix,AddOrphansBelow,&
    & GetNuclideNumber,MassNuc2NucMass,EnsureHyphen,ReadNuclideSpecs,AtomName,&
    & IsRelated,RegularizedIsRelated,ReadNProcessENDFNuclideSpecs
-
-   CHARACTER(DefaultLength) :: ENDFPath = './../ENDF-B-VIII.0_decay/'
-   CHARACTER(DefaultLength) :: ENDFSpontaneousPath = './../ENDFB_spontaneous/'
 
    INTEGER, PARAMETER :: MaxAtoms = 118 ! largest atom number available
 
@@ -212,6 +209,27 @@ MODULE LibENDF
    TYPE(NuclideFamilyType) :: NuclideFamily
 
 CONTAINS
+   function ENDFPath()
+      character(:), allocatable :: ENDFPath
+
+      call env_var('COCKTAIL_DCC_ENDF_DIR', ENDFPath)
+      if (.not. allocated(ENDFPath)) error stop 'need to set environment variable: COCKTAIL_DCC_ENDF_DIR'
+   end function
+
+   function RIVMSourcesPath()
+      character(:), allocatable :: RIVMSourcesPath
+
+      call env_var('COCKTAIL_DCC_SOURCES_DIR', RIVMSourcesPath)
+      if (.not. allocated(RIVMSourcesPath)) RIVMSourcesPath = './'
+   end function
+
+   function TransitionMatrixPath()
+      character(:), allocatable :: TransitionMatrixPath
+
+      call env_var('COCKTAIL_DCC_OUTPUT_DIR', TransitionMatrixPath)
+      if (.not. allocated(TransitionMatrixPath)) TransitionMatrixPath = '.'
+   end function
+
    INTEGER FUNCTION GetAtomNumber(Symbol)
       !
       ! Search for the given name of an atom in the list of known atoms and
@@ -669,7 +687,7 @@ CONTAINS
 
       INTEGER, PARAMETER :: DebugLevel = 0
 
-      FName = TRIM(ENDFPath)//'decay.list'
+      FName = TRIM(ENDFPath()) // '/decay.list'
 
       OPEN(ScratchFile,FILE=FName,FORM='FORMATTED',ACTION='READ')
       !
@@ -1151,7 +1169,7 @@ CONTAINS
       ENDIF
       FName = TRIM(FName)//TRIM(MyTail)
 
-      FName = TRIM(ENDFPath)//TRIM(FName)//'.endf'
+      FName = TRIM(ENDFPath()) // '/' // TRIM(FName)//'.endf'
 
       IF (IsException) WRITE(*,'(A)') 'To match ENDF with ICRP-107, instead of '&
       & //TRIM(NuclideSpecs(iNuclide)%NuclideName)&
@@ -1242,6 +1260,8 @@ CONTAINS
       REAL(Float), DIMENSION(3) :: MyBranchingRatio
 
       INTEGER, PARAMETER :: DebugLevel = 0
+
+      CHARACTER(DefaultLength), parameter :: ENDFSpontaneousPath = './build/external/ENDFB_spontaneous/'
 
       IF (.NOT.FileExists(TRIM(ENDFSpontaneousPath)//TRIM(FName))) THEN
          WRITE(*,'(A)') 'Cannot find file "'//TRIM(FName)//'" for spontaneous fission! Exiting!!'
@@ -1507,14 +1527,14 @@ CONTAINS
 
       WRITE(*,'(A)') 'Reading the ENDF database of nuclides...'
 
-      IF (.NOT.FileExists('ICRP-07.NDX')) THEN
+      IF (.NOT.FileExists(RIVMSourcesPath() // '/ICRP-07.NDX')) THEN
          WRITE(*,'(A)') 'Make sure you have file ICRP-07.NDX in the directory where you call this utility! Exiting!!'
          CALL EXIT()
       ENDIF
       !
       ! Read all data on nuclides from an earlier run or construct them afresh
       !
-      ENDFBinFileExists = FileExists('ENDFBinFile.dat')
+      ENDFBinFileExists = FileExists(TransitionMatrixPath() // '/ENDFBinFile.dat')
 
       IF (ENDFBinFileExists) THEN
 
@@ -1524,7 +1544,7 @@ CONTAINS
          WRITE(*,'(A)') 'Initialization will go smooth and fast!'
          WRITE(*,'(A)') 'Going to read this preprocessed file ...'
 
-         OPEN(ScratchFile,FILE='ENDFBinFile.dat',FORM='UNFORMATTED',POSITION='REWIND',ACTION='READ')
+         OPEN(ScratchFile,FILE=TransitionMatrixPath() // '/ENDFBinFile.dat',FORM='UNFORMATTED',POSITION='REWIND',ACTION='READ')
 
          READ(ScratchFile) AtomSpecs
          READ(ScratchFile) AtomName
@@ -1611,7 +1631,7 @@ CONTAINS
 
          WRITE(*,'(A)') 'Ready reading and parsting all the ENDF data files!'
 
-         OPEN(ScratchFile,FILE='ENDFBinFile.dat',FORM='UNFORMATTED',POSITION='REWIND',ACTION='WRITE')
+         OPEN(ScratchFile,FILE=TransitionMatrixPath() // '/ENDFBinFile.dat',FORM='UNFORMATTED',POSITION='REWIND',ACTION='WRITE')
 
          WRITE(ScratchFile) AtomSpecs
          WRITE(ScratchFile) AtomName

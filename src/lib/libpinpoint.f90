@@ -31,7 +31,6 @@ MODULE LibPinPoint
    END TYPE CocktailType
 
    CHARACTER(DefaultLength) :: ProjectPath = './'
-   CHARACTER(DefaultLength) :: TransitionMatrixPath
 
    REAL(Float), PARAMETER :: FirstDelay = 60._Float ! seconds
    REAL(Float), PARAMETER :: DelayGrowthFactor = 1.15_Float
@@ -64,8 +63,6 @@ CONTAINS
       CALL ReadGroundDCCs()
       CALL ReadInhalationDCCs()
       CALL ReadThyroidInhalationDCCs()
-
-      TransitionMatrixPath = TRIM(ProjectPath)//'../matrices/'
 
       AvailableDelay(0) = 0
       AvailableDelay(1) = 60
@@ -214,7 +211,7 @@ CONTAINS
 
          IF (DebugLevel.GT.0) WRITE(*,'(A)') 'Reading '//TRIM(FName)
          CALL FLUSH(6)
-         OPEN(ScratchFile,FILE=TRIM(TransitionMatrixPath)//TRIM(FName),ACTION='READ')
+         OPEN(ScratchFile, FILE=TransitionMatrixPath() // '/' // TRIM(FName), ACTION='READ')
 
          IF (.NOT.UseICRP) THEN
             DO iLine=1,7

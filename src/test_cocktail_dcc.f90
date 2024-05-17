@@ -24,14 +24,7 @@ PROGRAM test_cocktail_dcc
    REAL(Float), DIMENSION(10) :: MyAmountI133,MyAmountKr85m,MyAmountCs137
 
    INTEGER, PARAMETER :: SourceTermUKrausFoster2 = 1
-   INTEGER, PARAMETER :: SourceTermUKrausFoster5 = 2
-   INTEGER, PARAMETER :: SourceTermPuSTUK        = 3
-   INTEGER, PARAMETER :: SourceTermUSTUK         = 4
-   INTEGER, PARAMETER :: SourceTermSTCCON1       = 5
-   !
-   ! Specify the location of the DCC files
-   !
-   RIVMSourcesPath = './../brontermen/'
+   INTEGER, PARAMETER :: SourceTermAxelsson = 2
    !
    ! Example 1: Show some specific regular and cumulative DCCs for specific times
    !
@@ -42,14 +35,14 @@ PROGRAM test_cocktail_dcc
    MyCumulativeEstimate = GetCocktailDCC(t,SourceTermUKrausFoster2,PathwayAir,iCumulativeDCC)
    WRITE(*,'(A,2EN15.5)') 'DCC(Uranium-KrausFoster,Air) after 1 day  = ',MyEstimate,MyCumulativeEstimate
 
-   t = 7*24*3600._Float
-   MyEstimate = GetCocktailDCC(t,SourceTermPuSTUK,PathwayGround,iRegularDCC)
-   MyCumulativeEstimate = GetCocktailDCC(t,SourceTermPuSTUK,PathwayGround,iCumulativeDCC)
-   WRITE(*,'(A,2EN15.5)') 'DCC(Plutonium-STUK,Ground)   after 1 week = ',MyEstimate,MyCumulativeEstimate
+   !t = 7*24*3600._Float
+   !MyEstimate = GetCocktailDCC(t,SourceTermPuSTUK,PathwayGround,iRegularDCC)
+   !MyCumulativeEstimate = GetCocktailDCC(t,SourceTermPuSTUK,PathwayGround,iCumulativeDCC)
+   !WRITE(*,'(A,2EN15.5)') 'DCC(Plutonium-STUK,Ground)   after 1 week = ',MyEstimate,MyCumulativeEstimate
 
    t = 365.24_Float*24*3600._Float
-   MyEstimate = GetCocktailDCC(t,SourceTermSTCCON1,PathwayInhalation,iRegularDCC)
-   MyCumulativeEstimate = GetCocktailDCC(t,SourceTermSTCCON1,PathwayInhalation,iCumulativeDCC)
+   MyEstimate = GetCocktailDCC(t,SourceTermAxelsson,PathwayInhalation,iRegularDCC)
+   MyCumulativeEstimate = GetCocktailDCC(t,SourceTermAxelsson,PathwayInhalation,iCumulativeDCC)
    WRITE(*,'(A,2EN15.5)') 'DCC(Uranium-RIVM,Inhalation) after 1 year = ',MyEstimate,MyCumulativeEstimate
    !
    ! Example 2: Estimate all types of DCC and cumulative DCC for all known types of SourceTerm

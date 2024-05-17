@@ -1,0 +1,11 @@
+--- decay.list
++++ new-decay.list
+@@ -1806,7 +1806,7 @@
+ 1803)  55-Cs-139  BNL        EVAL-NOV05 Conversion from ENSDF           1803
+ 1804)  55-Cs-140  BNL        EVAL-NOV05 Conversion from ENSDF           1804
+ 1805)  55-Cs-141  BNL        EVAL-NOV05 Conversion from ENSDF           1805
+-1806)  55-CS-142  BNL        EVAL-NOV05 Conversion from ENSDF           1806
++1806)  55-Cs-142  BNL        EVAL-NOV05 Conversion from ENSDF           1806
+ 1807)  55-Cs-143  BNL        EVAL-NOV05 Conversion from ENSDF           1807
+ 1808)  55-Cs-144  BNL        EVAL-AUG11 Conv. from CGM                  1808
+ 1809)  55-Cs-144M NNDC       EVAL-APR11 Conversion from N. Wallet Cards 1809
