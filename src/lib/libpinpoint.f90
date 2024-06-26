@@ -641,7 +641,7 @@ CONTAINS
       !
       NParticipatingNuclides = 0
       DO iNuclide = 1,NNuclides
-         IF (MyStartCocktail%x(iNuclide).GT.0._Float) THEN
+         IF (ANY(MyCocktail%x(iNuclide).GT.0._Float)) THEN
             NParticipatingNuclides = NParticipatingNuclides + 1
             ParticipatingNuclide(NParticipatingNuclides) = iNuclide
          ENDIF ! nuclide is participating
