@@ -14,7 +14,7 @@ MODULE LibDCC
    USE libxmath
    USE libutil
    USE libendf
-   use LibENDF, only: RIVMSourcesPath
+   use LibENDF, only: RIVMSourcesPath, isGas
    IMPLICIT NONE
 
    PRIVATE

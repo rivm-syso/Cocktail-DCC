@@ -24,6 +24,7 @@ MODULE LibENDF
    & CollectProgeny,ListTransitions,MakeEvolutionMatrix,AddOrphansBelow,&
    & GetNuclideNumber,MassNuc2NucMass,EnsureHyphen,ReadNuclideSpecs,AtomName,&
    & IsRelated,RegularizedIsRelated,ReadNProcessENDFNuclideSpecs
+   public :: isGas
 
    INTEGER, PARAMETER :: MaxAtoms = 118 ! largest atom number available
 
@@ -249,6 +250,26 @@ CONTAINS
       ENDDO
       GetAtomNumber = DumInt
    END FUNCTION GetAtomNumber
+
+
+
+   function IsGas(nuclide)
+      ! Tell me whether the nuclide with a given name is a gas (Kr, Xe, H, Ar)
+      type(NuclideType), intent(in) :: nuclide
+
+      logical IsGas, DumLog
+
+      DumLog = (nuclide%AtomNumber == 1) & ! H , hydrogen
+         .OR.(nuclide%AtomNumber == 2) &   ! He, Helium
+         .OR.(nuclide%AtomNumber == 10) &  ! Ne, Neon
+         .OR.(nuclide%AtomNumber == 18) &  ! Ar, Argon
+         .OR.(nuclide%AtomNumber == 36) &  ! Kr, Krypton
+         .OR.(nuclide%AtomNumber == 54) &  ! Xe, Xenon
+         .OR.(nuclide%AtomNumber == 86) &  ! Rn, Radon
+         .OR.(nuclide%AtomNumber == 118)   ! Og, Oganesson
+
+      IsGas = DumLog
+   end function
 
 
 
