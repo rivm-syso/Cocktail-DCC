@@ -28,6 +28,8 @@ MODULE LibDCC
    CHARACTER(DefaultLength) :: DCCAirSubmersionPath,DCCSoilContaminationPath,DCCWaterImmersionPath,&
    & DCCInhalationPath
 
+   logical :: OPTION_NobleGroundShine
+
    INTEGER, PARAMETER :: InAir = 1
    INTEGER, PARAMETER :: InWater = 2
 
@@ -409,6 +411,14 @@ CONTAINS
                !
                READ(ALine(9:DefaultLength),*) (DCCGround(iGroundDepth,iAge)%x(jNuclide),iAge=1,NDCCAges),&
                & DCCEquivalentDoseGround(iGroundDepth)%x(jNuclide),DCCKermaRateGround(iGroundDepth)%x(jNuclide)
+               !
+               ! check if it is a noble gas and if they are supposed to have groundshine
+               !
+               if (isGas(NuclideSpecs(jNuclide)) .and. (.not. OPTION_NobleGroundShine)) then
+                  DCCGround(:,:)%x(jNuclide) = 0._Float
+                  DCCEquivalentDoseGround(:)%x(jNuclide) = 0._Float
+                  DCCKermaRateGround(:)%x(jNuclide) = 0._Float
+               endif
 
             ENDIF ! not a dash line
          ENDDO ! loop over nuclides
