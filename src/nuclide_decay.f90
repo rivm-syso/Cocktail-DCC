@@ -73,7 +73,7 @@ PROGRAM nuclide_decay
    ! Initialize the set of delays
    !
    AvailableDelay(0) = 0
-   AvailableDelay(1) = 60
+   AvailableDelay(1) = FirstDelay
    DO iStartingTime = 2,NStartingTimes
       AvailableDelay(iStartingTime) = DelayGrowthFactor*AvailableDelay(iStartingTime-1)
    ENDDO ! loop over starting times
