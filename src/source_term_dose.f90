@@ -22,6 +22,8 @@ PROGRAM source_term_dose
    REAL(Float), DIMENSION(0:NStartingTimes,MaxNuclides) :: PinAirDoseRate,PinGroundDoseRate,PinInhalationDoseRate
    INTEGER :: NArguements,MotherNature,DaughterNature
    LOGICAL :: WithDaughters,UseICRP
+
+   logical, parameter :: OPTION_NobleGroundShine = .True.
    !
    ! Get commmand line arguement:
    !

@@ -28,7 +28,7 @@ MODULE LibDCC
    CHARACTER(DefaultLength) :: DCCAirSubmersionPath,DCCSoilContaminationPath,DCCWaterImmersionPath,&
    & DCCInhalationPath
 
-   logical :: OPTION_NobleGroundShine
+   logical :: OPTION_NobleGroundShine = .False.
 
    INTEGER, PARAMETER :: InAir = 1
    INTEGER, PARAMETER :: InWater = 2
