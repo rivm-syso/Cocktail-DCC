@@ -16,7 +16,7 @@ program nuclide_decay
    integer, parameter :: NIntervals = 16
    type(NuclideType), dimension(0:MaxNuclides) :: RegularizedNuclideSpecs
    real(Float), dimension(MaxNuclides,MaxNuclides) :: RegularizedMotherDaughterMatrix,TheDecayMatrix
-   character(6), dimension(4), parameter :: TimeUnitName = ((/'second','minute','hour  ','day   '/))
+   character(6), dimension(4), parameter :: TimeUnitName = (['second','minute','hour  ','day   '])
    real(Float) :: tMin,Lambda,Yield,Dum,tMax
    integer :: MotherNuclide,DaughterNuclide,iNuclide,jNuclide,NArguements,NFirstMotherOrphans,iStartingTime,MyNuclide
    integer, dimension(NIntervals) :: tStarType

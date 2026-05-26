@@ -34,7 +34,7 @@ module LibENDF
    !
    integer, parameter :: NNuclideGroups = 11
    character(5), dimension(0:NNuclideGroups), parameter :: NuclideGroupName &
-      & = (/'Other',&
+      & = ['Other',&
       &     'Noble',&
       &     'I    ',&
       &     'Cs   ',&
@@ -45,7 +45,7 @@ module LibENDF
       &     'Mo   ',&
       &     'La   ',&
       &     'Ce   ',&
-      &     'U    '/)
+      &     'U    ']
 
    type AtomType
       character(13) :: Name
@@ -106,21 +106,21 @@ module LibENDF
    integer, parameter :: NRecordTypes   =  7 ! should be same as last number above
 
    character(7), dimension(0:NRecordTypes), parameter :: RecordName = &
-      & (/'Unknown',&!   0
+      & ['Unknown',&!   0
       &   'Text   ',&!   1
       &   'Cont   ',&!   2
       &   'List   ',&!   3
       &   'Tab1   ',&!   4
       &   'Tab2   ',&!   5
       &   'Intg   ',&!   6
-      &   'Decay  '/)!   7
+      &   'Decay  ']!   7
 
    character(1), dimension(0:4), parameter :: MetastabilityName = &
-      & (/' ',&!   0
+      & [' ',&!   0
       &   'm',&!   1
       &   'n',&!   2
       &   'o',&!   3
-      &   'p'/)!   4
+      &   'p']!   4
 
    integer, parameter :: iDecayModeGamma              =  0
    integer, parameter :: iDecayModeBeta               =  1
@@ -133,7 +133,7 @@ module LibENDF
    integer, parameter :: iDecayModeUnknown            = 10
 
    character(19), dimension(0:10), parameter :: DecayModeName = &
-      & (/'Gamma              ',&!   0
+      & ['Gamma              ',&!   0
       &   'Beta               ',&!   1
       &   'Electron capture   ',&!   2
       &   'Isomeric transition',&!   3
@@ -143,10 +143,10 @@ module LibENDF
       &   'Proton             ',&!   7
       &   '-invalid1-         ',&!   8
       &   '-invalid2-         ',&!   9
-      &   'Unknown            '/)!  10
+      &   'Unknown            ']!  10
 
    integer, dimension(0:10), parameter :: AtomStep = &
-      & (/ 0,& ! Gamma
+      & [ 0,& ! Gamma
       &    1,& ! Beta
       &   -1,& ! Electron capture
       &    0,& ! Isomeric transition
@@ -156,10 +156,10 @@ module LibENDF
       &   -1,& ! Proton
       & 1000,& ! -invalid1-
       & 1000,& ! -invalid2-
-      & 1000/)  ! Unknown
+      & 1000]  ! Unknown
 
    integer, dimension(0:10), parameter :: MassStep = &
-      & (/ 0,& ! Gamma
+      & [ 0,& ! Gamma
       &    0,& ! Beta
       &    0,& ! Electron capture
       &    0,& ! Isomeric transition
@@ -169,7 +169,7 @@ module LibENDF
       &   -1,& ! Proton
       & 1000,& ! -invalid1-
       & 1000,& ! -invalid2-
-      & 1000/)  ! Unknown
+      & 1000]  ! Unknown
 
    real(Float), dimension(MaxNuclides,MaxNuclides) :: MotherDaughterMatrix,DecayMatrix
 

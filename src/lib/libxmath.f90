@@ -104,7 +104,7 @@ contains
       type( Vector2 ), intent( in ) :: xVector2
       real( Float ), intent( in ) :: xFloat
 
-      DumVec2 = Vector2((/xFloat*xVector2%x(1),xFloat*xVector2%x(2)/))
+      DumVec2 = Vector2([xFloat*xVector2%x(1),xFloat*xVector2%x(2)])
       MultiplyFloatVector2 = DumVec2
    end function MultiplyFloatVector2
 
@@ -118,7 +118,7 @@ contains
       type( Vector ), intent( in ) :: xVector
       real( Float ), intent( in ) :: xFloat
 
-      DumVec = Vector((/xFloat*xVector%x(1),xFloat*xVector%x(2),xFloat*xVector%x(3)/))
+      DumVec = Vector([xFloat*xVector%x(1),xFloat*xVector%x(2),xFloat*xVector%x(3)])
       MultiplyFloatVector = DumVec
    end function MultiplyFloatVector
 
@@ -178,7 +178,7 @@ contains
       type( Vector2 ) MultiplyVector2Vector2, DumVec2
       type( Vector2 ), intent( in ) :: xVector2,yVector2
 
-      DumVec2 = Vector2((/xVector2%x(1)*yVector2%x(1),xVector2%x(2)*yVector2%x(2)/))
+      DumVec2 = Vector2([xVector2%x(1)*yVector2%x(1),xVector2%x(2)*yVector2%x(2)])
       MultiplyVector2Vector2 = DumVec2
    end function MultiplyVector2Vector2
 
@@ -190,7 +190,7 @@ contains
       type( Vector2 ) DivideVector2Vector2, DumVec2
       type( Vector2 ), intent( in ) :: xVector2,yVector2
 
-      DumVec2 = Vector2((/xVector2%x(1)/yVector2%x(1),xVector2%x(2)/yVector2%x(2)/))
+      DumVec2 = Vector2([xVector2%x(1)/yVector2%x(1),xVector2%x(2)/yVector2%x(2)])
       DivideVector2Vector2 = DumVec2
    end function DivideVector2Vector2
 
@@ -202,7 +202,7 @@ contains
       type( Vector ) DivideVectorVector, DumVec
       type( Vector ), intent( in ) :: xVector,yVector
 
-      DumVec = Vector((/xVector%x(1)/yVector%x(1),xVector%x(2)/yVector%x(2),xVector%x(3)/yVector%x(3)/))
+      DumVec = Vector([xVector%x(1)/yVector%x(1),xVector%x(2)/yVector%x(2),xVector%x(3)/yVector%x(3)])
       DivideVectorVector = DumVec
    end function DivideVectorVector
 
@@ -214,7 +214,7 @@ contains
       type( Vector ) MultiplyVectorVector, DumVec
       type( Vector ), intent( in ) :: xVector,yVector
 
-      DumVec = Vector((/xVector%x(1)*yVector%x(1),xVector%x(2)*yVector%x(2),xVector%x(3)*yVector%x(3)/))
+      DumVec = Vector([xVector%x(1)*yVector%x(1),xVector%x(2)*yVector%x(2),xVector%x(3)*yVector%x(3)])
       MultiplyVectorVector = DumVec
    end function MultiplyVectorVector
 
@@ -226,7 +226,7 @@ contains
       type( Vector2 ) AddVector2Vector2, DumVec2
       type( Vector2 ), intent( in ) :: xVector2,yVector2
 
-      DumVec2 = Vector2((/xVector2%x(1)+yVector2%x(1),xVector2%x(2)+yVector2%x(2)/))
+      DumVec2 = Vector2([xVector2%x(1)+yVector2%x(1),xVector2%x(2)+yVector2%x(2)])
       AddVector2Vector2 = DumVec2
    end function AddVector2Vector2
 
@@ -238,7 +238,7 @@ contains
       type( Vector ) AddVectorVector, DumVec
       type( Vector ), intent( in ) :: xVector,yVector
 
-      DumVec = Vector((/xVector%x(1)+yVector%x(1),xVector%x(2)+yVector%x(2),xVector%x(3)+yVector%x(3)/))
+      DumVec = Vector([xVector%x(1)+yVector%x(1),xVector%x(2)+yVector%x(2),xVector%x(3)+yVector%x(3)])
       AddVectorVector = DumVec
    end function AddVectorVector
 

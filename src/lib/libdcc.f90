@@ -66,7 +66,7 @@ module LibDCC
    integer, parameter :: NTissues          = 29
 
    character(10), parameter, dimension(NTissues) :: TissueName = &
-      & (/'R-marrow  ',&
+      & ['R-marrow  ',&
       &   'Colon     ',&
       &   'Lungs     ',&
       &   'ST-wall   ',&
@@ -94,7 +94,7 @@ module LibDCC
       &   'SI-wall   ',&
       &   'Spleen    ',&
       &   'Thymus    ',&
-      &   'Uterus    '/)
+      &   'Uterus    ']
 
    integer, parameter :: Age_Adult   = 1
    integer, parameter :: Age_15yr    = 2
@@ -106,17 +106,17 @@ module LibDCC
    integer, parameter :: NDCCAges = 6
 
    character(7), parameter, dimension(NDCCAges) :: DCCAgeName = &
-      & (/'Adult  ',&
+      & ['Adult  ',&
       &   '15yr   ',&
       &   '10yr   ',&
       &   '5yr    ',&
       &   '1yr    ',&
-      &   'Newborn'/)
+      &   'Newborn']
 
    integer, parameter :: NGroundDepths = 9
 
    character(45), parameter, dimension(NGroundDepths) :: GroundDepthName = &
-      & (/'Planar sources at specific depths/0.5 g.cm-2/',&
+      & ['Planar sources at specific depths/0.5 g.cm-2/',&
       &   'Exponential sources/0.5 g.cm-2/              ',&
       &   'Exponential sources/1.0 g.cm-2/              ',&
       &   'Exponential sources/2.5 g.cm-2/              ',&
@@ -124,7 +124,7 @@ module LibDCC
       &   'Exponential sources/10.0 g.cm-2/             ',&
       &   'Exponential sources/20.0 g.cm-2/             ',&
       &   'Exponential sources/50.0 g.cm-2/             ',&
-      &   'Exponential sources/100.0 g.cm-2/            '/)
+      &   'Exponential sources/100.0 g.cm-2/            ']
 
    integer, parameter :: NInhalationDCCs = 8
 
@@ -138,14 +138,14 @@ module LibDCC
    integer, parameter :: Inhalation_public_adult   = 8
 
    character(14), parameter, dimension(NInhalationDCCs) :: InhalationDCCName = &
-      & (/'worker 1um    ',&
+      & ['worker 1um    ',&
       &   'worker 5um    ',&
       &   'public infant ',&
       &   'public 1 year ',&
       &   'public 5 year ',&
       &   'public 10 year',&
       &   'public 15 year',&
-      &   'public adult  '/)
+      &   'public adult  ']
 
    type DCCVector
       real(Float), dimension(MaxNuclides) :: x

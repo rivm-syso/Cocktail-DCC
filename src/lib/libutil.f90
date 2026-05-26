@@ -34,7 +34,7 @@ module LibUtil
    integer, parameter :: Male = 1
    integer, parameter :: Female = 2
 
-   character(6), dimension(2), parameter :: GenderName = ((/'male  ','female'/))
+   character(6), dimension(2), parameter :: GenderName = (['male  ','female'])
    !
    ! To accommodate for long file- and directory names, by default such strings
    ! have the following length:

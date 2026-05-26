@@ -154,8 +154,8 @@ module LibCocktailDCC
    integer, parameter :: iCumulativeDCC = 2
 
    character(13), dimension(2), parameter :: DCCTypeName = &
-   & (/'DCC          ',&!  1
-   &   'CumulativeDCC'/)!  2
+   & ['DCC          ',&!  1
+   &  'CumulativeDCC']!  2
 
    type(ExponentialIntervalType), dimension(MaxNSourceTerms,NPathways,iRegularDCC:iCumulativeDCC) :: CocktailDCC
    type(ExponentialIntervalType), dimension(MaxNSourceTerms,MaxNuclides) :: LookupCocktail
@@ -165,9 +165,9 @@ module LibCocktailDCC
    character(DefaultLength), dimension(MaxNSourceTerms) :: SourceTermName
 
    character(10), dimension(NPathways), parameter :: PathwayName = &
-   & (/'Air       ',&!  1
-   &   'Ground    ',&!  2
-   &   'Inhalation'/)!  3
+   & ['Air       ',&!  1
+   &  'Ground    ',&!  2
+   &  'Inhalation']!  3
 
 
 contains
