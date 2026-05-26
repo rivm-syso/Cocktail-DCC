@@ -1,4 +1,4 @@
-MODULE LibENDF
+module LibENDF
    ! ____________________________________________________
    !
    ! Developed For:
@@ -10,15 +10,15 @@ MODULE LibENDF
    ! NL - 3720 BA Bilthoven
    ! The Netherlands
 
-   USE libxmath
-   USE libutil
-   USE Matrix_Exponential
+   use libxmath
+   use libutil
+   use Matrix_Exponential
    use LibUtil, only: env_var
-   IMPLICIT NONE
+   implicit none
 
-   PRIVATE
+   private
    public :: RIVMSourcesPath, TransitionMatrixPath
-   PUBLIC :: NNuclides,NuclideSpecs,MakeMotherDaughterMatrix,&
+   public :: NNuclides,NuclideSpecs,MakeMotherDaughterMatrix,&
    & MotherDaughterMatrix,FindOrphans,RegularizeNuclides,&
    & NuclideType,MaxNuclides,Orphanage,NuclideFamily,&
    & CollectProgeny,ListTransitions,MakeEvolutionMatrix,AddOrphansBelow,&
@@ -26,14 +26,14 @@ MODULE LibENDF
    & IsRelated,RegularizedIsRelated,ReadNProcessENDFNuclideSpecs
    public :: isGas
 
-   INTEGER, PARAMETER :: MaxAtoms = 118 ! largest atom number available
+   integer, parameter :: MaxAtoms = 118 ! largest atom number available
 
-   CHARACTER(2), DIMENSION(0:MaxAtoms) :: AtomName
+   character(2), dimension(0:MaxAtoms) :: AtomName
    !
    ! Number of nuclide groups
    !
-   INTEGER, PARAMETER :: NNuclideGroups = 11
-   CHARACTER(5), DIMENSION(0:NNuclideGroups), PARAMETER :: NuclideGroupName &
+   integer, parameter :: NNuclideGroups = 11
+   character(5), dimension(0:NNuclideGroups), parameter :: NuclideGroupName &
       & = (/'Other',&
       &     'Noble',&
       &     'I    ',&
@@ -47,65 +47,65 @@ MODULE LibENDF
       &     'Ce   ',&
       &     'U    '/)
 
-   TYPE AtomType
-      CHARACTER(13) :: Name
-      CHARACTER(3) :: Symbol
-      INTEGER :: Period,Group,NuclideGroup
-      CHARACTER(24) :: ChemicalSeries
-      REAL(Float) :: Mass
-   END TYPE AtomType
+   type AtomType
+      character(13) :: Name
+      character(3) :: Symbol
+      integer :: Period,Group,NuclideGroup
+      character(24) :: ChemicalSeries
+      real(Float) :: Mass
+   end type AtomType
 
-   INTEGER :: NAtoms = 0
-   TYPE(AtomType), DIMENSION(0:MaxAtoms) :: AtomSpecs
+   integer :: NAtoms = 0
+   type(AtomType), dimension(0:MaxAtoms) :: AtomSpecs
    !
    ! The maximum number of nuclides that we will read from the database:
    !
-   INTEGER, PARAMETER :: MaxNuclides = 4000
+   integer, parameter :: MaxNuclides = 4000
    !
    !
-   INTEGER, PARAMETER :: MaxNDaughters = 15 ! Sufficient for "normal decay", including assignment of very fast decays to their grandmothers
+   integer, parameter :: MaxNDaughters = 15 ! Sufficient for "normal decay", including assignment of very fast decays to their grandmothers
    !
    ! The true number of nuclides found:
    !
-   INTEGER :: NNuclides
+   integer :: NNuclides
 
-   TYPE NuclideType
-      CHARACTER(10) :: NuclideName
-      CHARACTER(10), DIMENSION(MaxNDaughters) :: DaughterName
-      CHARACTER(40), DIMENSION(MaxNDaughters) :: DecayName
-      INTEGER :: NDecayModes,AtomNumber,NHadrons,NDaughters,MetaStableMode,NuclideGroup
-      CHARACTER(15) :: AtomName
-      INTEGER, DIMENSION(MaxNDaughters) :: Daughter
-      REAL(Float) :: HalfTime,AtomMass
-      REAL(Float), DIMENSION(MaxNDaughters) :: DaughterFraction,DecayFraction
-      LOGICAL :: IsOrphan
-   END TYPE NuclideType
+   type NuclideType
+      character(10) :: NuclideName
+      character(10), dimension(MaxNDaughters) :: DaughterName
+      character(40), dimension(MaxNDaughters) :: DecayName
+      integer :: NDecayModes,AtomNumber,NHadrons,NDaughters,MetaStableMode,NuclideGroup
+      character(15) :: AtomName
+      integer, dimension(MaxNDaughters) :: Daughter
+      real(Float) :: HalfTime,AtomMass
+      real(Float), dimension(MaxNDaughters) :: DaughterFraction,DecayFraction
+      logical :: IsOrphan
+   end type NuclideType
    !
    ! The whole lot of information will be stored in:
    !
-   TYPE(NuclideType), DIMENSION(0:MaxNuclides) :: NuclideSpecs
+   type(NuclideType), dimension(0:MaxNuclides) :: NuclideSpecs
    !
    ! A single datafile can have so many lines
    !
-   INTEGER, PARAMETER :: MaxNLines = 30000
+   integer, parameter :: MaxNLines = 30000
 
-   INTEGER, DIMENSION(MaxNLines) :: iRecordType
-   LOGICAL, DIMENSION(MaxNLines) :: IsContinuation
+   integer, dimension(MaxNLines) :: iRecordType
+   logical, dimension(MaxNLines) :: IsContinuation
    !
    ! The following types of records can be found:
    !
-   INTEGER, PARAMETER :: iUnknownRecord =  0
-   INTEGER, PARAMETER :: iTextRecord    =  1
-   INTEGER, PARAMETER :: iContRecord    =  2
-   INTEGER, PARAMETER :: iListRecord    =  3
-   INTEGER, PARAMETER :: iTab1Record    =  4
-   INTEGER, PARAMETER :: iTab2Record    =  5
-   INTEGER, PARAMETER :: iIntgRecord    =  6
-   INTEGER, PARAMETER :: iDecayRecord   =  7
+   integer, parameter :: iUnknownRecord =  0
+   integer, parameter :: iTextRecord    =  1
+   integer, parameter :: iContRecord    =  2
+   integer, parameter :: iListRecord    =  3
+   integer, parameter :: iTab1Record    =  4
+   integer, parameter :: iTab2Record    =  5
+   integer, parameter :: iIntgRecord    =  6
+   integer, parameter :: iDecayRecord   =  7
 
-   INTEGER, PARAMETER :: NRecordTypes   =  7 ! should be same as last number above
+   integer, parameter :: NRecordTypes   =  7 ! should be same as last number above
 
-   CHARACTER(7), DIMENSION(0:NRecordTypes), PARAMETER :: RecordName = &
+   character(7), dimension(0:NRecordTypes), parameter :: RecordName = &
       & (/'Unknown',&!   0
       &   'Text   ',&!   1
       &   'Cont   ',&!   2
@@ -115,24 +115,24 @@ MODULE LibENDF
       &   'Intg   ',&!   6
       &   'Decay  '/)!   7
 
-   CHARACTER(1), DIMENSION(0:4), PARAMETER :: MetastabilityName = &
+   character(1), dimension(0:4), parameter :: MetastabilityName = &
       & (/' ',&!   0
       &   'm',&!   1
       &   'n',&!   2
       &   'o',&!   3
       &   'p'/)!   4
 
-   INTEGER, PARAMETER :: iDecayModeGamma              =  0
-   INTEGER, PARAMETER :: iDecayModeBeta               =  1
-   INTEGER, PARAMETER :: iDecayModeElectronCapture    =  2
-   INTEGER, PARAMETER :: iDecayModeIsomericTransition =  3
-   INTEGER, PARAMETER :: iDecayModeAlpha              =  4
-   INTEGER, PARAMETER :: iDecayModeNeutron            =  5
-   INTEGER, PARAMETER :: iDecayModeSpontaneousFission =  6
-   INTEGER, PARAMETER :: iDecayModeProton             =  7
-   INTEGER, PARAMETER :: iDecayModeUnknown            = 10
+   integer, parameter :: iDecayModeGamma              =  0
+   integer, parameter :: iDecayModeBeta               =  1
+   integer, parameter :: iDecayModeElectronCapture    =  2
+   integer, parameter :: iDecayModeIsomericTransition =  3
+   integer, parameter :: iDecayModeAlpha              =  4
+   integer, parameter :: iDecayModeNeutron            =  5
+   integer, parameter :: iDecayModeSpontaneousFission =  6
+   integer, parameter :: iDecayModeProton             =  7
+   integer, parameter :: iDecayModeUnknown            = 10
 
-   CHARACTER(19), DIMENSION(0:10), PARAMETER :: DecayModeName = &
+   character(19), dimension(0:10), parameter :: DecayModeName = &
       & (/'Gamma              ',&!   0
       &   'Beta               ',&!   1
       &   'Electron capture   ',&!   2
@@ -145,7 +145,7 @@ MODULE LibENDF
       &   '-invalid2-         ',&!   9
       &   'Unknown            '/)!  10
 
-   INTEGER, DIMENSION(0:10), PARAMETER :: AtomStep = &
+   integer, dimension(0:10), parameter :: AtomStep = &
       & (/ 0,& ! Gamma
       &    1,& ! Beta
       &   -1,& ! Electron capture
@@ -158,7 +158,7 @@ MODULE LibENDF
       & 1000,& ! -invalid2-
       & 1000/)  ! Unknown
 
-   INTEGER, DIMENSION(0:10), PARAMETER :: MassStep = &
+   integer, dimension(0:10), parameter :: MassStep = &
       & (/ 0,& ! Gamma
       &    0,& ! Beta
       &    0,& ! Electron capture
@@ -171,45 +171,45 @@ MODULE LibENDF
       & 1000,& ! -invalid2-
       & 1000/)  ! Unknown
 
-   REAL(Float), DIMENSION(MaxNuclides,MaxNuclides) :: MotherDaughterMatrix,DecayMatrix
+   real(Float), dimension(MaxNuclides,MaxNuclides) :: MotherDaughterMatrix,DecayMatrix
 
-   TYPE OrphanType
-      INTEGER :: Mother,Daughter
-      REAL(Float) :: Yield,CompoundYield
-      LOGICAL :: Active
-   END TYPE OrphanType
+   type OrphanType
+      integer :: Mother,Daughter
+      real(Float) :: Yield,CompoundYield
+      logical :: Active
+   end type OrphanType
 
-   INTEGER, PARAMETER :: MaxNOrphans = 1700
+   integer, parameter :: MaxNOrphans = 1700
 
-   TYPE OrphanageType
-      REAL(Float) :: tMin
-      INTEGER :: NOrphans,NTooUnStable
-      LOGICAL, DIMENSION(MaxNuclides) :: IsTooUnstable
-      TYPE(OrphanType), DIMENSION(MaxNOrphans) :: Orphan
-      LOGICAL, DIMENSION(MaxNuclides) :: OrphanActive
-   END TYPE OrphanageType
+   type OrphanageType
+      real(Float) :: tMin
+      integer :: NOrphans,NTooUnStable
+      logical, dimension(MaxNuclides) :: IsTooUnstable
+      type(OrphanType), dimension(MaxNOrphans) :: Orphan
+      logical, dimension(MaxNuclides) :: OrphanActive
+   end type OrphanageType
 
-   TYPE(OrphanageType) :: Orphanage
+   type(OrphanageType) :: Orphanage
 
-   LOGICAL, DIMENSION(MaxNuclides,MaxNuclides) :: IsRelated,RegularizedIsRelated
+   logical, dimension(MaxNuclides,MaxNuclides) :: IsRelated,RegularizedIsRelated
    !
    ! Structure for storing relatives stemming from 1 nuclide
    !
-   TYPE NuclideFamilyType
-      INTEGER :: NFamily,NFarFamily
+   type NuclideFamilyType
+      integer :: NFamily,NFarFamily
       ! Equivalent of compound yield: if you start with any (specified) family member with activity 1, how much of the other
       ! nuclides do you find? Only contributions are counted that are linked to the starting nuclide via fast-decaying nuclides.
-      REAL(Float), DIMENSION(MaxNuclides) :: RemainingFraction
-      INTEGER, DIMENSION(MaxNuclides) :: FamilyMember,NDaughters,NMothers,FamilyNumber
-      INTEGER, DIMENSION(MaxNuclides,MaxNuclides) :: Mother,Daughter
-      LOGICAL, DIMENSION(MaxNuclides) :: IsFamily,IsFarFamily,IncomingArrowsChecked,OutgoingArrowsChecked,&
+      real(Float), dimension(MaxNuclides) :: RemainingFraction
+      integer, dimension(MaxNuclides) :: FamilyMember,NDaughters,NMothers,FamilyNumber
+      integer, dimension(MaxNuclides,MaxNuclides) :: Mother,Daughter
+      logical, dimension(MaxNuclides) :: IsFamily,IsFarFamily,IncomingArrowsChecked,OutgoingArrowsChecked,&
       & DescendentOfStartMember
-      LOGICAL, DIMENSION(MaxNuclides,MaxNuclides) :: IsRelated
-   END TYPE NuclideFamilyType
+      logical, dimension(MaxNuclides,MaxNuclides) :: IsRelated
+   end type NuclideFamilyType
 
-   TYPE(NuclideFamilyType) :: NuclideFamily
+   type(NuclideFamilyType) :: NuclideFamily
 
-CONTAINS
+contains
    function ENDFPath()
       character(:), allocatable :: ENDFPath
 
@@ -231,25 +231,25 @@ CONTAINS
       if (.not. allocated(TransitionMatrixPath)) TransitionMatrixPath = '.'
    end function
 
-   INTEGER FUNCTION GetAtomNumber(Symbol)
+   integer function GetAtomNumber(Symbol)
       !
       ! Search for the given name of an atom in the list of known atoms and
       ! return its number
       !
-      CHARACTER(*), INTENT(IN) :: Symbol
-      INTEGER :: DumInt,iAtom,TheIndex
-      CHARACTER(10) :: DumSymbol
+      character(*), intent(in) :: Symbol
+      integer :: DumInt,iAtom,TheIndex
+      character(10) :: DumSymbol
 
-      DumSymbol = TRIM(Symbol)
-      CALL Capitalize(DumSymbol)
+      DumSymbol = trim(Symbol)
+      call Capitalize(DumSymbol)
       TheIndex = INDEX(DumSymbol,'-')
-      IF (TheIndex > 0) DumSymbol = DumSymbol(1:(TheIndex-1))
+      if (TheIndex > 0) DumSymbol = DumSymbol(1:(TheIndex-1))
       DumInt = 0
-      DO iAtom = 1,NAtoms
-         IF (TRIM(DumSymbol) == TRIM(AtomSpecs(iAtom)%Symbol)) DumInt = iAtom
-      ENDDO
+      do iAtom = 1,NAtoms
+         if (trim(DumSymbol) == trim(AtomSpecs(iAtom)%Symbol)) DumInt = iAtom
+      enddo
       GetAtomNumber = DumInt
-   END FUNCTION GetAtomNumber
+   end function GetAtomNumber
 
 
 
@@ -273,11 +273,11 @@ CONTAINS
 
 
 
-   SUBROUTINE InitNuclide(iNuclide)
+   subroutine InitNuclide(iNuclide)
       !
       ! Set all info to 0 or anything else that shows clearly that the nulcide is stil empty
       !
-      INTEGER, INTENT(IN) :: iNuclide
+      integer, intent(in) :: iNuclide
 
       NuclideSpecs(iNuclide)%NuclideName = ' '
       NuclideSpecs(iNuclide)%DaughterName = ' '
@@ -287,465 +287,465 @@ CONTAINS
       NuclideSpecs(iNuclide)%Daughter = 0
       NuclideSpecs(iNuclide)%HalfTime = 0._Float
       NuclideSpecs(iNuclide)%DaughterFraction = 0._Float
-   END SUBROUTINE InitNuclide
+   end subroutine InitNuclide
 
 
 
-   SUBROUTINE ReadICRPNuclides(InName)
+   subroutine ReadICRPNuclides(InName)
       !
       ! Read the names, decaytimes and daughters for a collection of nuclides
       !
-      CHARACTER(*), INTENT(IN) :: InName
+      character(*), intent(in) :: InName
 
-      INTEGER :: iNuclide,jNuclide,DumInt,iDaughter,iAtom,i
-      CHARACTER(DefaultLength) :: ALine,DumStr
-      CHARACTER(2) :: Units
-      CHARACTER(7) :: DumStr7
-      CHARACTER(7), DIMENSION(MaxNuclides) :: NuclideName
-      CHARACTER(11), DIMENSION(4) :: YieldStr
-      REAL(Float) :: C,Dum
-      LOGICAL, DIMENSION(MaxNuclides) :: Available
-      INTEGER, DIMENSION(MaxNuclides) :: SortedIndex,AtomNumber
+      integer :: iNuclide,jNuclide,DumInt,iDaughter,iAtom,i
+      character(DefaultLength) :: ALine,DumStr
+      character(2) :: Units
+      character(7) :: DumStr7
+      character(7), dimension(MaxNuclides) :: NuclideName
+      character(11), dimension(4) :: YieldStr
+      real(Float) :: C,Dum
+      logical, dimension(MaxNuclides) :: Available
+      integer, dimension(MaxNuclides) :: SortedIndex,AtomNumber
 
-      INTEGER, PARAMETER :: DebugLevel = 0
+      integer, parameter :: DebugLevel = 0
       !
       ! Find number of nuclides and sort them before reading the true specs
       !
-      OPEN(ScratchFile,FILE=TRIM(InName),FORM='FORMATTED',STATUS='OLD',&
-         & POSITION='REWIND')
-      READ(ScratchFile,*) ! Skip header
+      open(ScratchFile,file=trim(InName),form='FORMATTED',status='OLD',&
+         & position='REWIND')
+      read(ScratchFile,*) ! Skip header
 
-      IF(DebugLevel > 1) WRITE(*,*)
-      IF(DebugLevel > 1) WRITE(*,'(A)') 'First pass: the nuclides in the order as in the file:'
+      if(DebugLevel > 1) write(*,*)
+      if(DebugLevel > 1) write(*,'(A)') 'First pass: the nuclides in the order as in the file:'
       iNuclide = 0
-      DO
-         READ(ScratchFile,'(A7)',END=20) DumStr7
+      do
+         read(ScratchFile,'(A7)',end=20) DumStr7
 
          iNuclide = iNuclide + 1
-         NuclideName(iNuclide) = TRIM(DumStr7)
+         NuclideName(iNuclide) = trim(DumStr7)
          AtomNumber(iNuclide) = GetAtomNumber(NuclideName(iNuclide))
-         IF(DebugLevel > 1) WRITE(*,'(I4,1X,A7,5X,I3,1X,A20)') iNuclide,NuclideName(iNuclide),&
+         if(DebugLevel > 1) write(*,'(I4,1X,A7,5X,I3,1X,A20)') iNuclide,NuclideName(iNuclide),&
             & AtomNumber(iNuclide),AtomSpecs(AtomNumber(iNuclide))%Name
             !
             ! Initialize nuclide
             !
-         CALL InitNuclide(iNuclide)
+         call InitNuclide(iNuclide)
 
-      ENDDO
-      20 CONTINUE ! ready counting nuclides
+      enddo
+      20 continue ! ready counting nuclides
 
          NNuclides = iNuclide ! The number of nuclides actually found in the file
-      IF(DebugLevel > 1) WRITE(*,*)
+      if(DebugLevel > 1) write(*,*)
       !
       ! Sort the nuclides by atom number in stead of alphabetically
       !
-      IF(DebugLevel > 1) WRITE(*,'(A)') 'Second pass: sorting the nuclides:'
+      if(DebugLevel > 1) write(*,'(A)') 'Second pass: sorting the nuclides:'
       Available = .TRUE.
       SortedIndex = 0
       i = 0
-      DO iAtom=1,NAtoms
-         DO iNuclide = 1,NNuclides
-            IF ((AtomNumber(iNuclide) == iAtom).AND.(Available(iNuclide))) THEN
+      do iAtom=1,NAtoms
+         do iNuclide = 1,NNuclides
+            if ((AtomNumber(iNuclide) == iAtom).AND.(Available(iNuclide))) then
                i = i + 1
                SortedIndex(iNuclide) = i
                Available(iNuclide) = .FALSE.
-               IF(DebugLevel > 1) WRITE(*,'(I4,1X,I3,1X,A20)') i,iAtom,TRIM(NuclideName(iNuclide))
-            ENDIF
-         ENDDO
-      ENDDO
-      IF(DebugLevel > 1) WRITE(*,*)
+               if(DebugLevel > 1) write(*,'(I4,1X,I3,1X,A20)') i,iAtom,trim(NuclideName(iNuclide))
+            endif
+         enddo
+      enddo
+      if(DebugLevel > 1) write(*,*)
       !
       ! Read the specs
       !
-      IF(DebugLevel > 1) WRITE(*,'(A)') 'Third pass: reading the specs:'
+      if(DebugLevel > 1) write(*,'(A)') 'Third pass: reading the specs:'
       REWIND(ScratchFile)
-      READ(ScratchFile,*) ! Skip header
+      read(ScratchFile,*) ! Skip header
 
-      DO jNuclide = 1,NNuclides
+      do jNuclide = 1,NNuclides
          iNuclide = SortedIndex(jNuclide)
-         READ(ScratchFile,10,END=20) ALine
-         10 FORMAT(A)
-         IF (DebugLevel > 1) WRITE(*,70) jNuclide,iNuclide
-         70 FORMAT('Line: ',I4,': interpreting specs for sorted nuclide ',I4)
-         IF (DebugLevel > 2) WRITE(*,60) TRIM(ALine)
-         60 FORMAT('Specs from database are: "',A,'"')
+         read(ScratchFile,10,end=20) ALine
+         10 format(A)
+         if (DebugLevel > 1) write(*,70) jNuclide,iNuclide
+         70 format('Line: ',I4,': interpreting specs for sorted nuclide ',I4)
+         if (DebugLevel > 2) write(*,60) trim(ALine)
+         60 format('Specs from database are: "',A,'"')
          !
          ! Get the nuclide name
          !
-         READ(ALine,100) NuclideSpecs(iNuclide)%NuclideName,NuclideSpecs(iNuclide)%HalfTime,Units,&
+         read(ALine,100) NuclideSpecs(iNuclide)%NuclideName,NuclideSpecs(iNuclide)%HalfTime,Units,&
          & DumStr,DumInt,DumInt,DumInt,DumInt,&
          & (NuclideSpecs(iNuclide)%DaughterName(iDaughter),DumStr,&
          &   YieldStr(iDaughter),iDaughter=1,4),Dum,Dum,Dum,DumInt,DumInt,DumInt,DumInt,DumInt,&
          & NuclideSpecs(iNuclide)%AtomMass
          NuclideSpecs(iNuclide)%NHadrons = NINT(NuclideSpecs(iNuclide)%AtomMass)
 
-         100 FORMAT(A7,F8.0,A2,A8,3I7,I6,4(1X,A7,A6,A11),f7.0,2f8.0,3i4,i5,i4,e11.0,e10.0,e9.0)
+         100 format(A7,F8.0,A2,A8,3I7,I6,4(1X,A7,A6,A11),f7.0,2f8.0,3i4,i5,i4,e11.0,e10.0,e9.0)
          !
          ! Calibrate halftime
          !
-         IF (TRIM(Units) == 'y') THEN
+         if (trim(Units) == 'y') then
             C = 3600._Float*24._Float*365.25_Float
-            IF (DebugLevel > 1) WRITE(*,'(A,EN20.5)') &
+            if (DebugLevel > 1) write(*,'(A,EN20.5)') &
             & 'Half time is given in year --> conversion to seconds with factor ',C
-         ELSE IF (TRIM(Units) == 'd') THEN
+         else if (trim(Units) == 'd') then
             C = 3600._Float*24._Float
-            IF (DebugLevel > 1) WRITE(*,'(A,EN20.5)') &
+            if (DebugLevel > 1) write(*,'(A,EN20.5)') &
             & 'Half time is given in day --> conversion to seconds with factor ',C
-         ELSE IF (TRIM(Units) == 'h') THEN
+         else if (trim(Units) == 'h') then
             C = 3600._Float
-            IF (DebugLevel > 1) WRITE(*,'(A,EN20.5)') &
+            if (DebugLevel > 1) write(*,'(A,EN20.5)') &
             & 'Half time is given in hour --> conversion to seconds with factor ',C
-         ELSE IF (TRIM(Units) == 'm') THEN
+         else if (trim(Units) == 'm') then
             C = 60._Float
-            IF (DebugLevel > 1) WRITE(*,'(A,EN20.5)') &
+            if (DebugLevel > 1) write(*,'(A,EN20.5)') &
             & 'Half time is given in minute --> conversion to seconds with factor ',C
-         ELSE IF (TRIM(Units) == 's') THEN
+         else if (trim(Units) == 's') then
             C = 1._Float
-            IF (DebugLevel > 1) WRITE(*,'(A,EN20.5)') &
+            if (DebugLevel > 1) write(*,'(A,EN20.5)') &
             & 'Half time is given in second --> conversion to seconds with factor ',C
-         ELSE IF (TRIM(Units) == 'ms') THEN
+         else if (trim(Units) == 'ms') then
             C = 1.E-3_Float
-            IF (DebugLevel > 1) WRITE(*,'(A,EN20.5)') &
+            if (DebugLevel > 1) write(*,'(A,EN20.5)') &
             & 'Half time is given in millisecond --> conversion to seconds with factor ',C
-         ELSE IF (TRIM(Units) == 'us') THEN
+         else if (trim(Units) == 'us') then
             C = 1.E-6_Float
-            IF (DebugLevel > 1) WRITE(*,'(A,EN20.5)') &
+            if (DebugLevel > 1) write(*,'(A,EN20.5)') &
             & 'Half time is given in microsecond --> conversion to seconds with factor ',C
-         ELSE
-            WRITE(*,'(A)') 'Strange unit for halftime: '//Units//' !   --> Exiting!'
-            CALL EXIT()
-         ENDIF
+         else
+            write(*,'(A)') 'Strange unit for halftime: '//Units//' !   --> Exiting!'
+            call exit()
+         endif
 
          NuclideSpecs(iNuclide)%HalfTime = NuclideSpecs(iNuclide)%HalfTime*C
 
          NuclideSpecs(iNuclide)%AtomNumber = GetAtomNumber(NuclideSpecs(iNuclide)%NuclideName)
          NuclideSpecs(iNuclide)%AtomName = AtomSpecs(NuclideSpecs(iNuclide)%AtomNumber)%Name
-         IF (DebugLevel > 1) THEN
-            IF (NuclideSpecs(iNuclide)%AtomNumber > 0) THEN
-               WRITE(*,'(A,I3,A,A)') 'Recognized atom ',NuclideSpecs(iNuclide)%AtomNumber,' : ',&
-               & TRIM(NuclideSpecs(iNuclide)%AtomName)
-            ELSE
-               WRITE(*,'(A)') 'This is not a nuclide related to an atom in my database...'
-            ENDIF
-         ENDIF
+         if (DebugLevel > 1) then
+            if (NuclideSpecs(iNuclide)%AtomNumber > 0) then
+               write(*,'(A,I3,A,A)') 'Recognized atom ',NuclideSpecs(iNuclide)%AtomNumber,' : ',&
+               & trim(NuclideSpecs(iNuclide)%AtomName)
+            else
+               write(*,'(A)') 'This is not a nuclide related to an atom in my database...'
+            endif
+         endif
 
          NuclideSpecs(iNuclide)%NuclideGroup = AtomSpecs(NuclideSpecs(iNuclide)%AtomNumber)%NuclideGroup
          !
          ! Extract daughters
          !
-         DO iDaughter=1,4
-            IF (DebugLevel > 2) WRITE(*,'(I1,5X,A)') iDaughter,'"'//TRIM(YieldStr(iDaughter))//'"'
-            IF (LEN_TRIM(NuclideSpecs(iNuclide)%DaughterName(iDaughter)) > 0) &
-            & READ(YieldStr(iDaughter),'(E11.0)') NuclideSpecs(iNuclide)%DaughterFraction(iDaughter)
-         ENDDO
+         do iDaughter=1,4
+            if (DebugLevel > 2) write(*,'(I1,5X,A)') iDaughter,'"'//trim(YieldStr(iDaughter))//'"'
+            if (len_trim(NuclideSpecs(iNuclide)%DaughterName(iDaughter)) > 0) &
+            & read(YieldStr(iDaughter),'(E11.0)') NuclideSpecs(iNuclide)%DaughterFraction(iDaughter)
+         enddo
 
-         IF (DebugLevel > 1) THEN
-            WRITE(*,'(A)') 'Nuclide: '//TRIM(NuclideSpecs(iNuclide)%NuclideName)
-            WRITE(*,'(A,EN20.10,A)') 'Half time: ',NuclideSpecs(iNuclide)%HalfTime,' [s]'
-            WRITE(*,'(A,A2)') 'Units of half time: ',Units
-            DO iDaughter=1,4
-               IF (LEN_TRIM(NuclideSpecs(iNuclide)%DaughterName(iDaughter)) > 0) THEN
-               WRITE(*,'(A,I1,A,A7,A,EN20.5)') 'Daughter(',iDaughter,'): ',&
-                  & TRIM(NuclideSpecs(iNuclide)%DaughterName(iDaughter)),&
+         if (DebugLevel > 1) then
+            write(*,'(A)') 'Nuclide: '//trim(NuclideSpecs(iNuclide)%NuclideName)
+            write(*,'(A,EN20.10,A)') 'Half time: ',NuclideSpecs(iNuclide)%HalfTime,' [s]'
+            write(*,'(A,A2)') 'Units of half time: ',Units
+            do iDaughter=1,4
+               if (len_trim(NuclideSpecs(iNuclide)%DaughterName(iDaughter)) > 0) then
+               write(*,'(A,I1,A,A7,A,EN20.5)') 'Daughter(',iDaughter,'): ',&
+                  & trim(NuclideSpecs(iNuclide)%DaughterName(iDaughter)),&
                   & '     Yield: ',NuclideSpecs(iNuclide)%DaughterFraction(iDaughter)
-               ENDIF
-            ENDDO
-            WRITE(*,*)
-         ENDIF
+               endif
+            enddo
+            write(*,*)
+         endif
 
-         IF (DebugLevel > 0) THEN
-            WRITE(*,'(A10,EN20.10)') TRIM(NuclideSpecs(iNuclide)%NuclideName),NuclideSpecs(iNuclide)%HalfTime
-         ENDIF
+         if (DebugLevel > 0) then
+            write(*,'(A10,EN20.10)') trim(NuclideSpecs(iNuclide)%NuclideName),NuclideSpecs(iNuclide)%HalfTime
+         endif
 
-      ENDDO ! loop over ICRP-file
+      enddo ! loop over ICRP-file
 
-      IF(DebugLevel > 1) WRITE(*,*)
+      if(DebugLevel > 1) write(*,*)
 
-      CLOSE(ScratchFile)
-   END SUBROUTINE ReadICRPNuclides
+      close(ScratchFile)
+   end subroutine ReadICRPNuclides
 
 
 
-   SUBROUTINE MatchDaughters
+   subroutine MatchDaughters
       !
       ! Match the names of the daughters with the other nuclides.
       ! Exclude stable daughters
       !
-      INTEGER :: iNuclide,iDaughter
-      INTEGER, PARAMETER :: DebugLevel = 0
+      integer :: iNuclide,iDaughter
+      integer, parameter :: DebugLevel = 0
 
       IsRelated = .FALSE.
 
-      DO iNuclide = 1,NNuclides
+      do iNuclide = 1,NNuclides
          !
          ! By default the aughters is set to be irrelevant...
          !
-         DO iDaughter = 1,MaxNDaughters
+         do iDaughter = 1,MaxNDaughters
             NuclideSpecs(iNuclide)%Daughter(iDaughter) = &
             & GetNuclideNumber(NuclideSpecs(iNuclide)%DaughterName(iDaughter))
-            IF (NuclideSpecs(iNuclide)%Daughter(iDaughter) /= 0) THEN
+            if (NuclideSpecs(iNuclide)%Daughter(iDaughter) /= 0) then
                IsRelated(NuclideSpecs(iNuclide)%Daughter(iDaughter),iNuclide) = .TRUE.
-            ENDIF
-         ENDDO
+            endif
+         enddo
          !
          ! Print results
          !
-         IF (DebugLevel > 0) THEN
-            WRITE(*,40) iNuclide,&
-               &    '"'//TRIM(NuclideSpecs(iNuclide)%NuclideName)//'"',&
+         if (DebugLevel > 0) then
+            write(*,40) iNuclide,&
+               &    '"'//trim(NuclideSpecs(iNuclide)%NuclideName)//'"',&
                &    NuclideSpecs(iNuclide)%AtomNumber,&
-               &    '"'//TRIM(NuclideSpecs(iNuclide)%AtomName)//'"',&
+               &    '"'//trim(NuclideSpecs(iNuclide)%AtomName)//'"',&
                &    NuclideSpecs(iNuclide)%HalfTime,&
-               &    ('"'//TRIM(NuclideSpecs(NuclideSpecs(iNuclide)%Daughter(iDaughter))%NuclideName)//'"',&
+               &    ('"'//trim(NuclideSpecs(NuclideSpecs(iNuclide)%Daughter(iDaughter))%NuclideName)//'"',&
                &    NuclideSpecs(iNuclide)%DaughterFraction(iDaughter),iDaughter=1,4)
-            40    FORMAT(I4,'=',A12,'; atom(',I3,')=',A17,' T1/2=',G15.10,&
+            40    format(I4,'=',A12,'; atom(',I3,')=',A17,' T1/2=',G15.10,&
                & '  --> ',4(A12,' frac=',F10.8,'   '))
 
-            WRITE(*,*) 'Ready reading nuclide!'
-            WRITE(*,*) '-----------------------------------------------'
-            WRITE(*,*)
-            WRITE(*,*)
-         ENDIF
-      ENDDO ! loop over nuclides
-   END SUBROUTINE MatchDaughters
+            write(*,*) 'Ready reading nuclide!'
+            write(*,*) '-----------------------------------------------'
+            write(*,*)
+            write(*,*)
+         endif
+      enddo ! loop over nuclides
+   end subroutine MatchDaughters
 
 
 
-   SUBROUTINE ReadNuclideSpecs(InName)
+   subroutine ReadNuclideSpecs(InName)
       !
       ! Read the names, decaytimes and daughters for a collection of nuclides
       !
-      CHARACTER(*), INTENT(IN) :: InName
+      character(*), intent(in) :: InName
       !
-      IF (NAtoms == 0) CALL ReadAtoms('atoms.dat')
+      if (NAtoms == 0) call ReadAtoms('atoms.dat')
       !
       ! Read the datafile
       !
-      IF (.NOT.FileExists(TRIM(InName))) THEN
-         WRITE(*,'(A)') 'Cannot find ICRP nuclide file '//'/'//TRIM(InName)
-         WRITE(*,'(A)')  'You can download this file via the Supplemental Material associated with '&
+      if (.NOT.FileExists(trim(InName))) then
+         write(*,'(A)') 'Cannot find ICRP nuclide file '//'/'//trim(InName)
+         write(*,'(A)')  'You can download this file via the Supplemental Material associated with '&
             & //'http://www.icrp.org/publication.asp?id=ICRP%20Publication%20107'
-         WRITE(*,'(A)')  'Exiting!'
-         CALL EXIT()
-      ENDIF
+         write(*,'(A)')  'Exiting!'
+         call exit()
+      endif
 
-      WRITE(*,'(A)') 'Going to read nuclide specs from ICRP nuclide file '//TRIM(InName)
+      write(*,'(A)') 'Going to read nuclide specs from ICRP nuclide file '//trim(InName)
 
-      CALL ReadICRPNuclides(InName)
+      call ReadICRPNuclides(InName)
 
-      WRITE(*,'(A)') 'Ready reading nuclide specs, going to match daughters...'
+      write(*,'(A)') 'Ready reading nuclide specs, going to match daughters...'
       !
       ! Match the names of the daughters with the other nuclides.
       ! Exclude stable daughers
       !
-      CALL MatchDaughters()
-      WRITE(*,'(A)') 'Ready matching daughters!'
-   END SUBROUTINE ReadNuclideSpecs
+      call MatchDaughters()
+      write(*,'(A)') 'Ready matching daughters!'
+   end subroutine ReadNuclideSpecs
 
 
 
-   SUBROUTINE MassNuc2NucMass(MyName)
+   subroutine MassNuc2NucMass(MyName)
       !
       ! When applicable, convert the nuclide name from format 137mCs to Cs137m
       !
-      CHARACTER(*), INTENT(INOUT) :: MyName
-      LOGICAL :: HasWrongFormat,IsMetastable,Ready
-      CHARACTER(10) :: MassName,NukeName
-      INTEGER :: iCharacter
+      character(*), intent(inout) :: MyName
+      logical :: HasWrongFormat,IsMetastable,Ready
+      character(10) :: MassName,NukeName
+      integer :: iCharacter
 
       HasWrongFormat = CharacterIsADigit(MyName(1:1))
 
-      IF (HasWrongFormat) THEN
+      if (HasWrongFormat) then
       !
       ! Get the mass number
       !
       MassName = ' '
       iCharacter = 1
       Ready = .FALSE.
-      DO WHILE (.NOT.Ready)
-         MassName = TRIM(MassName)//MyName(iCharacter:iCharacter)
+      do while (.NOT.Ready)
+         MassName = trim(MassName)//MyName(iCharacter:iCharacter)
          iCharacter = iCharacter + 1
          Ready = (.NOT.CharacterIsADigit(MyName(iCharacter:iCharacter)))
-      ENDDO ! not ready
+      enddo ! not ready
       !
       ! Get the optional 'm' for meta-stable nuclides (case sensitive!!)
       !
       IsMetastable = (MyName(iCharacter:iCharacter) == 'm') ! This is case sensitive! Make sure you haven't converted to full uppercase yet!!
 
-      IF (IsMetastable) iCharacter = iCharacter + 1
+      if (IsMetastable) iCharacter = iCharacter + 1
       !
       ! Get the nuclide name
       !
       NukeName = ' '
       Ready = .FALSE.
-      DO WHILE (.NOT.Ready)
-         NukeName = TRIM(NukeName)//MyName(iCharacter:iCharacter)
+      do while (.NOT.Ready)
+         NukeName = trim(NukeName)//MyName(iCharacter:iCharacter)
          iCharacter = iCharacter + 1
          Ready = (MyName(iCharacter:iCharacter) == ' ')
-      ENDDO ! not ready
+      enddo ! not ready
       !
       ! Synthesis of elements in order. E.g., Cs137m
       !
-      IF (IsMetastable) THEN
-         MyName = TRIM(NukeName)//TRIM(MassName)//'m'
-      ELSE
-         MyName = TRIM(NukeName)//TRIM(MassName)
-      ENDIF
+      if (IsMetastable) then
+         MyName = trim(NukeName)//trim(MassName)//'m'
+      else
+         MyName = trim(NukeName)//trim(MassName)
+      endif
 
-      ENDIF
-   END SUBROUTINE MassNuc2NucMass
+      endif
+   end subroutine MassNuc2NucMass
 
 
 
-   SUBROUTINE EnsureHyphen(MyName)
+   subroutine EnsureHyphen(MyName)
       !
       ! When applicable, add a hyphen as separator between atom name and mass number
       !
-      CHARACTER(*), INTENT(INOUT) :: MyName
-      LOGICAL :: HasWrongFormat,IsMetastable,Ready,HasHyphen
-      CHARACTER(10) :: MassName,NukeName
-      INTEGER :: iCharacter
+      character(*), intent(inout) :: MyName
+      logical :: HasWrongFormat,IsMetastable,Ready,HasHyphen
+      character(10) :: MassName,NukeName
+      integer :: iCharacter
 
       HasWrongFormat = CharacterIsADigit(MyName(1:1))
 
-      IF (HasWrongFormat) CALL MassNuc2NucMass(MyName)
+      if (HasWrongFormat) call MassNuc2NucMass(MyName)
 
       HasHyphen = (INDEX(MyName,'-') > 0)
 
-      IF (.NOT.HasHyphen) THEN
+      if (.NOT.HasHyphen) then
          !
          ! Get the mass number
          !
          NukeName = ' '
          iCharacter = 1
          Ready = .FALSE.
-         DO WHILE (.NOT.Ready)
-            NukeName = TRIM(NukeName)//MyName(iCharacter:iCharacter)
+         do while (.NOT.Ready)
+            NukeName = trim(NukeName)//MyName(iCharacter:iCharacter)
             iCharacter = iCharacter + 1
             Ready = CharacterIsADigit(MyName(iCharacter:iCharacter))
-         ENDDO ! not ready
+         enddo ! not ready
 
-         NukeName = TRIM(NukeName)//'-'//MyName((iCharacter):LEN_TRIM(MyName))
-         MyName = TRIM(NukeName)
-      ENDIF
-   END SUBROUTINE EnsureHyphen
+         NukeName = trim(NukeName)//'-'//MyName((iCharacter):len_trim(MyName))
+         MyName = trim(NukeName)
+      endif
+   end subroutine EnsureHyphen
 
 
 
-   SUBROUTINE ReadAtoms(InName)
+   subroutine ReadAtoms(InName)
       !
       ! Read the specs of all known atoms
       !
-      CHARACTER(*), INTENT(IN) :: InName
+      character(*), intent(in) :: InName
 
-      INTEGER :: iAtom,DumInt,iNuclideGroup
-      CHARACTER(DefaultLength) :: ALine,DumStr
-      LOGICAL :: Ready
+      integer :: iAtom,DumInt,iNuclideGroup
+      character(DefaultLength) :: ALine,DumStr
+      logical :: Ready
 
-      INTEGER, PARAMETER :: DebugLevel = 0
+      integer, parameter :: DebugLevel = 0
 
-      WRITE(*,'(A)') 'Going to read atom specs...'
-      OPEN(ScratchFile,FILE=(' ./data/')//TRIM(InName),FORM='FORMATTED',STATUS='OLD',&
-         & POSITION='REWIND')
-      READ(ScratchFile,*) ! Skip header
+      write(*,'(A)') 'Going to read atom specs...'
+      open(ScratchFile,file=(' ./data/')//trim(InName),form='FORMATTED',status='OLD',&
+         & position='REWIND')
+      read(ScratchFile,*) ! Skip header
 
       Ready = .FALSE.
       iAtom = 0
-      DO WHILE (.NOT.Ready)
-         READ(ScratchFile,'(A)',END=20) ALine
+      do while (.NOT.Ready)
+         read(ScratchFile,'(A)',end=20) ALine
          iAtom = iAtom + 1
-         IF (DebugLevel > 1) WRITE(*,70) iAtom
-         70 FORMAT('Interpreting specs for Atom ',I3)
-         IF (DebugLevel > 1) WRITE(*,60) TRIM(ALine)
-         60 FORMAT('Specs from database are: "',A,'"')
+         if (DebugLevel > 1) write(*,70) iAtom
+         70 format('Interpreting specs for Atom ',I3)
+         if (DebugLevel > 1) write(*,60) trim(ALine)
+         60 format('Specs from database are: "',A,'"')
          !
          ! Get the atom specs
          !
-         READ(ALine( 1: 3),'(I3)')    DumInt
-         READ(ALine( 7:19),'(A13)')   AtomSpecs(iAtom)%Name
-         READ(ALine(21:23),'(A3)')    AtomSpecs(iAtom)%Symbol
-         READ(ALine(27:27),'(I1)')    AtomSpecs(iAtom)%Period
-         READ(ALine(34:35),'(I2)')    AtomSpecs(iAtom)%Group
-         READ(ALine(41:64),'(A24)')   AtomSpecs(iAtom)%ChemicalSeries
-         READ(ALine(65:76),'(F12.0)') AtomSpecs(iAtom)%Mass
-         DumStr = ALine(78:LEN(ALine))
+         read(ALine( 1: 3),'(I3)')    DumInt
+         read(ALine( 7:19),'(A13)')   AtomSpecs(iAtom)%Name
+         read(ALine(21:23),'(A3)')    AtomSpecs(iAtom)%Symbol
+         read(ALine(27:27),'(I1)')    AtomSpecs(iAtom)%Period
+         read(ALine(34:35),'(I2)')    AtomSpecs(iAtom)%Group
+         read(ALine(41:64),'(A24)')   AtomSpecs(iAtom)%ChemicalSeries
+         read(ALine(65:76),'(F12.0)') AtomSpecs(iAtom)%Mass
+         DumStr = ALine(78:len(ALine))
 
          AtomSpecs(iAtom)%NuclideGroup = 0
 
-         IF (LEN_TRIM(DumStr) /= 0) THEN
-            DO iNuclideGroup = 0,NNuclideGroups
-            IF (TRIM(DumStr) == TRIM(NuclideGroupName(iNuclideGroup))) &
+         if (len_trim(DumStr) /= 0) then
+            do iNuclideGroup = 0,NNuclideGroups
+            if (trim(DumStr) == trim(NuclideGroupName(iNuclideGroup))) &
                & AtomSpecs(iAtom)%NuclideGroup = iNuclideGroup
-            ENDDO
-         ENDIF
+            enddo
+         endif
 
-         IF (DumInt /= iAtom) THEN
-            WRITE(*,'(A)') 'Atom number does not match line number! Exiting!!'
-            CALL EXIT()
-         ENDIF
+         if (DumInt /= iAtom) then
+            write(*,'(A)') 'Atom number does not match line number! Exiting!!'
+            call exit()
+         endif
 
-         IF (DebugLevel > 0) THEN
-            WRITE(*,200) AtomSpecs(iAtom),NuclideGroupName(AtomSpecs(iAtom)%NuclideGroup)
-            200  FORMAT('Specs: "',A13,'"',1X,'"',A3,'"',1X,I2,1X,I2,1X,I2,1X,'"',A24,'"',1X,F12.8,1X,A)
-         ENDIF
-      ENDDO
-      20 CONTINUE ! ready reading data
+         if (DebugLevel > 0) then
+            write(*,200) AtomSpecs(iAtom),NuclideGroupName(AtomSpecs(iAtom)%NuclideGroup)
+            200  format('Specs: "',A13,'"',1X,'"',A3,'"',1X,I2,1X,I2,1X,I2,1X,'"',A24,'"',1X,F12.8,1X,A)
+         endif
+      enddo
+      20 continue ! ready reading data
 
       NAtoms = iAtom
 
-      WRITE(*,'(A,I3)') '... ready reading specs for this many atoms: ',NAtoms
-   END SUBROUTINE ReadAtoms
+      write(*,'(A,I3)') '... ready reading specs for this many atoms: ',NAtoms
+   end subroutine ReadAtoms
 
 
 
-   SUBROUTINE InitLibENDF()
+   subroutine InitLibENDF()
       !
       ! Prepare some settings before use of this library
       !
-      CHARACTER(DefaultLength) :: FName,ALine
-      LOGICAL :: IsMetaStable,ValidLine,IsException
-      INTEGER :: iLine,MyAtomNumber
+      character(DefaultLength) :: FName,ALine
+      logical :: IsMetaStable,ValidLine,IsException
+      integer :: iLine,MyAtomNumber
 
-      INTEGER, PARAMETER :: DebugLevel = 0
+      integer, parameter :: DebugLevel = 0
 
-      FName = TRIM(ENDFPath()) // '/decay.list'
+      FName = trim(ENDFPath()) // '/decay.list'
 
-      OPEN(ScratchFile,FILE=FName,FORM='FORMATTED',ACTION='READ')
+      open(ScratchFile,file=FName,form='FORMATTED',action='READ')
       !
       ! First, scan the file to get atom names only
       !
-      READ(ScratchFile,*)
-      READ(ScratchFile,*)
-      READ(ScratchFile,*)
+      read(ScratchFile,*)
+      read(ScratchFile,*)
+      read(ScratchFile,*)
 
-      DO
-         READ(ScratchFile,'(A)',END=10) ALine
+      do
+         read(ScratchFile,'(A)',end=10) ALine
          ValidLine = (ALine(1:1) /= '-')
-         IF (ValidLine) THEN
-            READ(ALine(7:9),*) MyAtomNumber
+         if (ValidLine) then
+            read(ALine(7:9),*) MyAtomNumber
             AtomName(MyAtomNumber) = ALine(11:12)
-         ENDIF ! valid line
-      ENDDO
+         endif ! valid line
+      enddo
 
-      10 CONTINUE
+      10 continue
       !
       ! Now, scan again and get the nuclides
       !
       REWIND(ScratchFile)
 
-      READ(ScratchFile,*)
-      READ(ScratchFile,*)
-      READ(ScratchFile,*)
+      read(ScratchFile,*)
+      read(ScratchFile,*)
+      read(ScratchFile,*)
 
       NNuclides = 0
       iLine = 3
 
-      DO
-         READ(ScratchFile,'(A)',END=20) ALine
+      do
+         read(ScratchFile,'(A)',end=20) ALine
 
          ValidLine = (ALine(1:1) /= '-')
 
-         IF (ValidLine) THEN
+         if (ValidLine) then
             NNuclides = NNuclides + 1
             iLine = iLine + 1
             !
@@ -756,260 +756,260 @@ CONTAINS
             !
             ! Interpret line
             !
-            IF (DebugLevel > 1) THEN
-               WRITE(*,'(A,I4,A)') 'Line ',NNuclides,' = "'//TRIM(ALine)//'"'
-            ENDIF
+            if (DebugLevel > 1) then
+               write(*,'(A,I4,A)') 'Line ',NNuclides,' = "'//trim(ALine)//'"'
+            endif
 
-            READ(ALine(7:9),*) NuclideSpecs(NNuclides)%AtomNumber
+            read(ALine(7:9),*) NuclideSpecs(NNuclides)%AtomNumber
             NuclideSpecs(NNuclides)%AtomName = ALine(11:12)
 
-            READ(ALine(14:16),*) NuclideSpecs(NNuclides)%NHadrons
+            read(ALine(14:16),*) NuclideSpecs(NNuclides)%NHadrons
 
-            IF (ALine(17:17) == ' ') THEN
+            if (ALine(17:17) == ' ') then
                NuclideSpecs(NNuclides)%MetaStableMode = 0
-            ELSE IF (ALine(17:17) == 'M') THEN
+            else if (ALine(17:17) == 'M') then
                NuclideSpecs(NNuclides)%MetaStableMode = 1
-            ELSE IF (ALine(17:17) == 'N') THEN
+            else if (ALine(17:17) == 'N') then
                NuclideSpecs(NNuclides)%MetaStableMode = 2
-            ELSE IF (ALine(17:17) == 'O') THEN
+            else if (ALine(17:17) == 'O') then
                NuclideSpecs(NNuclides)%MetaStableMode = 3
-            ELSE
-               WRITE(*,'(A,I0,A,I0,A,I0,A)') 'Unknown metastability mode "',NuclideSpecs(NNuclides)%MetaStableMode,&
+            else
+               write(*,'(A,I0,A,I0,A,I0,A)') 'Unknown metastability mode "',NuclideSpecs(NNuclides)%MetaStableMode,&
                & '" on line ',iLine,' for nuclide ',NNuclides,'! Exiting!!'
-               CALL EXIT()
-            ENDIF
+               call exit()
+            endif
             !
             ! ICRP-107 knows Pm-137m and ENDF knows Pm-137. These are probably the same nuclide.
             ! To allow the use of both datasets simultaneously, the ENDF nuclide is mapped on the ICRP-nuclide:
             ! The nuclide name gets an "m". All subsequent references in ENDF to Pm-137 are trapped and re-cast to Pm-137m.
             !
             IsException = ((NuclideSpecs(NNuclides)%AtomName == 'Pm').AND.(NuclideSpecs(NNuclides)%NHadrons == 137))
-            IF (IsException) NuclideSpecs(NNuclides)%MetaStableMode = 1
+            if (IsException) NuclideSpecs(NNuclides)%MetaStableMode = 1
 
             NuclideSpecs(NNuclides)%NDaughters = 0
 
-            WRITE(NuclideSpecs(NNuclides)%NuclideName,'(A,A,I0)') &
-               & TRIM(NuclideSpecs(NNuclides)%AtomName),'-',NuclideSpecs(NNuclides)%NHadrons
+            write(NuclideSpecs(NNuclides)%NuclideName,'(A,A,I0)') &
+               & trim(NuclideSpecs(NNuclides)%AtomName),'-',NuclideSpecs(NNuclides)%NHadrons
 
-            NuclideSpecs(NNuclides)%NuclideName = TRIM(NuclideSpecs(NNuclides)%NuclideName)&
+            NuclideSpecs(NNuclides)%NuclideName = trim(NuclideSpecs(NNuclides)%NuclideName)&
             & //MetastabilityName(NuclideSpecs(NNuclides)%MetaStableMode)
 
-            IF (DebugLevel > 0) WRITE(*,'(I4,1X,A)') NNuclides,TRIM(NuclideSpecs(NNuclides)%NuclideName)
-         ENDIF ! valid line
-      ENDDO
+            if (DebugLevel > 0) write(*,'(I4,1X,A)') NNuclides,trim(NuclideSpecs(NNuclides)%NuclideName)
+         endif ! valid line
+      enddo
 
-      20 CONTINUE
-      CLOSE(ScratchFile)
-   END SUBROUTINE InitLibENDF
+      20 continue
+      close(ScratchFile)
+   end subroutine InitLibENDF
 
 
 
-   INTEGER FUNCTION GetNuclideNumber(NuclideName)
+   integer function GetNuclideNumber(NuclideName)
       !
       ! Search for the given name of a nuclide in the list of known nuclides and
       ! return its number
       !
-      CHARACTER(*), INTENT(IN) :: NuclideName
-      INTEGER :: DumInt,iNuclide
-      CHARACTER(10) :: DumNuclideName
+      character(*), intent(in) :: NuclideName
+      integer :: DumInt,iNuclide
+      character(10) :: DumNuclideName
 
       DumInt = 0
 
-      IF (LEN_TRIM(NuclideName) > 0) THEN
-         DumNuclideName = TRIM(NuclideName)
-         CALL Capitalize(DumNuclideName)
-         DO iNuclide = 1,NNuclides
-            IF (TRIM(DumNuclideName) == TRIM(NuclideSpecs(iNuclide)%NuclideName)) DumInt = iNuclide
-         ENDDO
-      ENDIF ! length of input string <> 0
+      if (len_trim(NuclideName) > 0) then
+         DumNuclideName = trim(NuclideName)
+         call Capitalize(DumNuclideName)
+         do iNuclide = 1,NNuclides
+            if (trim(DumNuclideName) == trim(NuclideSpecs(iNuclide)%NuclideName)) DumInt = iNuclide
+         enddo
+      endif ! length of input string <> 0
 
       GetNuclideNumber = DumInt
-   END FUNCTION GetNuclideNumber
+   end function GetNuclideNumber
 
 
 
-   INTEGER FUNCTION AtomNMass2Nuclide(AtomNumber,NHadrons,MetastableMode)
+   integer function AtomNMass2Nuclide(AtomNumber,NHadrons,MetastableMode)
       !
       ! Find the nuclide with these properties
       !
-      INTEGER, INTENT(IN) :: AtomNumber,NHadrons,MetastableMode
-      INTEGER :: DumInt,iNuclide
+      integer, intent(in) :: AtomNumber,NHadrons,MetastableMode
+      integer :: DumInt,iNuclide
 
       DumInt = 0
 
-      DO iNuclide = 1,NNuclides
-      IF (      (AtomNumber     == NuclideSpecs(iNuclide)%AtomNumber)&
+      do iNuclide = 1,NNuclides
+      if (      (AtomNumber     == NuclideSpecs(iNuclide)%AtomNumber)&
          & .AND.(NHadrons       == NuclideSpecs(iNuclide)%NHadrons)&
          & .AND.(MetastableMode == NuclideSpecs(iNuclide)%MetastableMode)) DumInt = iNuclide
-      ENDDO
+      enddo
 
       AtomNMass2Nuclide = DumInt
-   END FUNCTION AtomNMass2Nuclide
+   end function AtomNMass2Nuclide
 
 
 
-   INTEGER FUNCTION Zap2Nuclide(Zap,iMetaStableMode)
+   integer function Zap2Nuclide(Zap,iMetaStableMode)
       !
       ! Convert a ZAP-number to a nuclide index
       !
-      INTEGER, INTENT(IN) :: Zap,iMetaStableMode
+      integer, intent(in) :: Zap,iMetaStableMode
 
-      INTEGER :: iAtom,iMass,iMother
+      integer :: iAtom,iMass,iMother
 
       iAtom = Zap/1000
       iMass = Zap - 1000*iAtom
 
       iMother = AtomNMass2Nuclide(iAtom,iMass,iMetastableMode)
       Zap2Nuclide = iMother
-   END FUNCTION Zap2Nuclide
+   end function Zap2Nuclide
 
 
 
-   SUBROUTINE CheckRecordType(iNuclide,iLine,ALine)
+   subroutine CheckRecordType(iNuclide,iLine,ALine)
       !
       ! Assess which type of record this is
       !
-      INTEGER, INTENT(IN) :: iNuclide,iLine
-      CHARACTER(*), INTENT(IN) :: ALine
+      integer, intent(in) :: iNuclide,iLine
+      character(*), intent(in) :: ALine
 
-      INTEGER :: MatNumber,MFNumber,MTNumber
+      integer :: MatNumber,MFNumber,MTNumber
 
-      INTEGER, PARAMETER :: DebugLevel = 0
+      integer, parameter :: DebugLevel = 0
       !
       ! Read the information at the end of the line to see what type of record this is
       !
-      READ(ALine(67:75),'(I4,I2,I3)') MatNumber,MFNumber,MTNumber
+      read(ALine(67:75),'(I4,I2,I3)') MatNumber,MFNumber,MTNumber
 
-      IF ((MFNumber == 1).AND.(MTNumber == 451)) THEN
+      if ((MFNumber == 1).AND.(MTNumber == 451)) then
          iRecordType(iLine) = iTextRecord
-      ELSE IF ((MFNumber == 8).AND.(MTNumber == 457)) THEN
+      else if ((MFNumber == 8).AND.(MTNumber == 457)) then
          iRecordType(iLine) = iDecayRecord
-      ENDIF
+      endif
 
-      IF (DebugLevel > 0) THEN
-         WRITE(*,'(A,I4,A29,3(1X,I4,1X,I2,1X,I3,4X,A))') 'Line ',iLine,&
-         & ' has a record of type '//RecordName(iRecordType(iLine)),MatNumber,MFNumber,MTNumber,'"'//TRIM(ALine)//'"'
-      ENDIF
-   END SUBROUTINE CheckRecordType
+      if (DebugLevel > 0) then
+         write(*,'(A,I4,A29,3(1X,I4,1X,I2,1X,I3,4X,A))') 'Line ',iLine,&
+         & ' has a record of type '//RecordName(iRecordType(iLine)),MatNumber,MFNumber,MTNumber,'"'//trim(ALine)//'"'
+      endif
+   end subroutine CheckRecordType
 
 
-   SUBROUTINE Line2Values(ALine,MySubString,MyFloat,MyInteger,SubStringIsInteger,DoingBullocks)
+   subroutine Line2Values(ALine,MySubString,MyFloat,MyInteger,SubStringIsInteger,DoingBullocks)
       !
       ! Read 6 values from a line and check if they are real or integer
       !
-      CHARACTER(*), INTENT(IN) :: ALine
-      INTEGER, DIMENSION(6), INTENT(OUT) :: MyInteger
-      REAL(Float), DIMENSION(6), INTENT(OUT) :: MyFloat
-      LOGICAL, DIMENSION(6), INTENT(OUT) :: SubStringIsInteger
-      LOGICAL, INTENT(OUT) :: DoingBullocks
-      CHARACTER(11), DIMENSION(6), INTENT(INOUT) :: MySubString
+      character(*), intent(in) :: ALine
+      integer, dimension(6), intent(out) :: MyInteger
+      real(Float), dimension(6), intent(out) :: MyFloat
+      logical, dimension(6), intent(out) :: SubStringIsInteger
+      logical, intent(out) :: DoingBullocks
+      character(11), dimension(6), intent(inout) :: MySubString
 
-      INTEGER :: iSubString,TheExponent,TheIndex
-      CHARACTER(DefaultLength) :: DumString
-      REAL(Float) :: RelativeDifference
+      integer :: iSubString,TheExponent,TheIndex
+      character(DefaultLength) :: DumString
+      real(Float) :: RelativeDifference
 
-      INTEGER, PARAMETER :: DebugLevel = 0
+      integer, parameter :: DebugLevel = 0
 
-      READ(ALine,'(6A11)') MySubString
+      read(ALine,'(6A11)') MySubString
 
       MyFloat = 0._Float
       MyInteger = 0
       DoingBullocks = .FALSE.
 
-      DO iSubString = 1,6
-         IF (DebugLevel > 2) WRITE(*,'(A,I0,A)') 'Substring ',iSubString,' = "'//MySubString(iSubString)//'"'
-      ENDDO
-      DO iSubString = 1,6
-         IF (DebugLevel > 1) WRITE(*,'(A,I0,A)') 'Substring ',iSubString,' = "'//MySubString(iSubString)//'"'
+      do iSubString = 1,6
+         if (DebugLevel > 2) write(*,'(A,I0,A)') 'Substring ',iSubString,' = "'//MySubString(iSubString)//'"'
+      enddo
+      do iSubString = 1,6
+         if (DebugLevel > 1) write(*,'(A,I0,A)') 'Substring ',iSubString,' = "'//MySubString(iSubString)//'"'
 
          TheIndex = MAX(INDEX(MySubString(iSubString),'.'),&
          & INDEX(MySubString(iSubString),'+'),INDEX(MySubString(iSubString),'-'))
-         IF (TheIndex > 0) THEN
+         if (TheIndex > 0) then
             SubStringIsInteger(iSubString) = .FALSE.
             !
             ! Values can be with or without E in the exponential notation, and there can be spaces in the string:
             !
-            IF ((INDEX(MySubString(iSubString),'E') /= 0)&
-            & .OR.((INDEX(MySubString(iSubString),'+') == 0).AND.(INDEX(MySubString(iSubString),'-') == 0)))THEN
-               READ(MySubString(iSubString),*) MyFloat(iSubString)
-            ELSE
-               READ(MySubString(iSubString)(1:(TheIndex-1)),*) MyFloat(iSubString)
+            if ((INDEX(MySubString(iSubString),'E') /= 0)&
+            & .OR.((INDEX(MySubString(iSubString),'+') == 0).AND.(INDEX(MySubString(iSubString),'-') == 0)))then
+               read(MySubString(iSubString),*) MyFloat(iSubString)
+            else
+               read(MySubString(iSubString)(1:(TheIndex-1)),*) MyFloat(iSubString)
                DumString = MySubString(iSubString)(TheIndex:11)
-               CALL RemoveCharacter(DumString,' ')
-               READ(DumString,*) TheExponent
+               call RemoveCharacter(DumString,' ')
+               read(DumString,*) TheExponent
                MyFloat(iSubString) = MyFloat(iSubString) * 10._Float**TheExponent
-            ENDIF
+            endif
             !
             ! If this is an integer in disguise, make it an integer (a real one! ;-) )
             !
             RelativeDifference = 0._Float
-            IF (ABS(MyFloat(iSubString)) > 0._Float) RelativeDifference = &
-               & ABS(MyFloat(iSubString)-NINT(MyFloat(iSubString)))/ABS(MyFloat(iSubString))
+            if (abs(MyFloat(iSubString)) > 0._Float) RelativeDifference = &
+               & abs(MyFloat(iSubString)-NINT(MyFloat(iSubString)))/abs(MyFloat(iSubString))
 
-            IF ((MyFloat(iSubString) <= 1.E6_Float)&
-               & .AND.(RelativeDifference < 1.E-10_Float)) THEN
+            if ((MyFloat(iSubString) <= 1.E6_Float)&
+               & .AND.(RelativeDifference < 1.E-10_Float)) then
                SubStringIsInteger(iSubString) = .TRUE.
                MyInteger(iSubString) = NINT(MyFloat(iSubString))
-            ENDIF
-         ELSE
+            endif
+         else
             SubStringIsInteger(iSubString) = .TRUE.
             DoingBullocks = .TRUE.
-            READ(MySubString(iSubString),*,END=20) MyInteger(iSubString)
+            read(MySubString(iSubString),*,end=20) MyInteger(iSubString)
             DoingBullocks = .FALSE.
-         ENDIF
+         endif
 
-         20  CONTINUE
+         20  continue
          !
          ! Show substring
          !
-         IF (DebugLevel > 1) THEN
-            IF (SubStringIsInteger(iSubString)) THEN
-               WRITE(*,'(A,I0,A,I0)') 'Substring ',iSubString,' is an integer: ',MyInteger(iSubString)
-            ELSE
-               WRITE(*,'(A,I0,A,F15.5)') 'Substring ',iSubString,' is a real    : ',MyFloat(iSubString)
-            ENDIF
-         ENDIF ! debug
-      ENDDO ! loop over substrings
-   END SUBROUTINE Line2Values
+         if (DebugLevel > 1) then
+            if (SubStringIsInteger(iSubString)) then
+               write(*,'(A,I0,A,I0)') 'Substring ',iSubString,' is an integer: ',MyInteger(iSubString)
+            else
+               write(*,'(A,I0,A,F15.5)') 'Substring ',iSubString,' is a real    : ',MyFloat(iSubString)
+            endif
+         endif ! debug
+      enddo ! loop over substrings
+   end subroutine Line2Values
 
 
 
-   SUBROUTINE Parse1DataLine(iLine,iNuclide,ALine,iLineInChapter,ReadyReadingFile,ThisLineHasDecay,iDecay)
+   subroutine Parse1DataLine(iLine,iNuclide,ALine,iLineInChapter,ReadyReadingFile,ThisLineHasDecay,iDecay)
       !
       ! Try to find useful info about a known nuclide
       !
-      INTEGER, INTENT(IN) :: iLine,iNuclide,iLineInChapter
-      CHARACTER(*), INTENT(IN) :: ALine
-      LOGICAL, INTENT(INOUT) :: ReadyReadingFile,ThisLineHasDecay
-      INTEGER, INTENT(INOUT) :: iDecay
+      integer, intent(in) :: iLine,iNuclide,iLineInChapter
+      character(*), intent(in) :: ALine
+      logical, intent(inout) :: ReadyReadingFile,ThisLineHasDecay
+      integer, intent(inout) :: iDecay
 
-      CHARACTER(DefaultLength) :: MyDecayModeLine
-      CHARACTER(80) :: PartOfLine
-      INTEGER :: TheIndex,iSubString,TheExponent,DaughterAtom,DaughterMass,MyDecayMode,MyMetastableMode,&
+      character(DefaultLength) :: MyDecayModeLine
+      character(80) :: PartOfLine
+      integer :: TheIndex,iSubString,TheExponent,DaughterAtom,DaughterMass,MyDecayMode,MyMetastableMode,&
       & MyAtomStep,MyMassStep,iParticle,iCompoundDecay,DaughterNuclide,iDaughter
-      LOGICAL, DIMENSION(6) :: SubStringIsInteger
-      INTEGER, DIMENSION(6) :: MyInteger
-      REAL(Float), DIMENSION(6) :: MyFloat
-      REAL(Float) :: MyFraction
-      LOGICAL :: Ready,IsValidDecay,DoingBullocks,IsException
-      CHARACTER(11), DIMENSION(6) :: MySubString
+      logical, dimension(6) :: SubStringIsInteger
+      integer, dimension(6) :: MyInteger
+      real(Float), dimension(6) :: MyFloat
+      real(Float) :: MyFraction
+      logical :: Ready,IsValidDecay,DoingBullocks,IsException
+      character(11), dimension(6) :: MySubString
 
-      INTEGER, PARAMETER :: DebugLevel = 0
+      integer, parameter :: DebugLevel = 0
 
       DoingBullocks = .FALSE.
       ReadyReadingFile = .FALSE.
       ThisLineHasDecay = .FALSE.
 
-      IF (DebugLevel > 1) WRITE(*,'(A,I0,A)') 'Line ',iLine,' : "'//TRIM(ALine)//'"'
+      if (DebugLevel > 1) write(*,'(A,I0,A)') 'Line ',iLine,' : "'//trim(ALine)//'"'
       !
       ! Only interpret decay info
       !
-      IF (iRecordType(iLine) == iDecayRecord) THEN
-         IF (DebugLevel > 1) WRITE(*,'(A,I4,A)') 'Decay information record ',iLineInChapter,' = "'//TRIM(ALine)//'"'
+      if (iRecordType(iLine) == iDecayRecord) then
+         if (DebugLevel > 1) write(*,'(A,I4,A)') 'Decay information record ',iLineInChapter,' = "'//trim(ALine)//'"'
          !
          ! Read the 6 values and check if they are real/integer
          !
-         CALL Line2Values(ALine,MySubstring,MyFloat,MyInteger,SubStringIsInteger,DoingBullocks)
+         call Line2Values(ALine,MySubstring,MyFloat,MyInteger,SubStringIsInteger,DoingBullocks)
          ! Check this criterion!!!!!
 
          ReadyReadingFile =      SubStringIsInteger(1).AND.(MyInteger(1) == 0)&
@@ -1023,34 +1023,34 @@ CONTAINS
          ReadyReadingFile = ReadyReadingFile.OR.&
          & ((iLineInChapter >= 5).AND.(iDecay >= NuclideSpecs(iNuclide)%NDecayModes))
 
-         IF (DoingBullocks) THEN
-            IF (DebugLevel > 0) THEN
-               WRITE(*,'(A,I0)') 'Encountering compliance problems in file for '&
+         if (DoingBullocks) then
+            if (DebugLevel > 0) then
+               write(*,'(A,I0)') 'Encountering compliance problems in file for '&
                & //NuclideSpecs(iNuclide)%NuclideName//' at line ',iLine
-            ENDIF ! debug
-         ELSE IF (ReadyReadingFile) THEN
-            IF (DebugLevel > 1) THEN
-               WRITE(*,'(A,I0)') 'Ready reading file for '&
+            endif ! debug
+         else if (ReadyReadingFile) then
+            if (DebugLevel > 1) then
+               write(*,'(A,I0)') 'Ready reading file for '&
                & //NuclideSpecs(iNuclide)%NuclideName//' at line ',iLine
-            ENDIF ! debug
-         ELSE
-            IF (iLineInChapter == 2) THEN
+            endif ! debug
+         else
+            if (iLineInChapter == 2) then
                NuclideSpecs(iNuclide)%HalfTime = MyFloat(1) ! Even in cases where you have value e.g. 1.000, this goes well
 
-               IF (DebugLevel > 1) WRITE(*,'(A,EN15.5,A)') 'Halflife = ',NuclideSpecs(iNuclide)%HalfTime,' s'
-            ELSE IF (iLineInChapter == 4) THEN
+               if (DebugLevel > 1) write(*,'(A,EN15.5,A)') 'Halflife = ',NuclideSpecs(iNuclide)%HalfTime,' s'
+            else if (iLineInChapter == 4) then
                NuclideSpecs(iNuclide)%NDecayModes = MyInteger(6)
 
-               IF (DebugLevel > 1) WRITE(*,'(A,I0)') 'Number of decay modes: ',NuclideSpecs(iNuclide)%NDecayModes
-            ELSE IF (iLineInChapter >= 5) THEN
+               if (DebugLevel > 1) write(*,'(A,I0)') 'Number of decay modes: ',NuclideSpecs(iNuclide)%NDecayModes
+            else if (iLineInChapter >= 5) then
 
                MyMetastableMode = MyInteger(2)
                MyFraction = MyFloat(5)
                !
                ! If you have a non-trivial decay fraction, update nuclide database
                !
-               IF ((MyFraction > 0._Float).AND.(MyFraction <= 1._Float)) THEN
-                  IF (DebugLevel > 1) WRITE(*,'(A,EN15.5)') 'Acceptable fraction = ',MyFraction
+               if ((MyFraction > 0._Float).AND.(MyFraction <= 1._Float)) then
+                  if (DebugLevel > 1) write(*,'(A,EN15.5)') 'Acceptable fraction = ',MyFraction
 
                   iParticle = 1
                   MyAtomStep = 0
@@ -1061,122 +1061,122 @@ CONTAINS
 
                   Ready = (iCompoundDecay < 1000000)
 
-                  DO WHILE (.NOT.Ready)
+                  do while (.NOT.Ready)
                      MyDecayMode = iCompoundDecay/10**(7-iParticle)
 
                      iCompoundDecay = iCompoundDecay - MyDecayMode*10**(7-iParticle)
 
                      Ready = (iCompoundDecay == 0)
 
-                     IF (iCompoundDecay < 0) THEN
-                        WRITE(*,'(A,I0)') 'Faulty value for iCompoundDecay: ',iCompoundDecay
-                        CALL EXIT()
-                     ENDIF ! rubbish
+                     if (iCompoundDecay < 0) then
+                        write(*,'(A,I0)') 'Faulty value for iCompoundDecay: ',iCompoundDecay
+                        call exit()
+                     endif ! rubbish
 
-                     IF (DebugLevel > 1) WRITE(*,'(A,A)') 'Found decay mode ',DecayModeName(MyDecayMode)
+                     if (DebugLevel > 1) write(*,'(A,A)') 'Found decay mode ',DecayModeName(MyDecayMode)
 
-                     MyDecayModeLine = TRIM(MyDecayModeLine)//' + '//DecayModeName(MyDecayMode)
+                     MyDecayModeLine = trim(MyDecayModeLine)//' + '//DecayModeName(MyDecayMode)
 
-                     IF (     (MyDecayMode >= 0)&
-                        &   .AND.(MyDecayMode <= 7)) THEN
+                     if (     (MyDecayMode >= 0)&
+                        &   .AND.(MyDecayMode <= 7)) then
                         IsValidDecay = .TRUE.
                         MyAtomStep = MyAtomStep + AtomStep(MyDecayMode)
                         MyMassStep = MyMassStep + MassStep(MyDecayMode)
-                     ELSE
+                     else
                         IsValidDecay = .FALSE.
-                        IF (DebugLevel > 1) WRITE(*,'(A,A,A)') &
+                        if (DebugLevel > 1) write(*,'(A,A,A)') &
                         & 'Found disqualifying decay mode ',DecayModeName(MyDecayMode),', making this decay invalid!!'
-                     ENDIF ! valid decay mode
+                     endif ! valid decay mode
 
                      iParticle = iParticle + 1
 
-                  ENDDO ! ready checking all particles in this single decay
+                  enddo ! ready checking all particles in this single decay
 
                   MyDecayModeLine = MyDecayModeLine(4:DefaultLength)
                   !
                   ! Account for the full train of released particles in this decay, e.g. NN, in 1 go
                   !
-                  IF (IsValidDecay) THEN
+                  if (IsValidDecay) then
                      ThisLineHasDecay = .TRUE.
                      iDecay = iDecay + 1
                      NuclideSpecs(iNuclide)%DecayFraction(iDecay) = MyFraction
 
-                     IF (.NOT.(MyDecayMode == iDecayModeSpontaneousFission)) THEN
+                     if (.NOT.(MyDecayMode == iDecayModeSpontaneousFission)) then
                         NuclideSpecs(iNuclide)%NDaughters = NuclideSpecs(iNuclide)%NDaughters + 1
                         iDaughter = NuclideSpecs(iNuclide)%NDaughters
 
                         DaughterAtom = NuclideSpecs(iNuclide)%AtomNumber + MyAtomStep
                         DaughterMass = NuclideSpecs(iNuclide)%NHadrons   + MyMassStep
 
-                        WRITE(NuclideSpecs(iNuclide)%DaughterName(iDaughter),'(A,A,I0)') &
-                           &  TRIM(AtomName(DaughterAtom)),'-',DaughterMass
+                        write(NuclideSpecs(iNuclide)%DaughterName(iDaughter),'(A,A,I0)') &
+                           &  trim(AtomName(DaughterAtom)),'-',DaughterMass
                         !
                         ! Trap Pm-137 and recast it to Pm-137m, which is the only isotope in ICRP-107 with this combination.
                         ! To allow for the simultaneous use of ENDF with ICRP-107, Pm-137 is renamed Pm-137m
                         !
                         IsException = ((DaughterAtom == 61).AND.(DaughterMass == 137))
-                        IF (IsException) MyMetastableMode = 1
+                        if (IsException) MyMetastableMode = 1
 
                         NuclideSpecs(iNuclide)%DaughterName(iDaughter) = &
-                           & TRIM(NuclideSpecs(iNuclide)%DaughterName(iDaughter))&
+                           & trim(NuclideSpecs(iNuclide)%DaughterName(iDaughter))&
                            & //MetaStabilityName(MyMetastableMode)
 
                         NuclideSpecs(iNuclide)%Daughter(iDaughter) = &
                            & GetNuclideNumber(NuclideSpecs(iNuclide)%DaughterName(iDaughter))
 
                         NuclideSpecs(iNuclide)%DaughterFraction(iDaughter) = MyFraction
-                        NuclideSpecs(iNuclide)%DecayName(iDaughter) = TRIM(MyDecayModeLine)
+                        NuclideSpecs(iNuclide)%DecayName(iDaughter) = trim(MyDecayModeLine)
 
-                        IF (DebugLevel > 0) WRITE(*,'(A,I4,A,A7,A,EN15.5,A,A,A7,A,F20.10,A)') &
+                        if (DebugLevel > 0) write(*,'(A,I4,A,A7,A,EN15.5,A,A,A7,A,F20.10,A)') &
                            & 'Nuclide ',iNuclide,': ',&
                            & NuclideSpecs(iNuclide)%NuclideName,&
                            & ' with halflife ',NuclideSpecs(iNuclide)%HalfTime,' s',&
                            & ' to daughter ',NuclideSpecs(iNuclide)%DaughterName(iDaughter),&
                            & ' takes a fraction ',MyFraction,&
-                           & ', decay: '//TRIM(NuclideSpecs(iNuclide)%DecayName(iDaughter))
+                           & ', decay: '//trim(NuclideSpecs(iNuclide)%DecayName(iDaughter))
 
-                     ELSE
-                        IF (DebugLevel > 0) THEN
-                           WRITE(*,'(A,I4,A,A7,A,EN15.5,A,A,F20.10,A)') &
+                     else
+                        if (DebugLevel > 0) then
+                           write(*,'(A,I4,A,A7,A,EN15.5,A,A,F20.10,A)') &
                               & 'Nuclide ',iNuclide,': ',&
                               & NuclideSpecs(iNuclide)%NuclideName,&
                               & ' with halflife ',NuclideSpecs(iNuclide)%HalfTime,&
                               & ' s to many daughters  ',&
                               & ' takes a fraction ',MyFraction,&
                               & ', decay: Spontaneous fission'
-                        ENDIF
-                     ENDIF ! SF or other valid decay
-                  ENDIF ! valid decay mode
-               ELSE
-                  IF (DebugLevel > 1) WRITE(*,'(A,EN15.5)') 'Unacceptable fraction = ',MyFraction
-               ENDIF ! yield > 0
-            ENDIF ! line 2 or 5 and later in the decay chapter
-         ENDIF ! not doing bullocks...
-      ENDIF ! Inside chapter of decay records
-   END SUBROUTINE Parse1DataLine
+                        endif
+                     endif ! SF or other valid decay
+                  endif ! valid decay mode
+               else
+                  if (DebugLevel > 1) write(*,'(A,EN15.5)') 'Unacceptable fraction = ',MyFraction
+               endif ! yield > 0
+            endif ! line 2 or 5 and later in the decay chapter
+         endif ! not doing bullocks...
+      endif ! Inside chapter of decay records
+   end subroutine Parse1DataLine
 
 
 
-   SUBROUTINE ParseENDFFile(iNuclide)
+   subroutine ParseENDFFile(iNuclide)
       !
       ! Parse 1 of the 3821 ENDF datafiles
       !
-      INTEGER, INTENT(IN) :: iNuclide
+      integer, intent(in) :: iNuclide
 
-      CHARACTER(DefaultLength) :: FName,ALine
-      CHARACTER(20) :: MyTail
-      LOGICAL :: Ready,IsNewChapter,FoundMeaningfulDecay,ThisLineHasDecay,IsException
-      INTEGER :: iLine,iLineInChapter,iDecay
+      character(DefaultLength) :: FName,ALine
+      character(20) :: MyTail
+      logical :: Ready,IsNewChapter,FoundMeaningfulDecay,ThisLineHasDecay,IsException
+      integer :: iLine,iLineInChapter,iDecay
 
-      INTEGER, PARAMETER :: DebugLevel = 0
+      integer, parameter :: DebugLevel = 0
       !
       ! Construct filename
       !
       FName = 'dec-???_'
-      WRITE(FName(5:7),'(I3.3)') NuclideSpecs(iNuclide)%AtomNumber
-      FName = TRIM(FName)//TRIM(NuclideSpecs(iNuclide)%AtomName)
+      write(FName(5:7),'(I3.3)') NuclideSpecs(iNuclide)%AtomNumber
+      FName = trim(FName)//trim(NuclideSpecs(iNuclide)%AtomName)
       MyTail = '_???'
-      WRITE(MyTail(2:4),'(I3.3)') NuclideSpecs(iNuclide)%NHadrons
+      write(MyTail(2:4),'(I3.3)') NuclideSpecs(iNuclide)%NHadrons
       !
       ! Trap Pm-137 and recast it to Pm-137m, which is the only isotope in ICRP-107 with this combination.
       ! To allow for the simultaneous use of ENDF with ICRP-107, Pm-137 is renamed Pm-137m
@@ -1185,25 +1185,25 @@ CONTAINS
 
 
 
-      IF ((NuclideSpecs(iNuclide)%MetaStableMode /= 0).AND..NOT.IsException) THEN
-         WRITE(MyTail(5:6),'(A1,I1)') 'm',NuclideSpecs(iNuclide)%MetaStableMode
-      ENDIF
-      FName = TRIM(FName)//TRIM(MyTail)
+      if ((NuclideSpecs(iNuclide)%MetaStableMode /= 0).AND..NOT.IsException) then
+         write(MyTail(5:6),'(A1,I1)') 'm',NuclideSpecs(iNuclide)%MetaStableMode
+      endif
+      FName = trim(FName)//trim(MyTail)
 
-      FName = TRIM(ENDFPath()) // '/' // TRIM(FName)//'.endf'
+      FName = trim(ENDFPath()) // '/' // trim(FName)//'.endf'
 
-      IF (IsException) WRITE(*,'(A)') 'To match ENDF with ICRP-107, instead of '&
-      & //TRIM(NuclideSpecs(iNuclide)%NuclideName)&
-      & //' I will read data from '//TRIM(FName)
-      IF (.NOT.FileExists(FName)) THEN
-         WRITE(*,'(A,I0,A)') 'Cannot find file "'//TRIM(FName)//'" for nuclide ',&
-         & iNuclide,': '//TRIM(NuclideSpecs(iNuclide)%NuclideName)//'! Exiting!!'
-         CALL EXIT()
-      ENDIF
+      if (IsException) write(*,'(A)') 'To match ENDF with ICRP-107, instead of '&
+      & //trim(NuclideSpecs(iNuclide)%NuclideName)&
+      & //' I will read data from '//trim(FName)
+      if (.NOT.FileExists(FName)) then
+         write(*,'(A,I0,A)') 'Cannot find file "'//trim(FName)//'" for nuclide ',&
+         & iNuclide,': '//trim(NuclideSpecs(iNuclide)%NuclideName)//'! Exiting!!'
+         call exit()
+      endif
       !
       ! Read contents
       !
-      OPEN(ScratchFile,FILE=TRIM(FName),FORM='FORMATTED',ACTION='READ')
+      open(ScratchFile,file=trim(FName),form='FORMATTED',action='READ')
 
       Ready = .FALSE.
       iLine = 0
@@ -1214,83 +1214,83 @@ CONTAINS
       FoundMeaningfulDecay = .FALSE.
       iDecay = 0
 
-      DO WHILE (.NOT.Ready)
-         READ(ScratchFile,'(A)',END=10) ALine
+      do while (.NOT.Ready)
+         read(ScratchFile,'(A)',end=10) ALine
          iLine = iLine + 1
-         !    WRITE(*,'(A,I4,A)') 'Line(',iLine,') = "'//TRIM(ALine)//'"'
+         !    write(*,'(A,I4,A)') 'Line(',iLine,') = "'//trim(ALine)//'"'
          !
          ! Find the type of the record
          !
-         CALL CheckRecordType(iNuclide,iLine,ALine)
+         call CheckRecordType(iNuclide,iLine,ALine)
 
-         IF (iLine > 1) THEN
+         if (iLine > 1) then
             IsNewChapter = (iRecordType(iLine) /= iRecordType(iLine-1))
-         ENDIF
+         endif
 
-         IF (IsNewChapter) THEN
+         if (IsNewChapter) then
             iLineInChapter = 1
-         ELSE
+         else
             iLineInChapter = iLineInChapter + 1
-         ENDIF
+         endif
          !
          ! Interpret the record on the line
          !
-         CALL Parse1DataLine(iLine,iNuclide,ALine,iLineInChapter,Ready,ThisLineHasDecay,iDecay)
+         call Parse1DataLine(iLine,iNuclide,ALine,iLineInChapter,Ready,ThisLineHasDecay,iDecay)
 
          FoundMeaningfulDecay = FoundMeaningfulDecay .OR. ThisLineHasDecay
 
-         IF (Ready.AND.(.NOT.FoundMeaningfulDecay)) THEN
-            IF (NuclideSpecs(iNuclide)%HalfTime < 1.E90_Float) THEN
-               WRITE(*,'(A,I4,A,A,A,EN20.10,A)') 'Nuclide ',iNuclide,': ',NuclideSpecs(iNuclide)%NuclideName,&
+         if (Ready.AND.(.NOT.FoundMeaningfulDecay)) then
+            if (NuclideSpecs(iNuclide)%HalfTime < 1.E90_Float) then
+               write(*,'(A,I4,A,A,A,EN20.10,A)') 'Nuclide ',iNuclide,': ',NuclideSpecs(iNuclide)%NuclideName,&
                & ' has halflife ',NuclideSpecs(iNuclide)%HalfTime,&
                & ', but I found end of file before I encountered any relevant decay info...'
-            ELSE
-               IF (DebugLevel > 0) WRITE(*,'(A,I4,A,A,A)') 'Nuclide ',iNuclide,': ',&
+            else
+               if (DebugLevel > 0) write(*,'(A,I4,A,A,A)') 'Nuclide ',iNuclide,': ',&
                & NuclideSpecs(iNuclide)%NuclideName,' is stable!'
-            ENDIF
-         ENDIF
+            endif
+         endif
 
-      ENDDO ! loop until ready
+      enddo ! loop until ready
 
-      10 CONTINUE
+      10 continue
 
-      CLOSE(ScratchFile)
-   END SUBROUTINE ParseENDFFile
+      close(ScratchFile)
+   end subroutine ParseENDFFile
 
 
 
-   SUBROUTINE ParseSpontaneousFile(FName)
+   subroutine ParseSpontaneousFile(FName)
       !
       ! Parse an ENDF file with branching ratio's for spontaneous fission.
       ! Unknown yet is if the branching ratio's account for the yield or not...
       !
-      CHARACTER(*), INTENT(IN) :: FName
+      character(*), intent(in) :: FName
 
-      LOGICAL :: Ready,IsSFLine,DoingBullocks,PrevLineIsSF,IsNonVoid,LastFissionProductFound
-      INTEGER :: iLine,SFLine,iMother,iDaughter,iParameter,NExpectedFissionProducts,NFissionProducts,iElement
-      CHARACTER(DefaultLength) :: ALine,DumString
-      CHARACTER(11), DIMENSION(12) :: MySubString
-      LOGICAL, DIMENSION(12) :: SubStringIsInteger
-      INTEGER, DIMENSION(12) :: MyInteger
-      INTEGER, DIMENSION(3) :: SFNuclide
-      REAL(Float), DIMENSION(12) :: MyFloat
-      REAL(Float) :: TotalYield
-      REAL(Float), DIMENSION(3) :: MyBranchingRatio
+      logical :: Ready,IsSFLine,DoingBullocks,PrevLineIsSF,IsNonVoid,LastFissionProductFound
+      integer :: iLine,SFLine,iMother,iDaughter,iParameter,NExpectedFissionProducts,NFissionProducts,iElement
+      character(DefaultLength) :: ALine,DumString
+      character(11), dimension(12) :: MySubString
+      logical, dimension(12) :: SubStringIsInteger
+      integer, dimension(12) :: MyInteger
+      integer, dimension(3) :: SFNuclide
+      real(Float), dimension(12) :: MyFloat
+      real(Float) :: TotalYield
+      real(Float), dimension(3) :: MyBranchingRatio
 
-      INTEGER, PARAMETER :: DebugLevel = 0
+      integer, parameter :: DebugLevel = 0
 
-      CHARACTER(DefaultLength), parameter :: ENDFSpontaneousPath = './build/external/ENDFB_spontaneous/'
+      character(DefaultLength), parameter :: ENDFSpontaneousPath = './build/external/ENDFB_spontaneous/'
 
-      IF (.NOT.FileExists(TRIM(ENDFSpontaneousPath)//TRIM(FName))) THEN
-         WRITE(*,'(A)') 'Cannot find file "'//TRIM(FName)//'" for spontaneous fission! Exiting!!'
-         CALL EXIT()
-      ELSE
-         WRITE(*,'(A)') 'Parsing file "'//TRIM(FName)//'" for spontaneous fission!'
-      ENDIF
+      if (.NOT.FileExists(trim(ENDFSpontaneousPath)//trim(FName))) then
+         write(*,'(A)') 'Cannot find file "'//trim(FName)//'" for spontaneous fission! Exiting!!'
+         call exit()
+      else
+         write(*,'(A)') 'Parsing file "'//trim(FName)//'" for spontaneous fission!'
+      endif
       !
       ! Read contents
       !
-      OPEN(ScratchFile,FILE=TRIM(ENDFSpontaneousPath)//TRIM(FName),FORM='FORMATTED',ACTION='READ')
+      open(ScratchFile,file=trim(ENDFSpontaneousPath)//trim(FName),form='FORMATTED',action='READ')
 
       Ready = .FALSE.
       iLine = 0
@@ -1300,324 +1300,324 @@ CONTAINS
       NFissionProducts = 0
       LastFissionProductFound = .FALSE.
 
-      DO WHILE (.NOT.Ready)
+      do while (.NOT.Ready)
 
-         READ(ScratchFile,'(A)',END=10) ALine
+         read(ScratchFile,'(A)',end=10) ALine
          iLine = iLine + 1
 
          IsSFLine = (ALine(72:75) == '8454')
 
-         IF (.NOT.IsSFLine) THEN
-            IF (PrevLineIsSF) THEN
-               WRITE(*,'(A,A10,A,F15.10)') 'Sum of branching ratios for spontaneous fission of ',&
+         if (.NOT.IsSFLine) then
+            if (PrevLineIsSF) then
+               write(*,'(A,A10,A,F15.10)') 'Sum of branching ratios for spontaneous fission of ',&
                & NuclideSpecs(iMother)%NuclideName,' is ',TotalYield
-               WRITE(*,'(A,A,A,I6,A,I6,A)') 'For ',NuclideSpecs(iMother)%NuclideName,' I expected ',&
+               write(*,'(A,A,A,I6,A,I6,A)') 'For ',NuclideSpecs(iMother)%NuclideName,' I expected ',&
                & NExpectedFissionProducts,' fission products, found ',&
                & NFissionProducts,' fission products!'
-            ENDIF
+            endif
             SFLine = 0 ! Reset Spontaneous Fission lines
             TotalYield = 0._Float
             PrevLineIsSF = .FALSE.
             NFissionProducts = 0
             LastFissionProductFound = .FALSE.
-         ELSE
+         else
             SFLine = SFLine + 1
             !
             ! Read the 6 values and check if they are real/integer
             !
-            CALL Line2Values(ALine,MySubString,MyFloat,MyInteger,SubStringIsInteger,DoingBullocks)
+            call Line2Values(ALine,MySubString,MyFloat,MyInteger,SubStringIsInteger,DoingBullocks)
 
-            IF (SFLine == 1) THEN
+            if (SFLine == 1) then
                iMother = Zap2Nuclide(MyInteger(1),MyInteger(2))
 
-               WRITE(*,'(A,I7,A,I4,A,A)') 'Head of chain for this list of spontaneous '&
+               write(*,'(A,I7,A,I4,A,A)') 'Head of chain for this list of spontaneous '&
                   & //'fissions, starting at line ',iLine,' = nuclide ',&
                   & iMother,': ',NuclideSpecs(iMother)%NuclideName
 
-            ELSE IF (SFLine == 2) THEN
+            else if (SFLine == 2) then
                NExpectedFissionProducts = MyInteger(6)
-            ELSE IF (SFLine > 2) THEN
-               READ(ScratchFile,'(A)',END=10) ALine
+            else if (SFLine > 2) then
+               read(ScratchFile,'(A)',end=10) ALine
                iLine = iLine + 1
 
-               CALL Line2Values(ALine,MySubstring(7),MyFloat(7),MyInteger(7),SubStringIsInteger(7),DoingBullocks)
+               call Line2Values(ALine,MySubstring(7),MyFloat(7),MyInteger(7),SubStringIsInteger(7),DoingBullocks)
                !
                ! Work out 3 nuclides per 2 lines:
                !
-               DO iElement = 1,3
-                  IF (.NOT.LastFissionProductFound) THEN
-                     IsNonVoid = (LEN_TRIM(MySubstring(4*iElement-3)) > 0)
-                     IF (IsNonVoid) THEN
+               do iElement = 1,3
+                  if (.NOT.LastFissionProductFound) then
+                     IsNonVoid = (len_trim(MySubstring(4*iElement-3)) > 0)
+                     if (IsNonVoid) then
                         SFNuclide(iElement) = Zap2Nuclide(MyInteger(4*iElement-3),MyInteger(4*iElement-2))
                         MyBranchingRatio(iElement) = MyFloat(4*iElement-1)
 
                         TotalYield = TotalYield + MyBranchingRatio(iElement)
                         NFissionProducts = NFissionProducts + 1
 
-                        IF ((SFNuclide(iElement) > 0).AND.(MyBranchingRatio(iElement) > 0._Float)) THEN
+                        if ((SFNuclide(iElement) > 0).AND.(MyBranchingRatio(iElement) > 0._Float)) then
 
-                           WRITE(*,'(A,I8,A,A,A,A,A,EN20.10,1X,I3,1X,I3)') 'Line ',iLine,' SF: ',&
+                           write(*,'(A,I8,A,A,A,A,A,EN20.10,1X,I3,1X,I3)') 'Line ',iLine,' SF: ',&
                            & NuclideSpecs(iMother)%NuclideName,' --> ',&
                            & NuclideSpecs(SFNuclide(iElement))%NuclideName,&
                            & ' with branching ratio ',MyBranchingRatio(iElement),&
                            & NuclideSpecs(SFNuclide(iElement))%AtomNumber,NuclideSpecs(SFNuclide(iElement))%NHadrons
-                        ENDIF
+                        endif
 
                         LastFissionProductFound = (NFissionProducts >= NExpectedFissionProducts)
-                     ENDIF ! nonvoid
-                  ENDIF ! not yet last fission product found
-               ENDDO ! loop over elements on 2 lines
+                     endif ! nonvoid
+                  endif ! not yet last fission product found
+               enddo ! loop over elements on 2 lines
 
                PrevLineIsSF = .TRUE.
 
-            ENDIF ! SF line 1, 2 or later
+            endif ! SF line 1, 2 or later
 
-         ENDIF ! line with SF data
-      ENDDO ! loop until ready
+         endif ! line with SF data
+      enddo ! loop until ready
 
-      10 CONTINUE
-   END SUBROUTINE ParseSpontaneousFile
+      10 continue
+   end subroutine ParseSpontaneousFile
 
 
 
-   SUBROUTINE MakeMotherDaughterMatrix(MyNuclideSpecs,MyMotherDaughterMatrix,OutName)
+   subroutine MakeMotherDaughterMatrix(MyNuclideSpecs,MyMotherDaughterMatrix,OutName)
       !
       ! Fill the sparse matrix of which the exponential gives the evolution of the
       ! nuclide strengths (in Bq possibly per unit of volume or surface)
       ! over a macroscopic timestep. The matrix is stored in a global variable,
       ! since it will be needed quite often.
       !
-      TYPE(NuclideType), DIMENSION(0:MaxNuclides), INTENT(IN) :: MyNuclideSpecs
-      REAL(Float), DIMENSION(MaxNuclides,MaxNuclides), INTENT(OUT) :: MyMotherDaughterMatrix
-      CHARACTER(*), INTENT(IN) :: OutName
-      INTEGER :: DaughterNuclide,MotherNuclide,NNonZero,HerDaughterNuclide,iDaughter,iGrandDaughter
-      CHARACTER(30) :: FormatString
-      REAL(Float) :: Ln2
+      type(NuclideType), dimension(0:MaxNuclides), intent(in) :: MyNuclideSpecs
+      real(Float), dimension(MaxNuclides,MaxNuclides), intent(out) :: MyMotherDaughterMatrix
+      character(*), intent(in) :: OutName
+      integer :: DaughterNuclide,MotherNuclide,NNonZero,HerDaughterNuclide,iDaughter,iGrandDaughter
+      character(30) :: FormatString
+      real(Float) :: Ln2
 
-      INTEGER, PARAMETER :: DebugLevel = 0
+      integer, parameter :: DebugLevel = 0
 
-      IF (DebugLevel > 0) THEN
-         WRITE(*,'(A,I4)') 'MakeMyMotherDaughterMatrix: NNuclides = ',NNuclides
-      ENDIF
+      if (DebugLevel > 0) then
+         write(*,'(A,I4)') 'MakeMyMotherDaughterMatrix: NNuclides = ',NNuclides
+      endif
 
       ln2 = LOG(2.)
       !
       ! Initialize diagonal with -1, rest at zero
       !
-      DO MotherNuclide = 1,NNuclides
-         DO DaughterNuclide = 1,NNuclides
-            IF (DaughterNuclide == MotherNuclide) THEN
+      do MotherNuclide = 1,NNuclides
+         do DaughterNuclide = 1,NNuclides
+            if (DaughterNuclide == MotherNuclide) then
                MyMotherDaughterMatrix(DaughterNuclide,MotherNuclide) = -ln2&
                   & /MyNuclideSpecs(DaughterNuclide)%HalfTime
-            ELSE
+            else
                MyMotherDaughterMatrix(DaughterNuclide,MotherNuclide) =  0.
-            ENDIF
-         ENDDO
-      ENDDO
+            endif
+         enddo
+      enddo
       !
       ! Now fill the nonzero off-diagonal elements. Leave open the option that some daughters are accounted for several times.
       !
-      DO MotherNuclide = 1,NNuclides
-         DO iDaughter = 1,MaxNDaughters
+      do MotherNuclide = 1,NNuclides
+         do iDaughter = 1,MaxNDaughters
             DaughterNuclide = MyNuclideSpecs(MotherNuclide)%Daughter(iDaughter)
-            IF (DaughterNuclide /= 0) THEN
+            if (DaughterNuclide /= 0) then
                MyMotherDaughterMatrix(DaughterNuclide,MotherNuclide) = &
                MyMotherDaughterMatrix(DaughterNuclide,MotherNuclide) &
                & + MyNuclideSpecs(MotherNuclide)%DaughterFraction(iDaughter)*ln2&
                &   /MyNuclideSpecs(DaughterNuclide)%HalfTime
-            ENDIF
-         ENDDO
-      ENDDO
+            endif
+         enddo
+      enddo
       !
       ! Write to output
       !
-      IF (DebugLevel > 0) WRITE(*,*)
-      IF (LEN_TRIM(OutName) > 0) THEN
-         OPEN(ScratchFile,FILE = OutName,FORM='FORMATTED', POSITION='REWIND')
-         WRITE(ScratchFile,'(A)') 'Mother/daughter Matrix: horizontal nuclides decay into the vertical nuclides'
-         WRITE(ScratchFile,664) NNuclides
-         664  FORMAT(I4,' nuclides are represented in this matrix. The matrix elements are for the decay of ACTIVITY!!')
+      if (DebugLevel > 0) write(*,*)
+      if (len_trim(OutName) > 0) then
+         open(ScratchFile,file = OutName,form='FORMATTED', position='REWIND')
+         write(ScratchFile,'(A)') 'Mother/daughter Matrix: horizontal nuclides decay into the vertical nuclides'
+         write(ScratchFile,664) NNuclides
+         664  format(I4,' nuclides are represented in this matrix. The matrix elements are for the decay of ACTIVITY!!')
 
          FormatString = '(11X,    (A10,1X))'
-         WRITE(FormatString(6:9),'(I4)') NNuclides
-         WRITE(ScratchFile,FormatString) (MyNuclideSpecs(MotherNuclide)%NuclideName,MotherNuclide = 1,NNuclides)
+         write(FormatString(6:9),'(I4)') NNuclides
+         write(ScratchFile,FormatString) (MyNuclideSpecs(MotherNuclide)%NuclideName,MotherNuclide = 1,NNuclides)
 
          FormatString = '(A10,1X,    (G10.4,1X))'
-         WRITE(FormatString(9:12),'(I4)') NNuclides
-         DO DaughterNuclide = 1,NNuclides
-            WRITE(ScratchFile,FormatString) MyNuclideSpecs(DaughterNuclide)%NuclideName,&
+         write(FormatString(9:12),'(I4)') NNuclides
+         do DaughterNuclide = 1,NNuclides
+            write(ScratchFile,FormatString) MyNuclideSpecs(DaughterNuclide)%NuclideName,&
          & (MyMotherDaughterMatrix(DaughterNuclide,MotherNuclide),MotherNuclide = 1,NNuclides)
-         ENDDO
+         enddo
          !
          ! Count number of non-zero entries in decay matrix
          !
          NNonZero = 0
-         DO DaughterNuclide = 1,NNuclides
-            DO MotherNuclide = 1,NNuclides
-               IF (ABS(MyMotherDaughterMatrix(DaughterNuclide,MotherNuclide)) > 1.E-24) CALL Inc(NNonZero)
-            ENDDO
-         ENDDO
+         do DaughterNuclide = 1,NNuclides
+            do MotherNuclide = 1,NNuclides
+               if (abs(MyMotherDaughterMatrix(DaughterNuclide,MotherNuclide)) > 1.E-24) call Inc(NNonZero)
+            enddo
+         enddo
          !
          ! Write only non-zero entries to output
          !
-         WRITE(ScratchFile,*)
-         WRITE(ScratchFile,'(A)') 'Here come the non-zero entries of the mother/daughter matrix:'
-         WRITE(ScratchFile,668) NNuclides,NNonZero
-         668  FORMAT(I10,1X,I10,'  = NNuclides and NNonZero')
-         DO DaughterNuclide = 1,NNuclides
-            DO MotherNuclide = 1,NNuclides
-               IF (ABS(MyMotherDaughterMatrix(DaughterNuclide,MotherNuclide)) > 1.E-24) THEN
-                  WRITE(ScratchFile,667) &
+         write(ScratchFile,*)
+         write(ScratchFile,'(A)') 'Here come the non-zero entries of the mother/daughter matrix:'
+         write(ScratchFile,668) NNuclides,NNonZero
+         668  format(I10,1X,I10,'  = NNuclides and NNonZero')
+         do DaughterNuclide = 1,NNuclides
+            do MotherNuclide = 1,NNuclides
+               if (abs(MyMotherDaughterMatrix(DaughterNuclide,MotherNuclide)) > 1.E-24) then
+                  write(ScratchFile,667) &
                      & DaughterNuclide,MotherNuclide,MyMotherDaughterMatrix(DaughterNuclide,MotherNuclide)
-                     667 FORMAT(I4,1X,I4,1X,G10.4)
-               ENDIF
-            ENDDO
-         ENDDO
-         CLOSE(ScratchFile)
-      ENDIF
-   END SUBROUTINE MakeMotherDaughterMatrix
+                     667 format(I4,1X,I4,1X,G10.4)
+               endif
+            enddo
+         enddo
+         close(ScratchFile)
+      endif
+   end subroutine MakeMotherDaughterMatrix
 
 
 
-   SUBROUTINE ReadENDFNuclideSpecs()
+   subroutine ReadENDFNuclideSpecs()
       !
       ! Get all nuclide stuff you want to have from the ENDF database
       !
-      INTEGER :: iNuclide
+      integer :: iNuclide
 
-      CALL InitLibENDF()
+      call InitLibENDF()
 
-      DO iNuclide = 1,NNuclides
-         CALL ParseENDFFile(iNuclide)
-      ENDDO ! loop over nuclides
+      do iNuclide = 1,NNuclides
+         call ParseENDFFile(iNuclide)
+      enddo ! loop over nuclides
       !
       ! Spontaneous fission is skippped, as for none of these nuclides there are meaningful dose conversion coefficients.
       ! You can give it a go by uncommenting the commands below. No guarantee that it works.
       !
-      !   CALL ParseSpontaneousFile('nt501')
-      !   CALL ParseSpontaneousFile('nt502')
-      !   CALL ParseSpontaneousFile('nt503')
-      !   CALL ParseSpontaneousFile('nt505')
-      !   CALL ParseSpontaneousFile('nt506')
-      !   CALL ParseSpontaneousFile('nt507')
-      !   CALL ParseSpontaneousFile('nt508')
-      !   CALL ParseSpontaneousFile('nt509')
-      !   CALL ParseSpontaneousFile('nt510')
-      !   CALL ParseSpontaneousFile('nt511')
-      !   CALL ParseSpontaneousFile('nt512')
-      !   CALL ParseSpontaneousFile('nt513')
-      !   CALL ParseSpontaneousFile('nt514')
-      !   CALL ParseSpontaneousFile('nt515')
-      !   CALL ParseSpontaneousFile('nt516')
-      !   CALL ParseSpontaneousFile('nt517')
-      !   CALL ParseSpontaneousFile('nt518')
-      !   CALL ParseSpontaneousFile('nt666a')
-      !   CALL ParseSpontaneousFile('nt666b')
-      !   CALL ParseSpontaneousFile('nt998')
-      !   CALL ParseSpontaneousFile('nt999')
+      !   call ParseSpontaneousFile('nt501')
+      !   call ParseSpontaneousFile('nt502')
+      !   call ParseSpontaneousFile('nt503')
+      !   call ParseSpontaneousFile('nt505')
+      !   call ParseSpontaneousFile('nt506')
+      !   call ParseSpontaneousFile('nt507')
+      !   call ParseSpontaneousFile('nt508')
+      !   call ParseSpontaneousFile('nt509')
+      !   call ParseSpontaneousFile('nt510')
+      !   call ParseSpontaneousFile('nt511')
+      !   call ParseSpontaneousFile('nt512')
+      !   call ParseSpontaneousFile('nt513')
+      !   call ParseSpontaneousFile('nt514')
+      !   call ParseSpontaneousFile('nt515')
+      !   call ParseSpontaneousFile('nt516')
+      !   call ParseSpontaneousFile('nt517')
+      !   call ParseSpontaneousFile('nt518')
+      !   call ParseSpontaneousFile('nt666a')
+      !   call ParseSpontaneousFile('nt666b')
+      !   call ParseSpontaneousFile('nt998')
+      !   call ParseSpontaneousFile('nt999')
       !
       ! Match the names of the daughters with the other nuclides.
       ! Exclude stable daughers
       !
-      CALL MatchDaughters()
-      WRITE(*,'(A)') 'Ready matching daughters!'
-   END SUBROUTINE ReadENDFNuclideSpecs
+      call MatchDaughters()
+      write(*,'(A)') 'Ready matching daughters!'
+   end subroutine ReadENDFNuclideSpecs
 
 
 
-   SUBROUTINE ReadNProcessENDFNuclideSpecs(tMin,RegularizedNuclideSpecs,RegularizedMotherDaughterMatrix)
+   subroutine ReadNProcessENDFNuclideSpecs(tMin,RegularizedNuclideSpecs,RegularizedMotherDaughterMatrix)
       !
       ! Read ENDF nuclide database, find orphans and construct mother-daughter matrices
       !
-      REAL(Float), INTENT(INOUT) :: tMin
-      TYPE(NuclideType), DIMENSION(0:MaxNuclides), INTENT(INOUT) :: RegularizedNuclideSpecs
-      REAL(Float), DIMENSION(MaxNuclides,MaxNuclides), INTENT(INOUT) :: RegularizedMotherDaughterMatrix
+      real(Float), intent(inout) :: tMin
+      type(NuclideType), dimension(0:MaxNuclides), intent(inout) :: RegularizedNuclideSpecs
+      real(Float), dimension(MaxNuclides,MaxNuclides), intent(inout) :: RegularizedMotherDaughterMatrix
 
-      TYPE(SparseMatrix) :: SparseMMMatrix,SparseRegularizedMMMatrix
-      REAL(Float) :: tMinSug
-      LOGICAL :: ENDFBinFileExists,IsDifferenttMin
-      TYPE(SparseLogicalMatrix) :: SparseIsRelated,SparseRegularizedIsRelated
-      INTEGER :: MostDaughters,iNuclide
-      CHARACTER(DefaultLength) :: FName
+      type(SparseMatrix) :: SparseMMMatrix,SparseRegularizedMMMatrix
+      real(Float) :: tMinSug
+      logical :: ENDFBinFileExists,IsDifferenttMin
+      type(SparseLogicalMatrix) :: SparseIsRelated,SparseRegularizedIsRelated
+      integer :: MostDaughters,iNuclide
+      character(DefaultLength) :: FName
 
-      INTEGER, PARAMETER :: DebugLevel = 0
+      integer, parameter :: DebugLevel = 0
 
-      WRITE(*,'(A)') 'Reading the ENDF database of nuclides...'
+      write(*,'(A)') 'Reading the ENDF database of nuclides...'
 
-      IF (.NOT.FileExists(RIVMSourcesPath() // '/ICRP-07.NDX')) THEN
-         WRITE(*,'(A)') 'Make sure you have file ICRP-07.NDX in the directory where you call this utility! Exiting!!'
-         CALL EXIT()
-      ENDIF
+      if (.NOT.FileExists(RIVMSourcesPath() // '/ICRP-07.NDX')) then
+         write(*,'(A)') 'Make sure you have file ICRP-07.NDX in the directory where you call this utility! Exiting!!'
+         call exit()
+      endif
       !
       ! Read all data on nuclides from an earlier run or construct them afresh
       !
       ENDFBinFileExists = FileExists(TransitionMatrixPath() // '/ENDFBinFile.dat')
 
-      IF (ENDFBinFileExists) THEN
+      if (ENDFBinFileExists) then
 
-         WRITE(*,'(A)') 'I found the binary file ENDFBinFile.dat with all parsed ENDF data readily available!'
-         WRITE(*,'(A)') 'This is not the first time that you run this library!'
-         WRITE(*,'(A)') ''
-         WRITE(*,'(A)') 'Initialization will go smooth and fast!'
-         WRITE(*,'(A)') 'Going to read this preprocessed file ...'
+         write(*,'(A)') 'I found the binary file ENDFBinFile.dat with all parsed ENDF data readily available!'
+         write(*,'(A)') 'This is not the first time that you run this library!'
+         write(*,'(A)') ''
+         write(*,'(A)') 'Initialization will go smooth and fast!'
+         write(*,'(A)') 'Going to read this preprocessed file ...'
 
-         OPEN(ScratchFile,FILE=TransitionMatrixPath() // '/ENDFBinFile.dat',FORM='UNFORMATTED',POSITION='REWIND',ACTION='READ')
+         open(ScratchFile,file=TransitionMatrixPath() // '/ENDFBinFile.dat',form='UNFORMATTED',position='REWIND',action='READ')
 
-         READ(ScratchFile) AtomSpecs
-         READ(ScratchFile) AtomName
-         READ(ScratchFile) NNuclides
-         READ(ScratchFile) NuclideSpecs
+         read(ScratchFile) AtomSpecs
+         read(ScratchFile) AtomName
+         read(ScratchFile) NNuclides
+         read(ScratchFile) NuclideSpecs
 
-         IF (ALLOCATED(SparseMMMatrix%Element)) DEALLOCATE(SparseMMMatrix%Element)
-         READ(ScratchFile) SparseMMMatrix%N,SparseMMMatrix%NMax
-         ALLOCATE(SparseMMMatrix%Element(SparseMMMatrix%N))
-         READ(ScratchFile) SparseMMMatrix%Element
-         CALL SparseMatrix2Matrix(SparseMMMatrix,MotherDaughterMatrix)
+         if (ALLOCATED(SparseMMMatrix%Element)) deallocate(SparseMMMatrix%Element)
+         read(ScratchFile) SparseMMMatrix%N,SparseMMMatrix%NMax
+         allocate(SparseMMMatrix%Element(SparseMMMatrix%N))
+         read(ScratchFile) SparseMMMatrix%Element
+         call SparseMatrix2Matrix(SparseMMMatrix,MotherDaughterMatrix)
 
-         READ(ScratchFile) SparseIsRelated%N
-         ALLOCATE(SparseIsRelated%Element(SparseIsRelated%N))
-         READ(ScratchFile) SparseIsRelated%Element
-         CALL SparseLMatrix2LMatrix(SparseIsRelated,IsRelated)
+         read(ScratchFile) SparseIsRelated%N
+         allocate(SparseIsRelated%Element(SparseIsRelated%N))
+         read(ScratchFile) SparseIsRelated%Element
+         call SparseLMatrix2LMatrix(SparseIsRelated,IsRelated)
 
-         READ(ScratchFile) tMinSug
-         IsDifferenttMin = (ABS(tMinSug/tMin-1._Float) > 0.001_Float)
-         IF (IsDifferenttMin) THEN
-            WRITE(*,'(A,EN20.10,A,EN20.10,A)') 'The value of tMin in the file of ',tMinSug,&
+         read(ScratchFile) tMinSug
+         IsDifferenttMin = (abs(tMinSug/tMin-1._Float) > 0.001_Float)
+         if (IsDifferenttMin) then
+            write(*,'(A,EN20.10,A,EN20.10,A)') 'The value of tMin in the file of ',tMinSug,&
             & ' seconds differs from the one in your subroutine call: ',tMin,' seconds!'
-            WRITE(*,'(A)') 'Going to replace your value by the one in tne file!'
+            write(*,'(A)') 'Going to replace your value by the one in tne file!'
             tMin = tMinSug
-         ENDIF
+         endif
 
-         READ(ScratchFile) Orphanage
+         read(ScratchFile) Orphanage
 
-         READ(ScratchFile) RegularizedNuclideSpecs
+         read(ScratchFile) RegularizedNuclideSpecs
 
-         IF (ALLOCATED(SparseRegularizedMMMatrix%Element)) DEALLOCATE(SparseRegularizedMMMatrix%Element)
-         READ(ScratchFile) SparseRegularizedMMMatrix%N,SparseRegularizedMMMatrix%NMax
-         ALLOCATE(SparseRegularizedMMMatrix%Element(SparseRegularizedMMMatrix%N))
-         READ(ScratchFile) SparseRegularizedMMMatrix%Element
-         CALL SparseMatrix2Matrix(SparseRegularizedMMMatrix,RegularizedMotherDaughterMatrix)
+         if (ALLOCATED(SparseRegularizedMMMatrix%Element)) deallocate(SparseRegularizedMMMatrix%Element)
+         read(ScratchFile) SparseRegularizedMMMatrix%N,SparseRegularizedMMMatrix%NMax
+         allocate(SparseRegularizedMMMatrix%Element(SparseRegularizedMMMatrix%N))
+         read(ScratchFile) SparseRegularizedMMMatrix%Element
+         call SparseMatrix2Matrix(SparseRegularizedMMMatrix,RegularizedMotherDaughterMatrix)
 
-         READ(ScratchFile) SparseRegularizedIsRelated%N
-         ALLOCATE(SparseRegularizedIsRelated%Element(SparseRegularizedIsRelated%N))
-         READ(ScratchFile) SparseRegularizedIsRelated%Element
-         CALL SparseLMatrix2LMatrix(SparseRegularizedIsRelated,RegularizedIsRelated)
+         read(ScratchFile) SparseRegularizedIsRelated%N
+         allocate(SparseRegularizedIsRelated%Element(SparseRegularizedIsRelated%N))
+         read(ScratchFile) SparseRegularizedIsRelated%Element
+         call SparseLMatrix2LMatrix(SparseRegularizedIsRelated,RegularizedIsRelated)
 
-         CLOSE(ScratchFile)
+         close(ScratchFile)
 
-         WRITE(*,'(A)') 'Ready reading preprocessed ENDF file ...'
-      ELSE
-         WRITE(*,'(A)') 'I could not find the binary file ENDFBinFile.dat with all parsed ENDF data readily available...'
-         WRITE(*,'(A)') 'This is probably the first time that you run this library...'
-         WRITE(*,'(A)') ''
-         WRITE(*,'(A)') 'Going to read all the ENDF data files one by one and parse them ...'
-         WRITE(*,'(A)') 'This may take some time ...'
+         write(*,'(A)') 'Ready reading preprocessed ENDF file ...'
+      else
+         write(*,'(A)') 'I could not find the binary file ENDFBinFile.dat with all parsed ENDF data readily available...'
+         write(*,'(A)') 'This is probably the first time that you run this library...'
+         write(*,'(A)') ''
+         write(*,'(A)') 'Going to read all the ENDF data files one by one and parse them ...'
+         write(*,'(A)') 'This may take some time ...'
 
-         CALL ReadENDFNuclideSpecs()
+         call ReadENDFNuclideSpecs()
          !
          ! Find all orphan decay steps, i.e. those involving a halflife < tMin, and put them in a list
          !
-         CALL FindOrphans(tMin)
+         call FindOrphans(tMin)
          !
          ! Make a copy of the nuclide specs with which we can play
          ! The original is kept such that we will be able to trace the true family relations
@@ -1626,87 +1626,87 @@ CONTAINS
          !
          ! Regularize nuclide specs by elimination of too fast nuclides
          !
-         CALL RegularizeNuclides(RegularizedNuclideSpecs)
+         call RegularizeNuclides(RegularizedNuclideSpecs)
 
-         WRITE(*,*)
+         write(*,*)
          !================================================================================================================
          !
          ! Construct matrix with time-rate-of-change of nuclide vector, based on the regularized transition characteristics
          !
-         WRITE(*,*)
-         WRITE(*,'(A)') 'Going to construct mother-daughter matrix for time-rate-of-change!'
+         write(*,*)
+         write(*,'(A)') 'Going to construct mother-daughter matrix for time-rate-of-change!'
          !
          ! Once for the original full set of decay options
          !
          FName = ' '
-         CALL MakeMotherDaughterMatrix(NuclideSpecs,MotherDaughterMatrix,FName)
+         call MakeMotherDaughterMatrix(NuclideSpecs,MotherDaughterMatrix,FName)
          !
          ! And once for the regularized set of decay relations, where all orphans have been taken out
          !
          FName = ' '
-         CALL MakeMotherDaughterMatrix(RegularizedNuclideSpecs,RegularizedMotherDaughterMatrix,FName)
+         call MakeMotherDaughterMatrix(RegularizedNuclideSpecs,RegularizedMotherDaughterMatrix,FName)
 
-         WRITE(*,'(A)') 'Ready reading and parsting all the ENDF data files!'
+         write(*,'(A)') 'Ready reading and parsting all the ENDF data files!'
 
-         OPEN(ScratchFile,FILE=TransitionMatrixPath() // '/ENDFBinFile.dat',FORM='UNFORMATTED',POSITION='REWIND',ACTION='WRITE')
+         open(ScratchFile,file=TransitionMatrixPath() // '/ENDFBinFile.dat',form='UNFORMATTED',position='REWIND',action='WRITE')
 
-         WRITE(ScratchFile) AtomSpecs
-         WRITE(ScratchFile) AtomName
-         WRITE(ScratchFile) NNuclides
-         WRITE(ScratchFile) NuclideSpecs
+         write(ScratchFile) AtomSpecs
+         write(ScratchFile) AtomName
+         write(ScratchFile) NNuclides
+         write(ScratchFile) NuclideSpecs
          SparseMMMatrix = Matrix2SparseMatrix(MotherDaughterMatrix)
-         WRITE(ScratchFile) SparseMMMatrix%N,SparseMMMatrix%NMax
-         WRITE(ScratchFile) SparseMMMatrix%Element
+         write(ScratchFile) SparseMMMatrix%N,SparseMMMatrix%NMax
+         write(ScratchFile) SparseMMMatrix%Element
          SparseIsRelated = LMatrix2SparseLMatrix(IsRelated)
-         WRITE(ScratchFile) SparseIsRelated%N
-         WRITE(ScratchFile) SparseIsRelated%Element
-         WRITE(ScratchFile) tMin
-         WRITE(ScratchFile) Orphanage
-         WRITE(ScratchFile) RegularizedNuclideSpecs
+         write(ScratchFile) SparseIsRelated%N
+         write(ScratchFile) SparseIsRelated%Element
+         write(ScratchFile) tMin
+         write(ScratchFile) Orphanage
+         write(ScratchFile) RegularizedNuclideSpecs
          SparseRegularizedMMMatrix = Matrix2SparseMatrix(RegularizedMotherDaughterMatrix)
-         WRITE(ScratchFile) SparseRegularizedMMMatrix%N,SparseRegularizedMMMatrix%NMax
-         WRITE(ScratchFile) SparseRegularizedMMMatrix%Element
+         write(ScratchFile) SparseRegularizedMMMatrix%N,SparseRegularizedMMMatrix%NMax
+         write(ScratchFile) SparseRegularizedMMMatrix%Element
          SparseRegularizedIsRelated = LMatrix2SparseLMatrix(RegularizedIsRelated)
-         WRITE(ScratchFile) SparseRegularizedIsRelated%N
-         WRITE(ScratchFile) SparseRegularizedIsRelated%Element
+         write(ScratchFile) SparseRegularizedIsRelated%N
+         write(ScratchFile) SparseRegularizedIsRelated%Element
 
-         CLOSE(ScratchFile)
+         close(ScratchFile)
 
-         WRITE(*,'(A)') 'Created binary file ENDFBinFile.dat with all parsed ENDF data for future use!'
+         write(*,'(A)') 'Created binary file ENDFBinFile.dat with all parsed ENDF data for future use!'
 
-      ENDIF ! Binary data already available
+      endif ! Binary data already available
 
-      IF (DebugLevel > 0) THEN
-         WRITE(*,'(A,I0,A)') 'AtomSpecs                  takes : ',SIZEOF(AtomSpecs),' bytes'
-         WRITE(*,'(A,I0,A)') 'AtomName                   takes : ',SIZEOF(AtomName),' bytes'
-         WRITE(*,'(A,I0,A)') 'NNuclides                  takes : ',SIZEOF(NNuclides),' bytes'
-         WRITE(*,'(A,I0,A)') 'NuclideSpecs               takes : ',SIZEOF(NuclideSpecs),' bytes'
-         WRITE(*,'(A,I0,A)') 'SparseMMMatrix             takes : ',SIZEOF(SparseMMMatrix%Element),' bytes'
-         WRITE(*,'(A,I0,A)') 'SparseIsRelated            takes : ',SIZEOF(SparseIsRelated%Element),' bytes'
-         WRITE(*,'(A,I0,A)') 'tMinSug                    takes : ',SIZEOF(tMinSug),' bytes'
-         WRITE(*,'(A,I0,A)') 'Orphanage                  takes : ',SIZEOF(Orphanage),' bytes'
-         WRITE(*,'(A,I0,A)') 'RegularizedNuclideSpecs    takes : ',SIZEOF(RegularizedNuclideSpecs),' bytes'
-         WRITE(*,'(A,I0,A)') 'SparseRegularizedMMMatrix  takes : ',SIZEOF(SparseRegularizedMMMatrix%Element),' bytes'
-         WRITE(*,'(A,I0,A)') 'SparseRegularizedIsRelated takes : ',SIZEOF(SparseRegularizedIsRelated%Element),' bytes'
-      ENDIF
-   END SUBROUTINE ReadNProcessENDFNuclideSpecs
+      if (DebugLevel > 0) then
+         write(*,'(A,I0,A)') 'AtomSpecs                  takes : ',SIZEOF(AtomSpecs),' bytes'
+         write(*,'(A,I0,A)') 'AtomName                   takes : ',SIZEOF(AtomName),' bytes'
+         write(*,'(A,I0,A)') 'NNuclides                  takes : ',SIZEOF(NNuclides),' bytes'
+         write(*,'(A,I0,A)') 'NuclideSpecs               takes : ',SIZEOF(NuclideSpecs),' bytes'
+         write(*,'(A,I0,A)') 'SparseMMMatrix             takes : ',SIZEOF(SparseMMMatrix%Element),' bytes'
+         write(*,'(A,I0,A)') 'SparseIsRelated            takes : ',SIZEOF(SparseIsRelated%Element),' bytes'
+         write(*,'(A,I0,A)') 'tMinSug                    takes : ',SIZEOF(tMinSug),' bytes'
+         write(*,'(A,I0,A)') 'Orphanage                  takes : ',SIZEOF(Orphanage),' bytes'
+         write(*,'(A,I0,A)') 'RegularizedNuclideSpecs    takes : ',SIZEOF(RegularizedNuclideSpecs),' bytes'
+         write(*,'(A,I0,A)') 'SparseRegularizedMMMatrix  takes : ',SIZEOF(SparseRegularizedMMMatrix%Element),' bytes'
+         write(*,'(A,I0,A)') 'SparseRegularizedIsRelated takes : ',SIZEOF(SparseRegularizedIsRelated%Element),' bytes'
+      endif
+   end subroutine ReadNProcessENDFNuclideSpecs
 
 
 
-   SUBROUTINE FindOrphans(tMin)
+   subroutine FindOrphans(tMin)
       !================================================================================================================
       !
       ! Find the orphans: nuclides with halftime shorter than Orphanage%tMin
       !
       !================================================================================================================
-      REAL(Float), INTENT(IN) :: tMin
+      real(Float), intent(in) :: tMin
 
-      INTEGER :: DaughterNuclide,MotherNuclide,NMothers,iDaughter,HerDaughterNuclide,iOrphan
+      integer :: DaughterNuclide,MotherNuclide,NMothers,iDaughter,HerDaughterNuclide,iOrphan
 
-      INTEGER, PARAMETER :: DebugLevel = 0
+      integer, parameter :: DebugLevel = 0
 
-      WRITE(*,*)
-      WRITE(*,'(A)') 'Starting to look for orphan nuclides!'
+      write(*,*)
+      write(*,'(A)') 'Starting to look for orphan nuclides!'
 
       Orphanage%tMin = tMin
       !
@@ -1715,11 +1715,11 @@ CONTAINS
       Orphanage%NOrphans = 0
       Orphanage%NTooUnStable = 0
 
-      DO DaughterNuclide = 1,NNuclides
+      do DaughterNuclide = 1,NNuclides
          Orphanage%IsTooUnstable(DaughterNuclide) = (NuclideSpecs(DaughterNuclide)%HalfTime < Orphanage%tMin)
-         IF (Orphanage%IsTooUnstable(DaughterNuclide)) THEN
-            IF (DebugLevel > 0) WRITE(*,'(A,EN20.10,A,EN20.10,A)') 'Handling too fast nuclide '&
-               & //TRIM(NuclideSpecs(DaughterNuclide)%NuclideName)//' with halflife ',NuclideSpecs(DaughterNuclide)%HalfTime,&
+         if (Orphanage%IsTooUnstable(DaughterNuclide)) then
+            if (DebugLevel > 0) write(*,'(A,EN20.10,A,EN20.10,A)') 'Handling too fast nuclide '&
+               & //trim(NuclideSpecs(DaughterNuclide)%NuclideName)//' with halflife ',NuclideSpecs(DaughterNuclide)%HalfTime,&
                & ' [s] < ',Orphanage%tMin,'[s]'
 
             NuclideSpecs(DaughterNuclide)%IsOrphan = .TRUE.
@@ -1730,55 +1730,55 @@ CONTAINS
             !
             NMothers = 0
 
-            DO MotherNuclide = 1,NNuclides
-               DO iDaughter = 1,MaxNDaughters
+            do MotherNuclide = 1,NNuclides
+               do iDaughter = 1,MaxNDaughters
                   HerDaughterNuclide = NuclideSpecs(MotherNuclide)%Daughter(iDaughter)
                   !
                   ! If a possible mother has been found, then define a new orphan
                   !
-               IF (DaughterNuclide == HerDaughterNuclide) THEN
+               if (DaughterNuclide == HerDaughterNuclide) then
                   NMothers = NMothers + 1
 
-                  IF (DebugLevel > 0) WRITE(*,'(A,I0,A,F15.10)') &
-                     & 'Found mother '//TRIM(NuclideSpecs(MotherNuclide)%NuclideName)//&
-                     & ' and '//TRIM(NuclideSpecs(DaughterNuclide)%NuclideName)//' is her daughter number ',iDaughter,&
+                  if (DebugLevel > 0) write(*,'(A,I0,A,F15.10)') &
+                     & 'Found mother '//trim(NuclideSpecs(MotherNuclide)%NuclideName)//&
+                     & ' and '//trim(NuclideSpecs(DaughterNuclide)%NuclideName)//' is her daughter number ',iDaughter,&
                      & ' with branching ratio ',NuclideSpecs(MotherNuclide)%DaughterFraction(iDaughter)
 
-                  IF (Orphanage%NOrphans == MaxNOrphans) THEN
-                     WRITE(*,'(A,I0,A)') 'Cannot add new orphan after maximum number of ',&
+                  if (Orphanage%NOrphans == MaxNOrphans) then
+                     write(*,'(A,I0,A)') 'Cannot add new orphan after maximum number of ',&
                         & Orphanage%NOrphans,' orphans! Exiting!!'
-                     CALL EXIT()
-                  ENDIF ! maximum dimension reached
+                     call exit()
+                  endif ! maximum dimension reached
 
                   Orphanage%NOrphans = Orphanage%NOrphans + 1
 
                   Orphanage%Orphan(Orphanage%NOrphans)%Mother   = MotherNuclide
                   Orphanage%Orphan(Orphanage%NOrphans)%Daughter = DaughterNuclide
                   Orphanage%Orphan(Orphanage%NOrphans)%yield    = NuclideSpecs(MotherNuclide)%DaughterFraction(iDaughter)
-               ENDIF ! Recognition of daughter by mother
-            ENDDO ! loop over daughters
-         ENDDO ! Loop over candidate mothers
+               endif ! Recognition of daughter by mother
+            enddo ! loop over daughters
+         enddo ! Loop over candidate mothers
 
-         IF (DebugLevel > 0) THEN
-            IF (NMothers > 0) THEN
-               WRITE(*,'(A,I0,A)') 'Found ',NMothers,' mothers for '//TRIM(NuclideSpecs(DaughterNuclide)%NuclideName)//'!'
-            ELSE
-               WRITE(*,'(A)') 'No mothers were found, '//TRIM(NuclideSpecs(DaughterNuclide)%NuclideName)&
+         if (DebugLevel > 0) then
+            if (NMothers > 0) then
+               write(*,'(A,I0,A)') 'Found ',NMothers,' mothers for '//trim(NuclideSpecs(DaughterNuclide)%NuclideName)//'!'
+            else
+               write(*,'(A)') 'No mothers were found, '//trim(NuclideSpecs(DaughterNuclide)%NuclideName)&
                   & //' is an artificial nuclide and not a decay product!'
-            ENDIF
+            endif
 
-            WRITE(*,'(A)') 'This is all I wanted to say about too fast nuclide '&
-               & //TRIM(NuclideSpecs(DaughterNuclide)%NuclideName)
-            ENDIF ! DebugLevel > 0
-         ENDIF ! Halflife of daughter too short
-      ENDDO ! Loop over daughters
+            write(*,'(A)') 'This is all I wanted to say about too fast nuclide '&
+               & //trim(NuclideSpecs(DaughterNuclide)%NuclideName)
+            endif ! DebugLevel > 0
+         endif ! Halflife of daughter too short
+      enddo ! Loop over daughters
       !
       ! Show list of orphans
       !
-      WRITE(*,'(A)') 'List of orphans: '
+      write(*,'(A)') 'List of orphans: '
 
-      DO iOrphan = 1,Orphanage%NOrphans
-         WRITE(*,'(A,I4,A,A,A,A,5X,A,EN20.10,A,F20.10,A)') &
+      do iOrphan = 1,Orphanage%NOrphans
+         write(*,'(A,I4,A,A,A,A,5X,A,EN20.10,A,F20.10,A)') &
             & 'Orphanage%Orphan ',iOrphan,' is daughter ',&
             & NuclideSpecs(Orphanage%Orphan(iOrphan)%Daughter)%NuclideName,&
             & ' from mother ',&
@@ -1786,57 +1786,57 @@ CONTAINS
             & 'because halflife ',&
             & NuclideSpecs(Orphanage%Orphan(iOrphan)%Daughter)%HalfTime,&
             & '[s] < limit ',Orphanage%tMin,'[s]'
-      ENDDO ! loop over orphans
+      enddo ! loop over orphans
 
-      WRITE(*,'(A)') 'Ready looking for orphan nuclides!'
-   END SUBROUTINE FindOrphans
+      write(*,'(A)') 'Ready looking for orphan nuclides!'
+   end subroutine FindOrphans
 
 
 
-   SUBROUTINE RegularizeNuclides(MyNuclideSpecs)
+   subroutine RegularizeNuclides(MyNuclideSpecs)
       !
       ! All orphan nuclides with halftime shorter than Orphanage%tMin are eliminated.
       ! Their contributions are attributed to the mother nuclide decaying directly to the grand-daughters.
       !
-      TYPE(NuclideType), DIMENSION(0:MaxNuclides), INTENT(INOUT) :: MyNuclideSpecs
+      type(NuclideType), dimension(0:MaxNuclides), intent(inout) :: MyNuclideSpecs
 
-      INTEGER :: DaughterNuclide,NGrandDaughters,iGrandDaughter,GrandDaughterNuclide,NMothers,MotherNuclide,iDaughter,&
+      integer :: DaughterNuclide,NGrandDaughters,iGrandDaughter,GrandDaughterNuclide,NMothers,MotherNuclide,iDaughter,&
       & HerDaughterNuclide,FreeDaughter,iNuclide
-      LOGICAL :: IsAlreadyADaughter,IsFirstFreeSlot
+      logical :: IsAlreadyADaughter,IsFirstFreeSlot
 
-      INTEGER, PARAMETER :: DebugLevel = 0
+      integer, parameter :: DebugLevel = 0
 
-      WRITE(*,*)
-      WRITE(*,'(A,EN20.10,A)') 'Going to eliminate all nuclides with halflife faster than ',Orphanage%tMin,' s'
-      WRITE(*,*)
+      write(*,*)
+      write(*,'(A,EN20.10,A)') 'Going to eliminate all nuclides with halflife faster than ',Orphanage%tMin,' s'
+      write(*,*)
       !
       ! "DaughterNuclide" is the possibly too fast nuclide, i.e. an orphan nuclide, that has to be brushed under the carpet.
       !
-      DO DaughterNuclide = 1,NNuclides
-         IF (Orphanage%IsTooUnstable(DaughterNuclide)) THEN
-            IF (DebugLevel > 0) WRITE(*,'(A,EN20.10,A)') 'Handling too fast nuclide '&
-               & //TRIM(MyNuclideSpecs(DaughterNuclide)%NuclideName)//' with halflife ',&
+      do DaughterNuclide = 1,NNuclides
+         if (Orphanage%IsTooUnstable(DaughterNuclide)) then
+            if (DebugLevel > 0) write(*,'(A,EN20.10,A)') 'Handling too fast nuclide '&
+               & //trim(MyNuclideSpecs(DaughterNuclide)%NuclideName)//' with halflife ',&
                & MyNuclideSpecs(DaughterNuclide)%HalfTime,&
                & ' s'
             !
             ! Count number of granddaughters that is formed and that we have to re-arrange
             !
-            WRITE(*,'(A)') 'Going to search for radioactive granddaughters...'
+            write(*,'(A)') 'Going to search for radioactive granddaughters...'
             NGrandDaughters = 0
-            DO iGrandDaughter = 1,MaxNDaughters
+            do iGrandDaughter = 1,MaxNDaughters
                GrandDaughterNuclide = MyNuclideSpecs(DaughterNuclide)%Daughter(iGrandDaughter)
-               IF (GrandDaughterNuclide > 0) THEN
-                  WRITE(*,'(A)') 'Spotted radioactive granddaughter '&
+               if (GrandDaughterNuclide > 0) then
+                  write(*,'(A)') 'Spotted radioactive granddaughter '&
                      & //MyNuclideSpecs(GrandDaughterNuclide)%NuclideName
                   NGrandDaughters = NGrandDaughters + 1
-               ENDIF
-            ENDDO
-            IF (NGrandDaughters > 0) THEN
-               WRITE(*,'(A,I0,A)') 'This daughter nuclide forms ',NGrandDaughters,' radioactive granddaughters'
-            ELSE
-               WRITE(*,'(A,I0,A)') 'This daughter nuclide forms no radioactive granddaughters, '&
+               endif
+            enddo
+            if (NGrandDaughters > 0) then
+               write(*,'(A,I0,A)') 'This daughter nuclide forms ',NGrandDaughters,' radioactive granddaughters'
+            else
+               write(*,'(A,I0,A)') 'This daughter nuclide forms no radioactive granddaughters, '&
                & //'I will only eliminate the formation of this nuclide'
-            ENDIF
+            endif
             !
             ! Check all nuclides if they can be the mother of this orphan daughter
             !
@@ -1844,37 +1844,37 @@ CONTAINS
             !
             NMothers = 0
 
-            DO MotherNuclide = 1,NNuclides
-               DO iDaughter = 1,MaxNDaughters
+            do MotherNuclide = 1,NNuclides
+               do iDaughter = 1,MaxNDaughters
                   HerDaughterNuclide = MyNuclideSpecs(MotherNuclide)%Daughter(iDaughter)
                   !
                   !#############################################################################################################
                   !
                   ! If a possible mother has been found, eliminate the family relation and pass all info on to the next generation
                   !
-                  IF (DaughterNuclide == HerDaughterNuclide) THEN
+                  if (DaughterNuclide == HerDaughterNuclide) then
 
                      NMothers = NMothers + 1
 
-                     WRITE(*,'(A,I0,A,F15.10)') 'Found mother '//TRIM(MyNuclideSpecs(MotherNuclide)%NuclideName)//&
-                        & ' and '//TRIM(MyNuclideSpecs(DaughterNuclide)%NuclideName)//' is her daughter number ',&
+                     write(*,'(A,I0,A,F15.10)') 'Found mother '//trim(MyNuclideSpecs(MotherNuclide)%NuclideName)//&
+                        & ' and '//trim(MyNuclideSpecs(DaughterNuclide)%NuclideName)//' is her daughter number ',&
                         & iDaughter,&
                         & ' with branching ratio ',MyNuclideSpecs(MotherNuclide)%DaughterFraction(iDaughter)
                      !
                      ! Pass heritage to granddaughters via daughter
                      !
-                     WRITE(*,'(A)') 'Going to pass heritage of mother '&
-                        & //TRIM(MyNuclideSpecs(MotherNuclide)%NuclideName)&
+                     write(*,'(A)') 'Going to pass heritage of mother '&
+                        & //trim(MyNuclideSpecs(MotherNuclide)%NuclideName)&
                         & //' to her radioactive granddaughters...'
 
-                     DO iGrandDaughter = 1,MyNuclideSpecs(DaughterNuclide)%NDaughters
+                     do iGrandDaughter = 1,MyNuclideSpecs(DaughterNuclide)%NDaughters
                         GrandDaughterNuclide = MyNuclideSpecs(DaughterNuclide)%Daughter(iGrandDaughter)
-                        IF (GrandDaughterNuclide > 0) THEN
+                        if (GrandDaughterNuclide > 0) then
                            !
                            ! Found a grand-daughter
                            !
-                           WRITE(*,'(A,I0,A,F15.10)') 'Found granddaughter '&
-                              & //TRIM(MyNuclideSpecs(GrandDaughterNuclide)%NuclideName)&
+                           write(*,'(A,I0,A,F15.10)') 'Found granddaughter '&
+                              & //trim(MyNuclideSpecs(GrandDaughterNuclide)%NuclideName)&
                               &   //' with index ',iGrandDaughter,' and with branching ratio ',&
                               & MyNuclideSpecs(DaughterNuclide)%DaughterFraction(iGrandDaughter)
                            !
@@ -1882,34 +1882,34 @@ CONTAINS
                            !
                            IsAlreadyADaughter = .FALSE.
                            FreeDaughter = 0
-                           DO iNuclide = 1,MaxNDaughters
-                              IF (MyNuclideSpecs(MotherNuclide)%Daughter(iNuclide) == GrandDaughterNuclide) THEN
+                           do iNuclide = 1,MaxNDaughters
+                              if (MyNuclideSpecs(MotherNuclide)%Daughter(iNuclide) == GrandDaughterNuclide) then
                                  FreeDaughter = iNuclide
                                  IsAlreadyADaughter = .TRUE.
-                              ENDIF ! Granddaughter is already also a daughter
-                           ENDDO
+                              endif ! Granddaughter is already also a daughter
+                           enddo
                            !
                            ! If not already a daughter, find the first available new daughter slot
                            !
-                           IF (FreeDaughter == 0) THEN
-                              DO iNuclide = 1,MaxNDaughters
+                           if (FreeDaughter == 0) then
+                              do iNuclide = 1,MaxNDaughters
                                  IsFirstFreeSlot=((FreeDaughter == 0).AND.(MyNuclideSpecs(MotherNuclide)%Daughter(iNuclide) == 0))
-                                 IF (IsFirstFreeSlot) FreeDaughter = iNuclide
-                              ENDDO
-                           ENDIF ! granddaughter was not also a daughter
+                                 if (IsFirstFreeSlot) FreeDaughter = iNuclide
+                              enddo
+                           endif ! granddaughter was not also a daughter
 
-                           IF (FreeDaughter > 0) THEN
-                              IF (IsAlreadyADaughter) THEN
-                                 WRITE(*,'(A,I0,A)') 'Daughter slot ',FreeDaughter,&
-                                 & ' of mother '//TRIM(MyNuclideSpecs(MotherNuclide)%NuclideName)&
-                                 & //' already contained granddaughter '//TRIM(MyNuclideSpecs(GrandDaughterNuclide)%NuclideName)&
+                           if (FreeDaughter > 0) then
+                              if (IsAlreadyADaughter) then
+                                 write(*,'(A,I0,A)') 'Daughter slot ',FreeDaughter,&
+                                 & ' of mother '//trim(MyNuclideSpecs(MotherNuclide)%NuclideName)&
+                                 & //' already contained granddaughter '//trim(MyNuclideSpecs(GrandDaughterNuclide)%NuclideName)&
                                  & //'! Adding contribution!'
 
-                                 WRITE(*,'(A,I0,A)') 'Augmenting branching ratio for old daughter '&
-                                 & //TRIM(MyNuclideSpecs(GrandDaughterNuclide)%NuclideName)&
-                                 & //' of mother '//TRIM(MyNuclideSpecs(MotherNuclide)%NuclideName)//' in daughter slot number ',&
+                                 write(*,'(A,I0,A)') 'Augmenting branching ratio for old daughter '&
+                                 & //trim(MyNuclideSpecs(GrandDaughterNuclide)%NuclideName)&
+                                 & //' of mother '//trim(MyNuclideSpecs(MotherNuclide)%NuclideName)//' in daughter slot number ',&
                                  & FreeDaughter,':'
-                                 WRITE(*,'(5(A,F15.10))') &
+                                 write(*,'(5(A,F15.10))') &
                                  & 'Adding ',MyNuclideSpecs(MotherNuclide)%DaughterFraction(iDaughter),&
                                  & ' x ',MyNuclideSpecs(DaughterNuclide)%DaughterFraction(iGrandDaughter),&
                                  & ' = ',MyNuclideSpecs(MotherNuclide  )%DaughterFraction(iDaughter)&
@@ -1924,13 +1924,13 @@ CONTAINS
                                  &  MyNuclideSpecs(MotherNuclide  )%DaughterFraction(iDaughter     )&
                                  & *MyNuclideSpecs(DaughterNuclide)%DaughterFraction(iGrandDaughter)
 
-                              ELSE
-                                 WRITE(*,'(A,I0,A)') 'Daughter slot ',FreeDaughter,&
+                              else
+                                 write(*,'(A,I0,A)') 'Daughter slot ',FreeDaughter,&
                                  & ' of mother is still free, adopting it for granddaughter!'
 
-                                 WRITE(*,'(A,I0)') 'Installing new daughter '&
-                                 & //TRIM(MyNuclideSpecs(GrandDaughterNuclide)%NuclideName)&
-                                 & //' of mother '//TRIM(MyNuclideSpecs(MotherNuclide)%NuclideName)//' in daughter slot number ',&
+                                 write(*,'(A,I0)') 'Installing new daughter '&
+                                 & //trim(MyNuclideSpecs(GrandDaughterNuclide)%NuclideName)&
+                                 & //' of mother '//trim(MyNuclideSpecs(MotherNuclide)%NuclideName)//' in daughter slot number ',&
                                  & FreeDaughter
 
                                  MyNuclideSpecs(MotherNuclide)%Daughter(FreeDaughter) = &
@@ -1943,76 +1943,76 @@ CONTAINS
                                  &  MyNuclideSpecs(MotherNuclide  )%DaughterFraction(iDaughter     )&
                                  & *MyNuclideSpecs(DaughterNuclide)%DaughterFraction(iGrandDaughter)
 
-                              ENDIF
-                           ELSE
-                              WRITE(*,'(A)') 'Somehow I cannot find a free daughter...'
-                              CALL EXIT()
-                           ENDIF
+                              endif
+                           else
+                              write(*,'(A)') 'Somehow I cannot find a free daughter...'
+                              call exit()
+                           endif
 
-                        ENDIF
-                     ENDDO ! loop over granddaughters
+                        endif
+                     enddo ! loop over granddaughters
                      !
                      ! Eliminate the decay from this mother to the daughter at hand in the nuclide database:
                      !
-                     WRITE(*,'(A,I0,A)') 'Eliminating daughter slot ',iDaughter,' of mother!'
+                     write(*,'(A,I0,A)') 'Eliminating daughter slot ',iDaughter,' of mother!'
 
                      MyNuclideSpecs(MotherNuclide)%Daughter(iDaughter) = 0
                      MyNuclideSpecs(MotherNuclide)%DaughterFraction(iDaughter) = 0._Float
                      MyNuclideSpecs(MotherNuclide)%DaughterName(iDaughter) = ' '
 
-                  ENDIF ! Recognition of daughter by mother
+                  endif ! Recognition of daughter by mother
                   !
                   ! End of bookkeeping of the removal of 1 orphan nuclide by adding its contributions to 1 of its mothers
                   !
                   !#############################################################################################################
                   !
-               ENDDO ! loop over 20 daughters
-            ENDDO ! Loop over candidate mothers
+               enddo ! loop over 20 daughters
+            enddo ! Loop over candidate mothers
 
-            IF (NMothers > 0) THEN
-               WRITE(*,'(A,I0,A)') 'Found ',NMothers,' mothers!'
-            ELSE
-               WRITE(*,'(A)') 'No mothers were found, this is an artificial nuclide and not a decay product!'
-            ENDIF
+            if (NMothers > 0) then
+               write(*,'(A,I0,A)') 'Found ',NMothers,' mothers!'
+            else
+               write(*,'(A)') 'No mothers were found, this is an artificial nuclide and not a decay product!'
+            endif
 
-            WRITE(*,'(A)')'Ready handling too fast nuclide '//TRIM(MyNuclideSpecs(DaughterNuclide)%NuclideName)
-            WRITE(*,*)
-         ENDIF ! Halflife of daughter too short
-      ENDDO ! Loop over daughters
+            write(*,'(A)')'Ready handling too fast nuclide '//trim(MyNuclideSpecs(DaughterNuclide)%NuclideName)
+            write(*,*)
+         endif ! Halflife of daughter too short
+      enddo ! Loop over daughters
       !
       ! Make IsRelated(Daughter,Mother) matrix for the regularized set
       !
       RegularizedIsRelated = .FALSE.
 
-      DO MotherNuclide = 1,NNuclides
-         DO iDaughter = 1,MaxNDaughters
+      do MotherNuclide = 1,NNuclides
+         do iDaughter = 1,MaxNDaughters
             HerDaughterNuclide = MyNuclideSpecs(MotherNuclide)%Daughter(iDaughter)
-            IF (HerDaughterNuclide /= 0) THEN
+            if (HerDaughterNuclide /= 0) then
                RegularizedIsRelated(HerDaughterNuclide,MotherNuclide) = .TRUE.
-            ENDIF
-         ENDDO
-      ENDDO
+            endif
+         enddo
+      enddo
 
-      WRITE(*,'(A)') 'Ready regularizing mother-daughter matrix!'
-   END SUBROUTINE RegularizeNuclides
+      write(*,'(A)') 'Ready regularizing mother-daughter matrix!'
+   end subroutine RegularizeNuclides
 
 
 
-   SUBROUTINE CollectProgeny(iNuclide,DoPrint)
+   subroutine CollectProgeny(iNuclide,DoPrint)
       !================================================================================================================
       !
       ! Collect all progeny of this nuclide, first the regular ones, then add the short-living ones.
       !
       !================================================================================================================
-      INTEGER, INTENT(IN) :: iNuclide
-      LOGICAL, INTENT(IN) :: DoPrint
+      integer, intent(in) :: iNuclide
+      logical, intent(in) :: DoPrint
 
-      INTEGER :: NAdded,MotherNuclide,DaughterNuclide,OrphanCounter,SwiftNuclide,NFarAdded
-      LOGICAL :: Ready,IsNewFamily,IsNewFarFamily
+      integer :: NAdded,MotherNuclide,DaughterNuclide,OrphanCounter,SwiftNuclide,NFarAdded
+      logical :: Ready,IsNewFamily,IsNewFarFamily
 
-      INTEGER, PARAMETER :: DebugLevel = 0
+      integer, parameter :: DebugLevel = 0
 
-      IF (DoPrint) WRITE(*,'(A,I0,A,EN20.10,A)') 'Collecting the progeny family for nuclide ',iNuclide,&
+      if (DoPrint) write(*,'(A,I0,A,EN20.10,A)') 'Collecting the progeny family for nuclide ',iNuclide,&
       & ': '//NuclideSpecs(iNuclide)%NuclideName//' with halflife ',NuclideSpecs(iNuclide)%HalfTime,' [s]:'
 
       NuclideFamily%NFamily = 1 ! i.e.: the mother nuclide
@@ -2034,17 +2034,17 @@ CONTAINS
       !
       Ready = .FALSE.
 
-      DO WHILE (.NOT.Ready)
+      do while (.NOT.Ready)
          NAdded = 0
          NFarAdded = 0
          !
          ! Loop over possible mothers
          !
-         DO MotherNuclide = 1,NNuclides
+         do MotherNuclide = 1,NNuclides
             !
             ! Loop over possible daughters
             !
-            DO DaughterNuclide = 1,NNuclides
+            do DaughterNuclide = 1,NNuclides
                !
                ! First check if this nuclide is part of the full family tree, including orphans
                ! The search is downward in the tree, so new members are identified if the mother is already a member,
@@ -2055,11 +2055,11 @@ CONTAINS
                &    .AND. (.NOT.NuclideFamily%IsFarFamily(DaughterNuclide))&
                &    .AND. (NuclideSpecs(DaughterNuclide)%HalfTime < 1.E80_Float))
 
-               IF (IsNewFarFamily) THEN
+               if (IsNewFarFamily) then
                   NuclideFamily%IsFarFamily(DaughterNuclide) = .TRUE.
                   NFarAdded = NFarAdded + 1
                   NuclideFamily%NFarFamily = NuclideFamily%NFarFamily + 1
-               ENDIF
+               endif
                !
                ! Now check if it is part of the narrow family of non-orphans and update bookkeeping if affirmative
                !
@@ -2070,7 +2070,7 @@ CONTAINS
                !
                ! Add new family member
                !
-               IF (IsNewFamily) THEN
+               if (IsNewFamily) then
                   NuclideFamily%IsFamily(DaughterNuclide) = .TRUE.
                   NAdded = NAdded + 1
                   NuclideFamily%NFamily = NuclideFamily%NFamily + 1
@@ -2085,46 +2085,46 @@ CONTAINS
                   NuclideFamily%Mother(DaughterNuclide,NuclideFamily%NMothers(DaughterNuclide)) = &
                   & MotherNuclide
 
-                  IF (DebugLevel > 2) THEN
-                     WRITE(*,'(A)') 'Adding daughter '//NuclideSpecs(DaughterNuclide)%NuclideName//' for mother '//&
+                  if (DebugLevel > 2) then
+                     write(*,'(A)') 'Adding daughter '//NuclideSpecs(DaughterNuclide)%NuclideName//' for mother '//&
                      & NuclideSpecs(MotherNuclide)%NuclideName
-                  ENDIF
-               ELSE IF (IsNewFarFamily) THEN
-                  IF (DebugLevel > 2) THEN
-                     WRITE(*,'(A)') 'Adding orphan daughter '//NuclideSpecs(DaughterNuclide)%NuclideName//' for mother '//&
+                  endif
+               else if (IsNewFarFamily) then
+                  if (DebugLevel > 2) then
+                     write(*,'(A)') 'Adding orphan daughter '//NuclideSpecs(DaughterNuclide)%NuclideName//' for mother '//&
                      & NuclideSpecs(MotherNuclide)%NuclideName
-                  ENDIF
-               ENDIF
-            ENDDO ! loop over all other nuclides
-         ENDDO ! loop over nuclides already in the family
+                  endif
+               endif
+            enddo ! loop over all other nuclides
+         enddo ! loop over nuclides already in the family
 
          Ready = (NFarAdded == 0)
 
-         IF (DebugLevel > 2) THEN
-            IF (Ready) THEN
-               WRITE(*,'(A)') 'Found no new members, halting iterations!'
-            ELSE
-               WRITE(*,'(A,I0,A,I0,A)') 'Found ',NFarAdded,' new members, of which ',NFarAdded-NAdded,' core members!'&
+         if (DebugLevel > 2) then
+            if (Ready) then
+               write(*,'(A)') 'Found no new members, halting iterations!'
+            else
+               write(*,'(A,I0,A,I0,A)') 'Found ',NFarAdded,' new members, of which ',NFarAdded-NAdded,' core members!'&
                & //' Proceeding with next iteration!'
-            ENDIF
-         ENDIF
-      ENDDO ! while loop
+            endif
+         endif
+      enddo ! while loop
       !
       ! Now add short living family members
       !
-      IF (DebugLevel > 2) THEN
-         WRITE(*,'(A)') 'The regular family has been formed, now going to add possible fast nuclides!'
-      ENDIF
+      if (DebugLevel > 2) then
+         write(*,'(A)') 'The regular family has been formed, now going to add possible fast nuclides!'
+      endif
 
       OrphanCounter = NuclideFamily%NFamily
 
       NAdded = 0
 
-      DO SwiftNuclide = 1,NNuclides
-         IF (NuclideFamily%IsFarFamily(SwiftNuclide).AND..NOT.(NuclideFamily%IsFamily(SwiftNuclide))) THEN
-            IF (DebugLevel > 2) THEN
-               WRITE(*,'(A)') 'Nuclide '//TRIM(NuclideSpecs(SwiftNuclide)%NuclideName)//' seems interesting! Adding it!'
-            ENDIF
+      do SwiftNuclide = 1,NNuclides
+         if (NuclideFamily%IsFarFamily(SwiftNuclide).AND..NOT.(NuclideFamily%IsFamily(SwiftNuclide))) then
+            if (DebugLevel > 2) then
+               write(*,'(A)') 'Nuclide '//trim(NuclideSpecs(SwiftNuclide)%NuclideName)//' seems interesting! Adding it!'
+            endif
 
             NAdded = NAdded + 1
 
@@ -2135,99 +2135,99 @@ CONTAINS
             !
             ! Register its daughters
             !
-            DO DaughterNuclide = 1,NNuclides
-               IF (IsRelated(DaughterNuclide,SwiftNuclide)) THEN
+            do DaughterNuclide = 1,NNuclides
+               if (IsRelated(DaughterNuclide,SwiftNuclide)) then
                NuclideFamily%NDaughters(SwiftNuclide) = NuclideFamily%NDaughters(SwiftNuclide) + 1
                NuclideFamily%Daughter(SwiftNuclide,NuclideFamily%NDaughters(SwiftNuclide)) = &
                &   DaughterNuclide
-               ENDIF
-            ENDDO ! loop over possible mothers
+               endif
+            enddo ! loop over possible mothers
             !
             ! Register its mothers
             !
-            DO MotherNuclide = 1,NNuclides
-               IF (IsRelated(SwiftNuclide,MotherNuclide)) THEN
+            do MotherNuclide = 1,NNuclides
+               if (IsRelated(SwiftNuclide,MotherNuclide)) then
                NuclideFamily%NMothers(SwiftNuclide) = NuclideFamily%NMothers(SwiftNuclide) + 1
                NuclideFamily%Mother(SwiftNuclide,NuclideFamily%NMothers(SwiftNuclide)) = &
                & MotherNuclide
-               ENDIF
-            ENDDO ! loop over possible mothers
-         ENDIF ! This is such a swift nuclide
-      ENDDO ! loop over possibly fast decaying nuclides that have to be added to the family, but with high index numbers
+               endif
+            enddo ! loop over possible mothers
+         endif ! This is such a swift nuclide
+      enddo ! loop over possibly fast decaying nuclides that have to be added to the family, but with high index numbers
 
       Ready = (NAdded == 0)
 
-      IF (DebugLevel > 2) THEN
-         WRITE(*,'(A,I0,A)') 'Found ',NAdded,' new too fast (orphan) members!'
-      ENDIF
+      if (DebugLevel > 2) then
+         write(*,'(A,I0,A)') 'Found ',NAdded,' new too fast (orphan) members!'
+      endif
       !
       ! Show all relatives for this nuclide
       !
-      IF (DebugLevel == 1) THEN
-         WRITE(*,'(A)') NuclideSpecs(iNuclide)%NuclideName//' chain:'
-         DO DaughterNuclide = 1,NNuclides
-            IF(DaughterNuclide /= iNuclide) THEN
-               IF(NuclideFamily%IsFamily(DaughterNuclide)) THEN
-                  WRITE(*,'(5X,A)') NuclideSpecs(DaughterNuclide)%NuclideName
-               ELSE IF (NuclideFamily%IsFarFamily(DaughterNuclide)) THEN
-                  WRITE(*,'(5X,A)') NuclideSpecs(DaughterNuclide)%NuclideName//' <-- orphan'
-               ENDIF
-            ENDIF ! Daughter not iNuclide
-         ENDDO
-      ELSEIF ((DebugLevel > 1).AND. DoPrint) THEN
-         WRITE(*,'(A,I0,A)') 'This nuclide has a family with ',NuclideFamily%NFarFamily-1,' more members:'
-         DO DaughterNuclide = 1,NNuclides
-            IF (DebugLevel > 2) THEN
-               WRITE(*,'(4A,2L5)') 'CollectProgeny: show all relatives: ',NuclideSpecs(iNuclide)%NuclideName,&
+      if (DebugLevel == 1) then
+         write(*,'(A)') NuclideSpecs(iNuclide)%NuclideName//' chain:'
+         do DaughterNuclide = 1,NNuclides
+            if(DaughterNuclide /= iNuclide) then
+               if(NuclideFamily%IsFamily(DaughterNuclide)) then
+                  write(*,'(5X,A)') NuclideSpecs(DaughterNuclide)%NuclideName
+               else if (NuclideFamily%IsFarFamily(DaughterNuclide)) then
+                  write(*,'(5X,A)') NuclideSpecs(DaughterNuclide)%NuclideName//' <-- orphan'
+               endif
+            endif ! Daughter not iNuclide
+         enddo
+      elseif ((DebugLevel > 1).AND. DoPrint) then
+         write(*,'(A,I0,A)') 'This nuclide has a family with ',NuclideFamily%NFarFamily-1,' more members:'
+         do DaughterNuclide = 1,NNuclides
+            if (DebugLevel > 2) then
+               write(*,'(4A,2L5)') 'CollectProgeny: show all relatives: ',NuclideSpecs(iNuclide)%NuclideName,&
                & ' --> ? ',NuclideSpecs(DaughterNuclide)%NuclideName,&
                & NuclideFamily%IsFamily(DaughterNuclide),NuclideFamily%IsFarFamily(DaughterNuclide)
-            ENDIF
+            endif
 
-            IF(DaughterNuclide /= iNuclide) THEN
-               IF(NuclideFamily%IsFamily(DaughterNuclide)) THEN
-                  WRITE(*,'(A,EN20.10,A)') NuclideSpecs(DaughterNuclide)%NuclideName//' with halflife ',&
+            if(DaughterNuclide /= iNuclide) then
+               if(NuclideFamily%IsFamily(DaughterNuclide)) then
+                  write(*,'(A,EN20.10,A)') NuclideSpecs(DaughterNuclide)%NuclideName//' with halflife ',&
                   & NuclideSpecs(DaughterNuclide)%HalfTime,' [s]'
-               ELSE IF (NuclideFamily%IsFarFamily(DaughterNuclide)) THEN
-                  WRITE(*,'(A,EN20.10,A)') NuclideSpecs(DaughterNuclide)%NuclideName//' with halflife ',&
+               else if (NuclideFamily%IsFarFamily(DaughterNuclide)) then
+                  write(*,'(A,EN20.10,A)') NuclideSpecs(DaughterNuclide)%NuclideName//' with halflife ',&
                   & NuclideSpecs(DaughterNuclide)%HalfTime,' [s]  <-- orphan'
-               ENDIF
-            ENDIF ! Daughter not iNuclide
-         ENDDO
-      ENDIF
-   END SUBROUTINE CollectProgeny
+               endif
+            endif ! Daughter not iNuclide
+         enddo
+      endif
+   end subroutine CollectProgeny
 
 
 
-   SUBROUTINE ListTransitions()
+   subroutine ListTransitions()
       !
       ! List all transitions that take place within 1 family, including orphans
       !
-      INTEGER :: MotherNuclide,DaughterNuclide,iDaughter,MAtom,DAtom
+      integer :: MotherNuclide,DaughterNuclide,iDaughter,MAtom,DAtom
 
-      WRITE(*,*)
-      WRITE(*,'(A)') 'Transitions in family with head of chain '&
+      write(*,*)
+      write(*,'(A)') 'Transitions in family with head of chain '&
       & //NuclideSpecs(NuclideFamily%FamilyMember(1))%NuclideName//':'
 
-      DO MotherNuclide = 1,NNuclides
-         IF (NuclideFamily%IsFarFamily(MotherNuclide)) THEN
-            DO iDaughter = 1,NuclideSpecs(MotherNuclide)%NDaughters
+      do MotherNuclide = 1,NNuclides
+         if (NuclideFamily%IsFarFamily(MotherNuclide)) then
+            do iDaughter = 1,NuclideSpecs(MotherNuclide)%NDaughters
                DaughterNuclide = NuclideSpecs(MotherNuclide)%Daughter(iDaughter)
-               IF (DaughterNuclide /= 0) THEN
+               if (DaughterNuclide /= 0) then
                !
                ! Find type of transition
                !
                MAtom = NuclideSpecs(MotherNuclide)%AtomNumber
                DAtom = NuclideSpecs(DaughterNuclide)%AtomNumber
 
-               WRITE(*,'(A,A,A30,A,A,A,F15.10)') &
+               write(*,'(A,A,A30,A,A,A,F15.10)') &
                & NuclideSpecs(MotherNuclide  )%NuclideName,&
-               & ' --- ',TRIM(NuclideSpecs(MotherNuclide)%DecayName(iDaughter)),' --> ',&
+               & ' --- ',trim(NuclideSpecs(MotherNuclide)%DecayName(iDaughter)),' --> ',&
                & NuclideSpecs(DaughterNuclide)%NuclideName,&
                & ' fraction ',&
                & NuclideSpecs(MotherNuclide)%DaughterFraction(iDaughter)
-               ELSE IF ((LEN_TRIM(NuclideSpecs(MotherNuclide)%DaughterName(iDaughter)) > 0)&
-               & .AND.(TRIM(NuclideSpecs(MotherNuclide)%DaughterName(iDaughter)) /= 'SF')) THEN
-               WRITE(*,'(4A,F15.10,A)') &
+               else if ((len_trim(NuclideSpecs(MotherNuclide)%DaughterName(iDaughter)) > 0)&
+               & .AND.(trim(NuclideSpecs(MotherNuclide)%DaughterName(iDaughter)) /= 'SF')) then
+               write(*,'(4A,F15.10,A)') &
                & NuclideSpecs(MotherNuclide)%NuclideName,&
                & ' ------------> ',&
                & NuclideSpecs(MotherNuclide)%DaughterName(iDaughter),&
@@ -2235,53 +2235,53 @@ CONTAINS
                & NuclideSpecs(MotherNuclide)%DaughterFraction(iDaughter),&
                & ' STABLE'
 
-               ENDIF
-            ENDDO
-         ENDIF ! mother is family
-      ENDDO
-   END SUBROUTINE ListTransitions
+               endif
+            enddo
+         endif ! mother is family
+      enddo
+   end subroutine ListTransitions
 
 
 
-   SUBROUTINE MakeEvolutionMatrix(iNuclide,RegularizedMotherDaughterMatrix,x,NSecondsDelay,zDelay)
+   subroutine MakeEvolutionMatrix(iNuclide,RegularizedMotherDaughterMatrix,x,NSecondsDelay,zDelay)
       !================================================================================================================
       !
       ! Construct exponential of mother/daughter matrix of this family
       !
       !================================================================================================================
-      INTEGER, INTENT(IN) :: iNuclide
-      REAL(Float), INTENT(IN) :: NSecondsDelay
-      REAL(Float), DIMENSION(MaxNuclides,MaxNuclides), INTENT(IN) :: RegularizedMotherDaughterMatrix
-      REAL(dp), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: zDelay
-      REAL(dp), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: x
+      integer, intent(in) :: iNuclide
+      real(Float), intent(in) :: NSecondsDelay
+      real(Float), dimension(MaxNuclides,MaxNuclides), intent(in) :: RegularizedMotherDaughterMatrix
+      real(dp), dimension(:,:), allocatable, intent(out) :: zDelay
+      real(dp), dimension(:,:), allocatable, intent(out) :: x
 
-      INTEGER :: MotherNuclide,DaughterNuclide,ErrorCode,iSecond,iMinute,iHour,iDay,jNuclide
-      REAL(dp), DIMENSION(:,:), ALLOCATABLE :: yDelay
-      CHARACTER(DefaultLength) :: MyFormat,FName
+      integer :: MotherNuclide,DaughterNuclide,ErrorCode,iSecond,iMinute,iHour,iDay,jNuclide
+      real(dp), dimension(:,:), allocatable :: yDelay
+      character(DefaultLength) :: MyFormat,FName
 
-      INTEGER, PARAMETER :: DebugLevel = 0
+      integer, parameter :: DebugLevel = 0
 
-      IF (ALLOCATED(x)) DEALLOCATE(x)
-      ALLOCATE(x(NuclideFamily%NFamily,NuclideFamily%NFamily))
+      if (ALLOCATED(x)) deallocate(x)
+      allocate(x(NuclideFamily%NFamily,NuclideFamily%NFamily))
       x = 0._Float
 
-      IF (ALLOCATED(yDelay)) DEALLOCATE(yDelay)
-      ALLOCATE(yDelay(NuclideFamily%NFamily,NuclideFamily%NFamily))
+      if (ALLOCATED(yDelay)) deallocate(yDelay)
+      allocate(yDelay(NuclideFamily%NFamily,NuclideFamily%NFamily))
       yDelay = 0._Float
 
-      IF (ALLOCATED(zDelay)) DEALLOCATE(zDelay)
-      ALLOCATE(zDelay(NuclideFamily%NFamily,NuclideFamily%NFamily))
+      if (ALLOCATED(zDelay)) deallocate(zDelay)
+      allocate(zDelay(NuclideFamily%NFamily,NuclideFamily%NFamily))
       zDelay = 0._Float
       !
       ! Copy time-rate of change from large matrix for all nuclides to smaller matrix
       !
-      DO MotherNuclide = 1,NuclideFamily%NFamily
-         DO DaughterNuclide = 1,NuclideFamily%NFamily
+      do MotherNuclide = 1,NuclideFamily%NFamily
+         do DaughterNuclide = 1,NuclideFamily%NFamily
             x(DaughterNuclide,MotherNuclide) = &
             & RegularizedMotherDaughterMatrix(NuclideFamily%FamilyMember(DaughterNuclide),&
             & NuclideFamily%FamilyMember(MotherNuclide))
-         ENDDO
-      ENDDO
+         enddo
+      enddo
       !
       ! Macroscopic time-step over 1 minute, 1 hour and 1 day
       !
@@ -2289,12 +2289,12 @@ CONTAINS
       !
       ! Exponential
       !
-      CALL dmexp(yDelay,NuclideFamily%NFamily,zDelay,ErrorCode)
-   END SUBROUTINE MakeEvolutionMatrix
+      call dmexp(yDelay,NuclideFamily%NFamily,zDelay,ErrorCode)
+   end subroutine MakeEvolutionMatrix
 
 
 
-   SUBROUTINE AddOrphansBelow(iNuclide,TheDecayMatrix,zDelay,NFirstMotherOrphans)
+   subroutine AddOrphansBelow(iNuclide,TheDecayMatrix,zDelay,NFirstMotherOrphans)
       !================================================================================================================
       !
       ! Modify a transition matrix to include the orphan transitions below this mother nuclide that have been short-circuited
@@ -2302,23 +2302,23 @@ CONTAINS
       ! i.e. the line in the transition matrix for element iNuclide.
       !
       !================================================================================================================
-      INTEGER, INTENT(IN) :: iNuclide
-      REAL(Float), DIMENSION(MaxNuclides,MaxNuclides), INTENT(INOUT) :: TheDecayMatrix
-      REAL(dp), DIMENSION(:,:), ALLOCATABLE, INTENT(INOUT) :: zDelay
-      INTEGER, INTENT(OUT) :: NFirstMotherOrphans
+      integer, intent(in) :: iNuclide
+      real(Float), dimension(MaxNuclides,MaxNuclides), intent(inout) :: TheDecayMatrix
+      real(dp), dimension(:,:), allocatable, intent(inout) :: zDelay
+      integer, intent(out) :: NFirstMotherOrphans
 
-      INTEGER :: iOrphan,NAdded,jOrphan,iIteration,iiNuclide,jjNuclide,MotherNuclide,&
+      integer :: iOrphan,NAdded,jOrphan,iIteration,iiNuclide,jjNuclide,MotherNuclide,&
       & GhostNuclide,NAddedRegular,NAddedOrphans
-      LOGICAL :: Ready,NotAlreadyAMember,IsMotherOfNewOrphan,HaveCandidateMother,ItsMotherIs_ii
-      LOGICAL, DIMENSION(MaxNuclides) :: TooFastFullyChecked
+      logical :: Ready,NotAlreadyAMember,IsMotherOfNewOrphan,HaveCandidateMother,ItsMotherIs_ii
+      logical, dimension(MaxNuclides) :: TooFastFullyChecked
 
-      INTEGER, PARAMETER :: DebugLevel = 0
+      integer, parameter :: DebugLevel = 0
 
-      IF (DebugLevel > 0) WRITE(*,*)
-      IF (DebugLevel > 0) WRITE(*,'(A)') '-------------------- Start of search for orphan chain ------------------------'
-      IF (DebugLevel > 0) WRITE(*,*)
-      IF (DebugLevel > 0) WRITE(*,'(A,I4,A,A)') 'Checking orphan chain below nuclide ',iNuclide,&
-      & ' : ',TRIM(NuclideSpecs(iNuclide)%NuclideName)
+      if (DebugLevel > 0) write(*,*)
+      if (DebugLevel > 0) write(*,'(A)') '-------------------- Start of search for orphan chain ------------------------'
+      if (DebugLevel > 0) write(*,*)
+      if (DebugLevel > 0) write(*,'(A,I4,A,A)') 'Checking orphan chain below nuclide ',iNuclide,&
+      & ' : ',trim(NuclideSpecs(iNuclide)%NuclideName)
 
       NFirstMotherOrphans = 0
       Orphanage%Orphan(:)%Active = .FALSE. ! None of the orphan transitions is yet recognized as relevant
@@ -2328,100 +2328,100 @@ CONTAINS
       Ready = .FALSE.
       iIteration = 0
 
-      DO WHILE (.NOT.Ready)
+      do while (.NOT.Ready)
          iIteration = iIteration + 1
-         IF (DebugLevel > 0) WRITE(*,*)
-         IF (DebugLevel > 0) WRITE(*,'(A,I0)') '############# Iteration ',iIteration
+         if (DebugLevel > 0) write(*,*)
+         if (DebugLevel > 0) write(*,'(A,I0)') '############# Iteration ',iIteration
          !
          ! If any arrow into a too fast nuclide, either from regular progeny of the head of chain or from another
          ! too fast nuclide in the family, is inactive, switch off this daughter nuclide from TooFastFullyChecked
          !
-         CALL MarkFullyCheckedOrphans()
+         call MarkFullyCheckedOrphans()
          !
          ! Now fill in the gaps in the transition matrix for too fast nuclide
          !
-         CALL AddOrphansFromRegularFamily(NAddedRegular)
-         CALL AddOrphansFromCheckedOrphans(NAddedOrphans)
+         call AddOrphansFromRegularFamily(NAddedRegular)
+         call AddOrphansFromCheckedOrphans(NAddedOrphans)
 
          NAdded = NAddedRegular + NAddedOrphans
 
          NFirstMotherOrphans = NFirstMotherOrphans + NAdded
 
-         IF (DebugLevel > 0) WRITE(*,'(A,I0)') 'Number of orphans added in this iteration: ',NAdded
+         if (DebugLevel > 0) write(*,'(A,I0)') 'Number of orphans added in this iteration: ',NAdded
 
          Ready = (NAdded == 0)
 
-      ENDDO ! loop until no new orphans added
+      enddo ! loop until no new orphans added
 
-      IF (DebugLevel > 0) WRITE(*,*)
-      IF (DebugLevel > 0) WRITE(*,'(A)') '-------------------- End of search for orphan chain --------------------------'
-      IF (DebugLevel > 0) WRITE(*,*)
+      if (DebugLevel > 0) write(*,*)
+      if (DebugLevel > 0) write(*,'(A)') '-------------------- End of search for orphan chain --------------------------'
+      if (DebugLevel > 0) write(*,*)
 
-      CONTAINS
+      contains
 
-         SUBROUTINE MarkFullyCheckedOrphans
+         subroutine MarkFullyCheckedOrphans
             TooFastFullyChecked = .TRUE. ! De-selection of non-fully checked too fast nuclides will be done immediately below
 
-            DO iOrphan = 1,Orphanage%NOrphans ! This loop includes all orphans, also the irrelevant ones not in this chain
+            do iOrphan = 1,Orphanage%NOrphans ! This loop includes all orphans, also the irrelevant ones not in this chain
                !
                ! See if its mother is either regular progeny in the chain at hand (which needs to be addressed)...
                !
-               DO MotherNuclide = 1,NuclideFamily%NFamily
+               do MotherNuclide = 1,NuclideFamily%NFamily
                   iiNuclide = NuclideFamily%FamilyMember(MotherNuclide)
-                  IF (Orphanage%Orphan(iOrphan)%Mother == iiNuclide) THEN ! So now the mother of the orphan is regular family
+                  if (Orphanage%Orphan(iOrphan)%Mother == iiNuclide) then ! So now the mother of the orphan is regular family
 
-                     IF (.NOT.Orphanage%Orphan(iOrphan)%Active) THEN ! but the transition to a too fast nuclide in not yet active
+                     if (.NOT.Orphanage%Orphan(iOrphan)%Active) then ! but the transition to a too fast nuclide in not yet active
                         TooFastFullyChecked(Orphanage%Orphan(iOrphan)%Daughter) = .FALSE.
                         ! Then the too fast daughter is not yet a good basis for searching for new too fast progeny below
 
-                        IF (DebugLevel > 0) WRITE(*,'(A,I0,A)') 'MarkFullyCheckedOrphans: In iteration ',iIteration,&
+                        if (DebugLevel > 0) write(*,'(A,I0,A)') 'MarkFullyCheckedOrphans: In iteration ',iIteration,&
                         & ' switched off orphan '&
-                        & //TRIM(NuclideSpecs(Orphanage%Orphan(iOrphan)%Daughter)%NuclideName)&
+                        & //trim(NuclideSpecs(Orphanage%Orphan(iOrphan)%Daughter)%NuclideName)&
                         & //' for lack of progeny transition '&
-                        & //TRIM(NuclideSpecs(Orphanage%Orphan(iOrphan)%Mother)%NuclideName)//' --> '&
-                        & //TRIM(NuclideSpecs(Orphanage%Orphan(iOrphan)%Daughter)%NuclideName)
-                     ENDIF
+                        & //trim(NuclideSpecs(Orphanage%Orphan(iOrphan)%Mother)%NuclideName)//' --> '&
+                        & //trim(NuclideSpecs(Orphanage%Orphan(iOrphan)%Daughter)%NuclideName)
+                     endif
 
-                  ENDIF ! We found the mother of this orphan in the regular progeny of the head of chain
-               ENDDO ! loop over mother nuclides
+                  endif ! We found the mother of this orphan in the regular progeny of the head of chain
+               enddo ! loop over mother nuclides
                !
                ! ... or a fully checked orphan that itself is in the big family
                !
-               DO jOrphan = 1,Orphanage%NOrphans
+               do jOrphan = 1,Orphanage%NOrphans
                   iiNuclide = Orphanage%Orphan(jOrphan)%Daughter
-                  IF (NuclideFamily%IsFarFamily(iiNuclide)) THEN
-                     IF (Orphanage%Orphan(iOrphan)%Mother == iiNuclide) THEN ! So now the mother of the orphan is an orphan
+                  if (NuclideFamily%IsFarFamily(iiNuclide)) then
+                     if (Orphanage%Orphan(iOrphan)%Mother == iiNuclide) then ! So now the mother of the orphan is an orphan
 
-                        IF (.NOT.Orphanage%Orphan(iOrphan)%Active) THEN ! but this mother orphan transition is not yet active..
+                        if (.NOT.Orphanage%Orphan(iOrphan)%Active) then ! but this mother orphan transition is not yet active..
                            TooFastFullyChecked(Orphanage%Orphan(iOrphan)%Daughter) = .FALSE. ! then, de-select this nuclide
 
-                           IF (DebugLevel > 0) WRITE(*,'(A,I0,A)') 'MarkFullyCheckedOrphans: In iteration ',&
+                           if (DebugLevel > 0) write(*,'(A,I0,A)') 'MarkFullyCheckedOrphans: In iteration ',&
                            & iIteration,' switched off orphan '&
-                           & //TRIM(NuclideSpecs(Orphanage%Orphan(iOrphan)%Daughter)%NuclideName)&
+                           & //trim(NuclideSpecs(Orphanage%Orphan(iOrphan)%Daughter)%NuclideName)&
                            & //' for lack of orphan-orphan transition '&
-                           & //TRIM(NuclideSpecs(Orphanage%Orphan(iOrphan)%Mother)%NuclideName)//' --> '&
-                           & //TRIM(NuclideSpecs(Orphanage%Orphan(iOrphan)%Daughter)%NuclideName)
-                        ENDIF
+                           & //trim(NuclideSpecs(Orphanage%Orphan(iOrphan)%Mother)%NuclideName)//' --> '&
+                           & //trim(NuclideSpecs(Orphanage%Orphan(iOrphan)%Daughter)%NuclideName)
+                        endif
 
-                     ENDIF ! We found the mother of this orphan in the regular progeny of the head of chain
-                  ENDIF ! Check if the mother of this orphan belongs to this (big) family
-               ENDDO ! loop over jOrphan
-            ENDDO ! loop over iOrphan
-         END SUBROUTINE MarkFullyCheckedOrphans
+                     endif ! We found the mother of this orphan in the regular progeny of the head of chain
+                  endif ! Check if the mother of this orphan belongs to this (big) family
+               enddo ! loop over jOrphan
+            enddo ! loop over iOrphan
+         end subroutine MarkFullyCheckedOrphans
 
-         SUBROUTINE AddOrphansFromRegularFamily(MyNAdded)
-            INTEGER, INTENT(OUT) :: MyNAdded
+         subroutine AddOrphansFromRegularFamily(MyNAdded)
+            integer, intent(out) :: MyNAdded
             !
             ! Step 1: Loop over all regular nuclides in this family to see if they have a yet inactive orphan in their progeny
             !
             MyNAdded = 0
 
-            DO MotherNuclide = 1,NuclideFamily%NFamily
+            do MotherNuclide = 1,NuclideFamily%NFamily
                iiNuclide = NuclideFamily%FamilyMember(MotherNuclide)
                !
                ! Check all non-active orphans if they can originate from this mother
                !
-               DO jOrphan = 1,Orphanage%NOrphans
+               do jOrphan = 1,Orphanage%NOrphans
                   !
                   ! You found a new family member if any new orphan is not already a member and if the orphan at hand is the mother of the new orphan
                   !
@@ -2429,7 +2429,7 @@ CONTAINS
 
                   ItsMotherIs_ii = (Orphanage%Orphan(jOrphan)%Mother == iiNuclide)
 
-                  IF (NotAlreadyAMember.AND.ItsMotherIs_ii) THEN
+                  if (NotAlreadyAMember.AND.ItsMotherIs_ii) then
                      Orphanage%Orphan(jOrphan)%Active = .TRUE.
                      !
                      ! Modify transition matrix by adding the yield x activity of the mother of the orphan to the activity of the orphan
@@ -2446,31 +2446,31 @@ CONTAINS
 
                      MyNAdded = MyNAdded + 1
 
-                     IF (DebugLevel > 0) WRITE(*,'(A,F20.15)') 'AddOrphansFromRegularFamily: Found new orphan transition: '&
+                     if (DebugLevel > 0) write(*,'(A,F20.15)') 'AddOrphansFromRegularFamily: Found new orphan transition: '&
                      & //NuclideSpecs(jjNuclide)%NuclideName &
                      & //' from mother '&
                      & //NuclideSpecs(iiNuclide)%NuclideName&
                      & //' with yield ',Orphanage%Orphan(jOrphan)%Yield
-                  ENDIF
-               ENDDO ! loop over non-active orphans
-            ENDDO ! loop over all regular nuclides in this family
-         END SUBROUTINE AddOrphansFromRegularFamily
+                  endif
+               enddo ! loop over non-active orphans
+            enddo ! loop over all regular nuclides in this family
+         end subroutine AddOrphansFromRegularFamily
 
-         SUBROUTINE AddOrphansFromCheckedOrphans(MyNAdded)
-            INTEGER, INTENT(OUT) :: MyNAdded
+         subroutine AddOrphansFromCheckedOrphans(MyNAdded)
+            integer, intent(out) :: MyNAdded
             !
             ! Step 2: Loop over all fully checked orphan nuclides in this big family to see if they have a yet inactive orphan in their progeny
             !
             MyNAdded = 0
 
-            DO iOrphan = 1,Orphanage%NOrphans
+            do iOrphan = 1,Orphanage%NOrphans
                iiNuclide = Orphanage%Orphan(iOrphan)%Daughter ! i.e. the endpoint of an orphan arrow, the too fast nuclide itself
-               IF (NuclideFamily%IsFarFamily(iiNuclide)) THEN ! the too fast nuclide is far family!
-                  IF (TooFastFullyChecked(iiNuclide)) THEN ! and all its incoming arrow have been accounted for, so not it can pass its activity to even lower decks!
+               if (NuclideFamily%IsFarFamily(iiNuclide)) then ! the too fast nuclide is far family!
+                  if (TooFastFullyChecked(iiNuclide)) then ! and all its incoming arrow have been accounted for, so not it can pass its activity to even lower decks!
                      !
                      ! Check all non-active orphans if they can originate from this (too fast) mother
                      !
-                     DO jOrphan = 1,Orphanage%NOrphans
+                     do jOrphan = 1,Orphanage%NOrphans
                         !
                         ! You found a new family member if any new orphan is not already a member and if the orphan at hand is the mother of the new orphan
                         !
@@ -2478,7 +2478,7 @@ CONTAINS
 
                         ItsMotherIs_ii = (Orphanage%Orphan(jOrphan)%Mother == iiNuclide)
 
-                        IF (NotAlreadyAMember.AND.ItsMotherIs_ii) THEN
+                        if (NotAlreadyAMember.AND.ItsMotherIs_ii) then
                            Orphanage%Orphan(jOrphan)%Active = .TRUE.
                            !
                            ! Modify transition matrix by adding the yield x activity of the mother of the orphan to the activity of the orphan.
@@ -2493,15 +2493,15 @@ CONTAINS
 
                            MyNAdded = MyNAdded + 1
 
-                           IF (DebugLevel > 0) WRITE(*,'(A)') 'AddOrphansFromCheckedOrphans: Found new orphan transition: '&
+                           if (DebugLevel > 0) write(*,'(A)') 'AddOrphansFromCheckedOrphans: Found new orphan transition: '&
                            & //NuclideSpecs(jjNuclide)%NuclideName &
                            & //' from mother '&
                            & //NuclideSpecs(iiNuclide)%NuclideName
-                        ENDIF
-                     ENDDO ! loop over non-active orphans
-                  ENDIF ! orphan active
-               ENDIF ! possible mother is an orphan herself that belongs to the big family
-            ENDDO ! loop over all active orphans
-         END SUBROUTINE AddOrphansFromCheckedOrphans
-   END SUBROUTINE AddOrphansBelow
-END MODULE LibENDF
+                        endif
+                     enddo ! loop over non-active orphans
+                  endif ! orphan active
+               endif ! possible mother is an orphan herself that belongs to the big family
+            enddo ! loop over all active orphans
+         end subroutine AddOrphansFromCheckedOrphans
+   end subroutine AddOrphansBelow
+end module LibENDF
