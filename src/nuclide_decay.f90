@@ -56,7 +56,7 @@ PROGRAM nuclide_decay
 
    NArguements = IARGC()
 
-   IF (NArguements.NE.1) THEN
+   IF (NArguements /= 1) THEN
       WRITE(*,'(A)') 'Call:'
       WRITE(*,*)
       WRITE(*,'(A)') 'nuclide_decay <full/sparse>'
@@ -68,7 +68,7 @@ PROGRAM nuclide_decay
 
    CALL GETARG(1,FullSparseString)
    WRITE(*,'(A)') 'You specified the following FullSparseString : '//TRIM(FullSparseString)
-   DoFull = (INDEX(FullSparseString,'full').GT.0)
+   DoFull = (INDEX(FullSparseString,'full') > 0)
    !
    ! Initialize the set of delays
    !
@@ -80,7 +80,7 @@ PROGRAM nuclide_decay
 
    DO iStartingTime = 0,NStartingTimes
       WRITE(PinPointName(iStartingTime),'(I3.3)') iStartingTime
-      IF (DebugLevel.GT.0) WRITE(*,'(A)') PinPointName(iStartingTime)//'second'
+      IF (DebugLevel > 0) WRITE(*,'(A)') PinPointName(iStartingTime)//'second'
 
       IF (DoFull) THEN
          FName(iStartingTime) = TransitionMatrixPath() // '/' // 'DecayMatrix_ENDF_' // TRIM(PinPointName(iStartingTime)) // '.dat'
@@ -147,14 +147,14 @@ PROGRAM nuclide_decay
          & ': '//TRIM(NuclideSpecs(iNuclide)%NuclideName)
       WRITE(*,*)
 
-      IF (DebugLevel.GT.3) WRITE(*,'(A,I0)') 'DEBUG: iNuclide = ',iNuclide
+      IF (DebugLevel > 3) WRITE(*,'(A,I0)') 'DEBUG: iNuclide = ',iNuclide
       Lambda = LOG(2._Float)/NuclideSpecs(iNuclide)%HalfTime
       !
       ! Only "long-lived" nuclides can be the mater familias, contamination with fast nuclides is not considered to be a contamination, since it resolves itself fast
       !
       TheDecayMatrix = 0._Float
 
-      IF (NuclideSpecs(iNuclide)%HalfTime.GE.Orphanage%tMin) THEN
+      IF (NuclideSpecs(iNuclide)%HalfTime >= Orphanage%tMin) THEN
          WRITE(*,'(A)') '----------------------------------------------------------------------------------------------'
          !
          ! Construct a list of all progeny from this head of chain
@@ -165,7 +165,7 @@ PROGRAM nuclide_decay
          !
          ! List all transitions in this family, including progeny
          !
-         IF (NuclideSpecs(iNuclide)%HalfTime.GE.1.E85_Float) THEN
+         IF (NuclideSpecs(iNuclide)%HalfTime >= 1.E85_Float) THEN
             WRITE(*,'(A)') 'This is a stable nuclide, so no transitions!'
          ELSE
             CALL ListTransitions()
@@ -197,7 +197,7 @@ PROGRAM nuclide_decay
             ! Save results in regular full or sparse format
             !
             DO jNuclide = 1,NNuclides
-               IF (ABS(TheDecayMatrix(jNuclide,iNuclide)).LT.VerySmallNumber) TheDecayMatrix(jNuclide,iNuclide) = 0._Float
+               IF (ABS(TheDecayMatrix(jNuclide,iNuclide)) < VerySmallNumber) TheDecayMatrix(jNuclide,iNuclide) = 0._Float
             ENDDO
 
             OPEN(ScrotchFile,FILE=FName(iStartingTime),FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
@@ -207,7 +207,7 @@ PROGRAM nuclide_decay
                & (TheDecayMatrix(jNuclide,iNuclide),jNuclide = 1,NNuclides)
             ELSE
                DO jNuclide = 1,NNuclides
-                  IF (TheDecayMatrix(jNuclide,iNuclide).NE.0._Float) THEN
+                  IF (TheDecayMatrix(jNuclide,iNuclide) /= 0._Float) THEN
                      WRITE(ScrotchFile,'(I0,1X,I0,1X,G17.10)') iNuclide,jNuclide,TheDecayMatrix(jNuclide,iNuclide)
                   ENDIF
                ENDDO
@@ -225,7 +225,7 @@ PROGRAM nuclide_decay
          !
          DO iStartingTime = 0,NStartingTimes
             DO jNuclide = 1,NNuclides
-               IF (ABS(TheDecayMatrix(jNuclide,iNuclide)).LT.VerySmallNumber) TheDecayMatrix(jNuclide,iNuclide) = 0._Float
+               IF (ABS(TheDecayMatrix(jNuclide,iNuclide)) < VerySmallNumber) TheDecayMatrix(jNuclide,iNuclide) = 0._Float
             ENDDO
 
             OPEN(ScrotchFile,FILE=FName(iStartingTime),FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
@@ -235,7 +235,7 @@ PROGRAM nuclide_decay
                & (TheDecayMatrix(jNuclide,iNuclide),jNuclide = 1,NNuclides)
             ELSE
                DO jNuclide = 1,NNuclides
-                  IF (TheDecayMatrix(jNuclide,iNuclide).NE.0._Float) THEN
+                  IF (TheDecayMatrix(jNuclide,iNuclide) /= 0._Float) THEN
                      WRITE(ScrotchFile,'(I0,1X,I0,1X,G17.10)') iNuclide,jNuclide,TheDecayMatrix(jNuclide,iNuclide)
                   ENDIF
                ENDDO

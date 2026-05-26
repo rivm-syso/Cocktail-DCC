@@ -55,17 +55,17 @@ CONTAINS
       Error = .FALSE.
 
       NX = Interval%IntervalSpecs%N
-      IF (DebugLevel.GT.0) WRITE(*,'(A,I0)') 'ExponentialIntervalInterpolate: NX = ',NX
+      IF (DebugLevel > 0) WRITE(*,'(A,I0)') 'ExponentialIntervalInterpolate: NX = ',NX
 
-      IF (x.LT.0._Float) THEN
+      IF (x < 0._Float) THEN
          Dum = Interval%Values(0)
          Error = .TRUE. ! You are violating the conditions!
-         IF (DebugLevel.GT.0) WRITE(*,'(A,F15.5)') 'ExponentialIntervalInterpolate: 1: ',Dum
-      ELSE IF (x.GT.Interval%IntervalSpecs%XMax) THEN
+         IF (DebugLevel > 0) WRITE(*,'(A,F15.5)') 'ExponentialIntervalInterpolate: 1: ',Dum
+      ELSE IF (x > Interval%IntervalSpecs%XMax) THEN
          Dum = Interval%Values(NX)
          Error = .TRUE. ! You are violating the conditions!
-         IF (DebugLevel.GT.0) WRITE(*,'(A,F15.5)') 'ExponentialIntervalInterpolate: 2: ',Dum
-      ELSE IF (x.LT.Interval%FirstDelay) THEN
+         IF (DebugLevel > 0) WRITE(*,'(A,F15.5)') 'ExponentialIntervalInterpolate: 2: ',Dum
+      ELSE IF (x < Interval%FirstDelay) THEN
          !
          ! For any x in [0,FirstDelay> use first order interpolation y = ax + b, irrespective of the given interpolation order
          !
@@ -82,14 +82,14 @@ CONTAINS
       ELSE
          LocX = 1._Float + LOG(x/Interval%FirstDelay)/LOG(Interval%DelayGrowthFactor)
          iLocX = MAX(MIN(INT(LocX),NX-1),1)
-         IF (DebugLevel.GT.0) WRITE(*,'(A,I0)') 'ExponentialIntervalInterpolate: iLocX = ',iLocX
+         IF (DebugLevel > 0) WRITE(*,'(A,I0)') 'ExponentialIntervalInterpolate: iLocX = ',iLocX
          CALL FLUSH(6)
 
          XLeft  = Interval%FirstDelay*Interval%DelayGrowthFactor**(iLocX-1)
          XRight = XLeft*Interval%DelayGrowthFactor
          YLeft  = Interval%Values(iLocX)
          YRight = Interval%Values(iLocX+1)
-         IF (DebugLevel.GT.0) THEN
+         IF (DebugLevel > 0) THEN
             WRITE(*,'(A,F15.2)') 'ExponentialIntervalInterpolate: XLeft  = ',XLeft
             WRITE(*,'(A,F15.2)') 'ExponentialIntervalInterpolate: XRight = ',XRight
             WRITE(*,'(A,F15.2)') 'ExponentialIntervalInterpolate: YLeft  = ',YLeft
@@ -99,37 +99,37 @@ CONTAINS
          !
          ! Powerlaw interpolation will not work if 1 of the y-values is 0. In that case use linear interpolation.
          !
-         BothAreNonZero = (ABS(YLeft*YRight).GT.0._Float)
-         IF (DebugLevel.GT.0) WRITE(*,'(A,L1)') 'ExponentialIntervalInterpolate: BothAreNonZero? ',BothAreNonZero
+         BothAreNonZero = (ABS(YLeft*YRight) > 0._Float)
+         IF (DebugLevel > 0) WRITE(*,'(A,L1)') 'ExponentialIntervalInterpolate: BothAreNonZero? ',BothAreNonZero
          CALL FLUSH(6)
          !
          ! Nearest neighbour interpolation
          !
-         IF (InterpolationWay.EQ.0) THEN
+         IF (InterpolationWay == 0) THEN
 
             CellX = (x-XLeft)/(XRight-XLeft)
 
-            IF (CellX.LE.0.5_Float) THEN
+            IF (CellX <= 0.5_Float) THEN
                Dum = YLeft
             ELSE
                Dum = YRight
             ENDIF
-               IF (DebugLevel.GT.0) THEN
+               IF (DebugLevel > 0) THEN
                WRITE(*,'(A,F10.2,A,EN20.10)') 'ExponentialIntervalInterpolate: Order 0, CellX = ',CellX,'    Dum = ',Dum
                CALL FLUSH(6)
             ENDIF
-         ELSE IF ((InterpolationWay.EQ.1).OR.(.NOT.BothAreNonZero)) THEN
+         ELSE IF ((InterpolationWay == 1).OR.(.NOT.BothAreNonZero)) THEN
             !
             ! Linear interpolation y = ax + b
             !
             CellX = (x-XLeft)/(XRight-XLeft)
 
             Dum = (1._Float-CellX) * YLeft + CellX *YRight
-            IF (DebugLevel.GT.0) THEN
+            IF (DebugLevel > 0) THEN
                WRITE(*,'(A,F10.2,A,EN20.10)') 'ExponentialIntervalInterpolate: Linear: CellX = ',CellX,'    Dum = ',Dum
                CALL FLUSH(6)
             ENDIF
-         ELSE IF (InterpolationWay.EQ.2) THEN
+         ELSE IF (InterpolationWay == 2) THEN
             !
             ! Powerlaw y = ax^b
             !
@@ -137,7 +137,7 @@ CONTAINS
                ThePower = LOG(YRight/YLeft)/LOG(XRight/XLeft)
 
                Dum = YLeft * (x/XLeft)**ThePower
-               IF (DebugLevel.GT.0) THEN
+               IF (DebugLevel > 0) THEN
                   WRITE(*,'(A,F10.2,A,EN20.10)') 'ExponentialIntervalInterpolate: Powerlaw: ThePower = ',&
                   & ThePower,'     Dum = ',Dum
                   CALL FLUSH(6)
@@ -154,7 +154,7 @@ CONTAINS
       ! Neglect very small values to avoid the possible writing of a number with an exponent that has 3 digits:
       ! the "E" is omitted in such cases, making the output unreadable for other programs...
       !
-      IF (ABS(Dum).LT.1.E-95_Float) Dum = 0._Float
+      IF (ABS(Dum) < 1.E-95_Float) Dum = 0._Float
 
       ExponentialIntervalInterpolate = Dum
 

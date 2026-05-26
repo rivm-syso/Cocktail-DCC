@@ -187,7 +187,7 @@ CONTAINS
          !
          tMin = 10._Float ! [s]
 
-         IF (DebugLevel.GT.0) THEN
+         IF (DebugLevel > 0) THEN
             WRITE(*,'(A)') 'Set shortest halflife admitted to the numerical scheme for solving the Bateman equations.'
             WRITE(*,'(A)') 'Shorter ones are skipped: the grandmother is directly transformed into the grand-daughter.'
             WRITE(*,'(A)') 'The missing decay steps are added afterwards.'
@@ -219,7 +219,7 @@ CONTAINS
       DO iImmersion = InAir,InWater
          DO iGender = Male,Female
             FName = 'Nuclide-specific_EquivalentDose_'//TRIM(GenderName(iGender))//'.txt'
-            IF (iImmersion.EQ.InAir) THEN
+            IF (iImmersion == InAir) THEN
                FName = 'Air_'//TRIM(FName)
                FName = TRIM(DCCAirSubmersionPath)//TRIM(FName)
             ELSE
@@ -233,10 +233,10 @@ CONTAINS
             NDashLinesFound = 0
             iLine = 0
 
-            DO WHILE (NDashLinesFound.LT.2)
+            DO WHILE (NDashLinesFound < 2)
                READ(ScratchFile,'(A)') ALine
                iLine = iLine + 1
-               IF (ALine(1:1).EQ.'-') NDashLinesFound = NDashLinesFound + 1
+               IF (ALine(1:1) == '-') NDashLinesFound = NDashLinesFound + 1
             ENDDO
             !
             ! Read data for all nuclides
@@ -248,16 +248,16 @@ CONTAINS
                   READ(ScratchFile,'(A)',END=10) ALine
                   iLine = iLine + 1
 
-                  IsDashLine = (INDEX(ALine,'-----').GT.0)
+                  IsDashLine = (INDEX(ALine,'-----') > 0)
 
                   IF (.NOT.IsDashLine) THEN
                      !
                      ! Get nuclide and check name
                      !
-                     IF (iTissue.EQ.1) THEN
+                     IF (iTissue == 1) THEN
                         MyNuclideName = ALine(1:7)
                         jNuclide = GetNuclideNumber(MyNuclideName)
-                        IF (jNuclide.EQ.0) THEN
+                        IF (jNuclide == 0) THEN
                            WRITE(*,'(A,I0,A,A)') 'At line ',iLine,' in file '//TRIM(FName),&
                            & ' : found nuclide '//MyNuclideName//', but I cannot give it a number... Exiting!!'
                            CALL EXIT()
@@ -267,7 +267,7 @@ CONTAINS
                      ! Get and check tissue name
                      !
                      MyTissueName = ALine(9:18)
-                     IF (MyTissueName.NE.TissueName(iTissue)) THEN
+                     IF (MyTissueName /= TissueName(iTissue)) THEN
                         WRITE(*,'(A,I0,A)') 'At line ',iLine,&
                         & ' : expected tissue '//TissueName(iTissue)//', but found '//MyTissueName//'! Exiting!!'
                         CALL EXIT()
@@ -306,7 +306,7 @@ CONTAINS
 
       DO iImmersion = InAir,InWater
          FName = 'Nuclide-specific_EffectiveDose.txt'
-         IF (iImmersion.EQ.InAir) THEN
+         IF (iImmersion == InAir) THEN
             FName = 'Air_'//TRIM(FName)
             FName = TRIM(DCCAirSubmersionPath)//TRIM(FName)
          ELSE
@@ -321,10 +321,10 @@ CONTAINS
          NDashLinesFound = 0
          iLine = 0
 
-         DO WHILE (NDashLinesFound.LT.2)
+         DO WHILE (NDashLinesFound < 2)
             READ(ScratchFile,'(A)') ALine
             iLine = iLine + 1
-            IF (ALine(1:1).EQ.'-') NDashLinesFound = NDashLinesFound + 1
+            IF (ALine(1:1) == '-') NDashLinesFound = NDashLinesFound + 1
          ENDDO
          !
          ! Read data for all nuclides
@@ -333,7 +333,7 @@ CONTAINS
             READ(ScratchFile,'(A)',END=10) ALine
             iLine = iLine + 1
 
-            IsDashLine = (INDEX(ALine,'-----').GT.0)
+            IsDashLine = (INDEX(ALine,'-----') > 0)
 
             IF (.NOT.IsDashLine) THEN
                !
@@ -341,7 +341,7 @@ CONTAINS
                !
                MyNuclideName = ALine(1:7)
                jNuclide = GetNuclideNumber(MyNuclideName)
-               IF (jNuclide.EQ.0) THEN
+               IF (jNuclide == 0) THEN
                   WRITE(*,'(A,I0,A,A)') 'At line ',iLine,' in file '//TRIM(FName),&
                   & ' : found nuclide '//MyNuclideName//', but I cannot give it a number... Exiting!!'
                   CALL EXIT()
@@ -349,7 +349,7 @@ CONTAINS
                !
                ! Read values
                !
-               IF (iImmersion.EQ.InAir) THEN
+               IF (iImmersion == InAir) THEN
                   READ(ALine(18:DefaultLength),*) (DCCEffectiveDose(iImmersion,iAge)%x(jNuclide),iAge=1,NDCCAges),&
                      & DCCEquivalentDoseInAir%x(jNuclide),DCCKermaRateInAir%x(jNuclide)
                ELSE
@@ -393,7 +393,7 @@ CONTAINS
             READ(ScratchFile,'(A)',END=10) ALine
             iLine = iLine + 1
 
-            IsDashLine = (INDEX(ALine,'-----').GT.0)
+            IsDashLine = (INDEX(ALine,'-----') > 0)
 
             IF (.NOT.IsDashLine) THEN
                !
@@ -401,7 +401,7 @@ CONTAINS
                !
                MyNuclideName = ALine(1:7)
                jNuclide = GetNuclideNumber(MyNuclideName)
-               IF (jNuclide.EQ.0) THEN
+               IF (jNuclide == 0) THEN
                   WRITE(*,'(A,I0,A,A)') 'At line ',iLine,' in file '//TRIM(FName),&
                   & ' : found nuclide '//MyNuclideName//', but I cannot give it a number... Exiting!!'
                   CALL EXIT()
@@ -456,7 +456,7 @@ CONTAINS
          !
          READ(ALine,*) MyNuclideName
          iNuclide = GetNuclideNumber(MyNuclideName)
-         IF (iNuclide.EQ.0) THEN
+         IF (iNuclide == 0) THEN
             WRITE(*,'(A,I0,A,A)') 'At line ',iLine,' in file '//TRIM(FName),&
             & ' : found nuclide '//MyNuclideName//', but I cannot give it a number... Exiting!!'
             CALL EXIT()
@@ -498,7 +498,7 @@ CONTAINS
          !
          READ(ALine,*) MyNuclideName
          iNuclide = GetNuclideNumber(MyNuclideName)
-         IF (iNuclide.EQ.0) THEN
+         IF (iNuclide == 0) THEN
             WRITE(*,'(A,I0,A,A)') 'At line ',iLine,' in file '//TRIM(FName),&
             & ' : found nuclide '//MyNuclideName//', but I cannot give it a number... Skipping nuclide!!'
          ELSE

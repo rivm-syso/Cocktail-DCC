@@ -29,7 +29,7 @@ PROGRAM source_term_dose
    !
    NArguements = IARGC()
 
-   IF (NArguements.NE.4) THEN
+   IF (NArguements /= 4) THEN
       WRITE(*,'(A)') 'Call:'
       WRITE(*,*)
       WRITE(*,'(A)') 'source_term_dose.exe <fname> <withdaughters> <Mother nature> <daughter nature>'
@@ -47,7 +47,7 @@ PROGRAM source_term_dose
 
    CALL AllLowCase(WithDaughterString)
 
-   WithDaughters = (INDEX(WithDaughterString,'yes').GT.0)
+   WithDaughters = (INDEX(WithDaughterString,'yes') >0)
    IF (WithDaughters) THEN
       WRITE(*,'(A)') 'Going to include full ingrowth of progeny!'
    ELSE

@@ -195,58 +195,58 @@ CONTAINS
          WRITE(*,'(A)') 'Cannot find list of source term files "'//TRIM(FName)//'"'
       ENDIF
 
-      IF (DebugLevel.GT.0) WRITE(*,'(A)') 'Reading list of source terms from file '//TRIM(FName)
+      IF (DebugLevel > 0) WRITE(*,'(A)') 'Reading list of source terms from file '//TRIM(FName)
 
       OPEN(ScrotchFile,FILE=FName,FORM='FORMATTED',ACTION='READ')
       !
       ! Skip header
       !
       READ(ScrotchFile,'(A)') ALine
-      DO WHILE (ALine(1:1).EQ.'!')
+      DO WHILE (ALine(1:1) == '!')
          READ(ScrotchFile,'(A)') ALine
       ENDDO ! skip header
       !
       ! Read source term names and check lookup tables. Add new lookup tables where necessary.
       !
       NSourceTerms = 0
-      DO WHILE (NSourceTerms.LT.MaxNSourceTerms)
+      DO WHILE (NSourceTerms < MaxNSourceTerms)
          !
          ! Read source file name
          !
          READ(Aline,'(A)',END=10) SourceFileName
          NSourceTerms = NSourceTerms + 1
 
-         IF (DebugLevel.GT.0) THEN
+         IF (DebugLevel > 0) THEN
             WRITE(*,'(A,I0,A)') 'Source term ',NSourceTerms,' is '//TRIM(SourceFileName)
-            IF (NSourceTerms.EQ.MaxNSourceTerms) WRITE(*,'(A,I0,A)') 'I Reached the maximum number of sources: ',&
+            IF (NSourceTerms == MaxNSourceTerms) WRITE(*,'(A,I0,A)') 'I Reached the maximum number of sources: ',&
             & MaxNSourceTerms,'! Subsequent sources will not be read!'
          ENDIF
          !
          ! Check if name suggests format .RIVMSource
          !
          TheIndex = INDEX(SourceFileName,'.RIVMSource')
-         IF (TheIndex.EQ.0) THEN
+         IF (TheIndex == 0) THEN
             WRITE(*,'(A)') 'Source term "'//TRIM(SourceFileName)//'" is not of type .RIVMSource! Exiting!!'
             CALL EXIT()
          ELSE
-            IF (DebugLevel.GT.1) WRITE(*,'(A,I0)') 'Extension .RIVMSource starts at position ',TheIndex
+            IF (DebugLevel > 1) WRITE(*,'(A,I0)') 'Extension .RIVMSource starts at position ',TheIndex
          ENDIF
 
          SourceTermName(NSourceTerms) = SourceFileName(1:(TheIndex-1))
-         IF (DebugLevel.GT.1) WRITE(*,'(A)') 'Name of source term is "'//TRIM(SourceTermName(NSourceTerms))//'"'
-         DO WHILE (INDEX(SourceTermName(NSourceTerms),'/').GT.0)
+         IF (DebugLevel > 1) WRITE(*,'(A)') 'Name of source term is "'//TRIM(SourceTermName(NSourceTerms))//'"'
+         DO WHILE (INDEX(SourceTermName(NSourceTerms),'/') > 0)
             SourceTermName(NSourceTerms) = SourceTermName(NSourceTerms) &
                & ((INDEX(SourceTermName(NSourceTerms),'/')+1):LEN_TRIM(SourceTermName(NSourceTerms)))
-            IF (DebugLevel.GT.1) WRITE(*,'(A)') 'Name of source term is "'//TRIM(SourceTermName(NSourceTerms))//'"'
+            IF (DebugLevel > 1) WRITE(*,'(A)') 'Name of source term is "'//TRIM(SourceTermName(NSourceTerms))//'"'
          ENDDO
-         IF (DebugLevel.GT.1) WRITE(*,'(A)') 'Name of source term is "'//TRIM(SourceTermName(NSourceTerms))//'"'
+         IF (DebugLevel > 1) WRITE(*,'(A)') 'Name of source term is "'//TRIM(SourceTermName(NSourceTerms))//'"'
          !
          ! Check existence of lookup tables. If not available, add new lookup tables.
          !
          CheckLookupFileName = SourceFileName(1:(TheIndex-1))//'_PinpointAirDoseRates_withprogeny.txt'
 
          IF (.NOT.FileExists(CheckLookupFileName)) THEN
-            IF (DebugLevel.GT.0) WRITE(*,'(A)') 'Cannot find associated lookup tables. Adding new tables...'
+            IF (DebugLevel > 0) WRITE(*,'(A)') 'Cannot find associated lookup tables. Adding new tables...'
             Commando = 'runlog??.txt'
             WRITE(Commando(7:8),'(I2.2)') NSourceTerms
 
@@ -259,14 +259,14 @@ CONTAINS
             Commando = TRIM(UtilityName)//' '//TRIM(SourceFileName)//' yes 0 0 > ' &
             &          // TransitionMatrixPath() // '/' // TRIM(Commando)
             Error = SYSTEM(Commando)
-            IF (Error.EQ.0) THEN
+            IF (Error == 0) THEN
                WRITE(*,'(A)') 'Execution of external call "'//TRIM(Commando)//'" went well!'
             ELSE
                WRITE(*,'(A)') 'Execution of external call "'//TRIM(Commando)//'" went wrong! Exiting'
                CALL EXIT()
             ENDIF
          ELSE
-            IF (DebugLevel.GT.0) WRITE(*,'(A)') 'Found associated lookup tables!'
+            IF (DebugLevel > 0) WRITE(*,'(A)') 'Found associated lookup tables!'
          ENDIF
          !
          ! Read lookup tables for this source term
@@ -389,7 +389,7 @@ CONTAINS
          !
          DO iPinpoint = 0,CocktailDCC(iSourceTerm,iPathway,iRegularDCC)%IntervalSpecs%N
             READ(ScratchFile,*) MyPinpoint,Dum,CocktailDCC(iSourceTerm,iPathway,iRegularDCC)%Values(iPinpoint)
-            IF (DebugLevel.GT.0) WRITE(*,'(A,I3,A,I3)') 'Pinpoint=',iPinpoint,', MyPinpoint=',MyPinpoint
+            IF (DebugLevel > 0) WRITE(*,'(A,I3,A,I3)') 'Pinpoint=',iPinpoint,', MyPinpoint=',MyPinpoint
          ENDDO ! loop over pinpoints
          !
          ! Close file
@@ -425,7 +425,7 @@ CONTAINS
 
       IF (.NOT.LibCocktailDCCInitialized) CALL InitLibCocktailDCC()
 
-      IF ((iSourceTerm.LT.1).OR.(iSourceTerm.GT.NSourceTerms)) THEN
+      IF ((iSourceTerm < 1).OR.(iSourceTerm > NSourceTerms)) THEN
          WRITE(*,'(A,I0,A)') 'Invalid source term index: ',iSourceTerm,'! Exiting!!'
          CALL EXIT()
       ENDIF !
@@ -496,7 +496,7 @@ CONTAINS
       DO iPinpoint = 0,PinpointN
          READ(ScratchFile,*) MyPinpoint,Dum,&
          & (LookupCocktail(iSourceTerm,iNuclide)%Values(iPinpoint),iNuclide=1,NContributingNuclides(iSourceTerm))
-         IF (DebugLevel.GT.0) WRITE(*,'(A,I3,A,I3)') 'Pinpoint=',iPinpoint,', MyPinpoint=',MyPinpoint
+         IF (DebugLevel > 0) WRITE(*,'(A,I3,A,I3)') 'Pinpoint=',iPinpoint,', MyPinpoint=',MyPinpoint
       ENDDO ! loop over pinpoints
       !
       ! Close file
@@ -525,7 +525,7 @@ CONTAINS
 
       IF (.NOT.LibCocktailDCCInitialized) CALL InitLibCocktailDCC()
 
-      IF ((iSourceTerm.LT.1).OR.(iSourceTerm.GT.NSourceTerms)) THEN
+      IF ((iSourceTerm < 1).OR.(iSourceTerm > NSourceTerms)) THEN
          WRITE(*,'(A,I0,A)') 'Invalid source term index: ',iSourceTerm,'! Exiting!!'
          CALL EXIT()
       ENDIF
@@ -540,14 +540,14 @@ CONTAINS
       TheNuclide = 0
       iNuclide = 0
       Ready = .FALSE.
-      DO WHILE((.NOT.Ready).AND.(iNuclide.LT.MaxNuclides))
+      DO WHILE((.NOT.Ready).AND.(iNuclide < MaxNuclides))
          iNuclide = iNuclide + 1
-         IF (TRIM(UpName).EQ.TRIM(MyNuclideName(iSourceTerm,iNuclide))) THEN
+         IF (TRIM(UpName) == TRIM(MyNuclideName(iSourceTerm,iNuclide))) THEN
             TheNuclide = iNuclide
          ENDIF
       ENDDO ! loop over nuclides
 
-      IF (TheNuclide.EQ.0) THEN
+      IF (TheNuclide == 0) THEN
          Dum = 0._Float
       ELSE
          Dum = ExponentialIntervalInterpolate(x,LookupCocktail(iSourceTerm,TheNuclide),InterpolationWay,Error)

@@ -92,7 +92,7 @@ CONTAINS
    FUNCTION CharacterIsADigit(Ch)
       CHARACTER(1), INTENT(IN) :: Ch
       LOGICAL :: CharacterIsADigit
-      CharacterIsADigit = (INDEX('0123456789',Ch).NE.0)
+      CharacterIsADigit = (INDEX('0123456789',Ch) /= 0)
    END FUNCTION CharacterIsADigit
 
 
@@ -108,7 +108,7 @@ CONTAINS
       CHARACTER(DefaultLength) :: PathAndName
 
       TheEnd = LEN_TRIM(PathName%Path)
-      IF (PathName%Path(TheEnd:TheEnd).EQ.'/') THEN
+      IF (PathName%Path(TheEnd:TheEnd) == '/') THEN
          PathAndName = TRIM(PathName%Path)//TRIM(PathName%Name)
       ELSE
          PathAndName = TRIM(PathName%Path)//'/'//TRIM(PathName%Name)
@@ -134,7 +134,7 @@ CONTAINS
       !
       ! Try the command
       !
-      IF (TheSystem.EQ.System_Windows) THEN
+      IF (TheSystem == System_Windows) THEN
          IF (.NOT.DoSilent) WRITE(*,10) TRIM(ReversedCommand)
          Error = SYSTEM(TRIM(ReversedCommand))
       ELSE
@@ -145,13 +145,13 @@ CONTAINS
       !
       ! If failure, try with reversed slashes
       !
-      IF (Error.NE.0) THEN
+      IF (Error /= 0) THEN
          IF (.NOT.DoSilent) WRITE(*,'(A)') 'Failure in shell-command. Retrying with path c:/msys/1.0/bin/ prepended...'
 
-         IF (TheSystem.EQ.System_Windows) THEN
+         IF (TheSystem == System_Windows) THEN
             IF (.NOT.DoSilent) WRITE(*,10) TRIM(Commando)
             Error = SYSTEM(TRIM(Commando))
-            IF (Error.EQ.0) THEN
+            IF (Error == 0) THEN
                TheSystem = System_Linux ! Switch system mode to Linux
                WRITE(*,*)
                WRITE(*,'(A)') '--> System reacts better to original way of calling: changing to Linux-mode!'
@@ -160,7 +160,7 @@ CONTAINS
          ELSE
             IF (.NOT.DoSilent) WRITE(*,10) TRIM(ReversedCommand)
             Error = SYSTEM(TRIM(ReversedCommand))
-            IF (Error.EQ.0) THEN
+            IF (Error == 0) THEN
                TheSystem = System_Windows ! Switch system mode to Windows
                WRITE(*,*)
                WRITE(*,'(A)') '--> System reacts better to MSYS-specific calling; changing to Windows-mode!'
@@ -168,7 +168,7 @@ CONTAINS
             ENDIF
          ENDIF
 
-         IF (Error.NE.0) THEN
+         IF (Error /= 0) THEN
             IF (.NOT.DoSilent) WRITE(*,*) '... sorry, second attempt of shell-command failed either!'
             IF (.NOT.DoSilent) WRITE(*,20) Error
             20    FORMAT('Error ',I7,' in execution of command')
@@ -176,7 +176,7 @@ CONTAINS
          ENDIF
       ENDIF
 
-      IF ((Error.EQ.0).AND.(.NOT.DoSilent)) WRITE(*,30)
+      IF ((Error == 0).AND.(.NOT.DoSilent)) WRITE(*,30)
       30  FORMAT('Shell-command succeeded!')
 
    END SUBROUTINE RunShellCommand
@@ -216,7 +216,7 @@ CONTAINS
       INTEGER :: MyCharacterPos
 
       MyCharacterPos = INDEX(MyString,MyCharacter)
-      DO WHILE ((MyCharacterPos.GT.0).AND.(MyCharacterPos.LE.LEN_TRIM(MyString)))
+      DO WHILE ((MyCharacterPos > 0).AND.(MyCharacterPos <= LEN_TRIM(MyString)))
          MyString = MyString(1:(MyCharacterPos-1))//MyString((MyCharacterPos+1):LEN_TRIM(MyString))
          MyCharacterPos = INDEX(MyString,MyCharacter)
       ENDDO
@@ -240,21 +240,21 @@ CONTAINS
       !
       ! Remove leading spaces or tabs
       !
-      IF (DebugLevel.GT.0) WRITE(*,10) '"'//TRIM(StringIn)//'"'
+      IF (DebugLevel > 0) WRITE(*,10) '"'//TRIM(StringIn)//'"'
       10 FORMAT('Cut : StringIn = ',A)
       DumStr1 = StringIn
-      DO WHILE (((DumStr1(1:1).EQ.CHAR(32)).OR.(DumStr1(1:1).EQ.CHAR(9))).AND.(LEN_TRIM(DumStr1).GT.1))
+      DO WHILE (((DumStr1(1:1) == CHAR(32)).OR.(DumStr1(1:1) == CHAR(9))).AND.(LEN_TRIM(DumStr1) > 1))
          DumStr1 = DumStr1(2:LEN_TRIM(DumStr1))
       ENDDO
-      IF (DebugLevel.GT.0) WRITE(*,11) TRIM(DumStr1)
+      IF (DebugLevel > 0) WRITE(*,11) TRIM(DumStr1)
       11 FORMAT(' Cut : DumStr1 zonder spaties aan het begin = "',A,'"')
       !
       ! Remove trailing tabs
       !
-      DO WHILE ((DumStr1(LEN_TRIM(DumStr1):LEN_TRIM(DumStr1)).EQ.CHAR(9)).AND.(LEN_TRIM(DumStr1).GT.1))
+      DO WHILE ((DumStr1(LEN_TRIM(DumStr1):LEN_TRIM(DumStr1)) == CHAR(9)).AND.(LEN_TRIM(DumStr1) > 1))
          DumStr1 = DumStr1(1:(LEN_TRIM(DumStr1)-1))
       ENDDO
-      IF (DebugLevel.GT.0) WRITE(*,12) TRIM(DumStr1)
+      IF (DebugLevel > 0) WRITE(*,12) TRIM(DumStr1)
       12 FORMAT(' Cut : DumStr1 zonder spaties aan het eind = "',A,'"')
       !
       ! Find a separator: space or tab
@@ -262,17 +262,17 @@ CONTAINS
       SpacePosition = INDEX(DumStr1,CHAR(32))
       TabPosition = INDEX(DumStr1,CHAR(9))
       CutPosition = SpacePosition
-      IF ((TabPosition.GT.0).AND.(TabPosition.LT.SpacePosition)) CutPosition = TabPosition
+      IF ((TabPosition > 0).AND.(TabPosition < SpacePosition)) CutPosition = TabPosition
 
-      NoSecondString = ((CutPosition.EQ.0).OR.(CutPosition.EQ.(LEN_TRIM(DumStr1)+1)))
+      NoSecondString = ((CutPosition == 0).OR.(CutPosition == (LEN_TRIM(DumStr1)+1)))
 
-      IF (DebugLevel.GT.0) WRITE(*,20) TRIM(DumStr1),SpacePosition,TabPosition,CutPosition
+      IF (DebugLevel > 0) WRITE(*,20) TRIM(DumStr1),SpacePosition,TabPosition,CutPosition
       20 FORMAT(' "',A,'" heeft spatie op ',I3,' en tab op ',I3,' dus we gaan knippen op ',I3)
       IF (.NOT.NoSecondString) THEN
          DumStr2 = DumStr1((CutPosition+1):LEN_TRIM(DumStr1))
          DumStr1 = DumStr1(1:(CutPosition-1))
       ENDIF
-      IF (DebugLevel.GT.0) THEN
+      IF (DebugLevel > 0) THEN
          IF (NoSecondString) THEN
             WRITE(*,31) TRIM(DumStr1)
             31 FORMAT(' Aan het eind: "',A,'"  en verder niets!')
@@ -283,7 +283,7 @@ CONTAINS
       ENDIF
       String1 = TRIM(DumStr1)
       IF (.NOT.NoSecondString) String2 = TRIM(DumStr2)
-      IF (DebugLevel.GT.0) WRITE(*,*)
+      IF (DebugLevel > 0) WRITE(*,*)
    END SUBROUTINE CutStringInTwo
 
 
@@ -294,7 +294,7 @@ CONTAINS
       !
       CHARACTER, INTENT(IN) :: Ch
       CHARACTER :: DumChar
-      IF ((ICHAR(Ch).GE.97).AND.(ICHAR(Ch).LE.122)) THEN
+      IF ((ICHAR(Ch) >= 97).AND.(ICHAR(Ch) <= 122)) THEN
          DumChar = CHAR(ICHAR(Ch)-32)
       ELSE
          DumChar = Ch
@@ -310,7 +310,7 @@ CONTAINS
       !
       CHARACTER, INTENT(IN) :: Ch
       CHARACTER :: DumChar
-      IF ((ICHAR(Ch).GE.65).AND.(ICHAR(Ch).LE.90)) THEN
+      IF ((ICHAR(Ch) >= 65).AND.(ICHAR(Ch) <= 90)) THEN
          DumChar = CHAR(ICHAR(Ch)+32)
       ELSE
          DumChar = Ch

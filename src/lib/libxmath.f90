@@ -289,7 +289,7 @@ CONTAINS
       NNonZero = 0
       DO i = 1,N
          DO j = 1,N
-            IF (A(j,i).NE.0._Float) NNonZero = NNonZero + 1
+            IF (A(j,i) /= 0._Float) NNonZero = NNonZero + 1
          ENDDO
       ENDDO
 
@@ -305,7 +305,7 @@ CONTAINS
 
       DO i = 1,N
          DO j = 1,N
-            IF (A(j,i).NE.0._Float) THEN
+            IF (A(j,i) /= 0._Float) THEN
             iElement = iElement + 1
             ASparse%Element(iElement)%i = i
             ASparse%Element(iElement)%j = j
@@ -336,12 +336,12 @@ CONTAINS
       !
       A = 0._Float
 
-      IF (DebugLevel.GT.0) THEN
+      IF (DebugLevel > 0) THEN
          WRITE(*,'(A,L1,1X,I0,1X,I0)') 'SparseMatrix2Matrix: ',ALLOCATED(ASparse%Element),ASparse%NMax,ASparse%N
       ENDIF
 
       DO iElement = 1,ASparse%N
-         IF (DebugLevel.GT.0) THEN
+         IF (DebugLevel > 0) THEN
             WRITE(*,'(A,I4,1X,I4,1X,EN20.10)') 'i,j,x = ',ASparse%Element(iElement)
          ENDIF
          A(ASparse%Element(iElement)%j,ASparse%Element(iElement)%i) = ASparse%Element(iElement)%x
@@ -412,12 +412,12 @@ CONTAINS
       !
       LA = .FALSE.
 
-      IF (DebugLevel.GT.0) THEN
+      IF (DebugLevel > 0) THEN
          WRITE(*,'(A,L1,1X,I0,1X,I0)') 'SparseLMatrix2LMatrix: ',ALLOCATED(LASparse%Element),LASparse%NMax,LASparse%N
       ENDIF
 
       DO iElement = 1,LASparse%N
-         IF (DebugLevel.GT.0) THEN
+         IF (DebugLevel > 0) THEN
             WRITE(*,'(A,I4,1X,I4)') 'i,j = ',LASparse%Element(iElement)%i,LASparse%Element(iElement)%j
          ENDIF
          LA(LASparse%Element(iElement)%j,LASparse%Element(iElement)%i) = .TRUE.

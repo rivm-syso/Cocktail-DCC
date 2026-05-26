@@ -70,11 +70,11 @@ CONTAINS
          AvailableDelay(iStartingTime) = DelayGrowthFactor*AvailableDelay(iStartingTime-1)
       ENDDO ! loop over starting times
 
-      IF (DebugLevel.GT.0) WRITE(*,*)
-      IF (DebugLevel.GT.0) WRITE(*,'(A)') 'Considering the following exponentially distributed delays:'
+      IF (DebugLevel > 0) WRITE(*,*)
+      IF (DebugLevel > 0) WRITE(*,'(A)') 'Considering the following exponentially distributed delays:'
       DO iStartingTime = 0,NStartingTimes
          WRITE(StartingTimeName(iStartingTime),'(E11.5)') AvailableDelay(iStartingTime)
-         IF (DebugLevel.GT.0) WRITE(*,'(A)') StartingTimeName(iStartingTime)//'second'
+         IF (DebugLevel > 0) WRITE(*,'(A)') StartingTimeName(iStartingTime)//'second'
       ENDDO ! loop over starting times
 
       CALL GetTransitionMatrices(UseICRP)
@@ -100,7 +100,7 @@ CONTAINS
       ! Extract name of the source term from filename
       !
       TheIndex = INDEX(FName,'.RIVMSource')
-      IF (TheIndex.EQ.0) THEN
+      IF (TheIndex == 0) THEN
          WRITE(*,'(A)') 'Sourcterm "'//TRIM(FName)//'" is not of type .RIVMSource! Exiting!!'
          CALL EXIT()
       ENDIF
@@ -109,11 +109,11 @@ CONTAINS
       !
       MyCocktail%MyDirectory = FName
       iCharacter = LEN_TRIM(MyCocktail%MyDirectory)
-      IsNotABackSlash = .NOT.(MyCocktail%MyDirectory(iCharacter:iCharacter).EQ.'/')
-      DO WHILE (IsNotABackSlash.AND.(iCharacter.GT.0))
+      IsNotABackSlash = .NOT.(MyCocktail%MyDirectory(iCharacter:iCharacter) == '/')
+      DO WHILE (IsNotABackSlash.AND.(iCharacter > 0))
          MyCocktail%MyDirectory(iCharacter:iCharacter) = ' '
          iCharacter = iCharacter - 1
-         IF (iCharacter.GT.0) IsNotABackSlash = .NOT.(MyCocktail%MyDirectory(iCharacter:iCharacter).EQ.'/')
+         IF (iCharacter > 0) IsNotABackSlash = .NOT.(MyCocktail%MyDirectory(iCharacter:iCharacter) == '/')
       ENDDO
       !
       ! Extract name of sourceterm
@@ -133,15 +133,15 @@ CONTAINS
       Ready = .FALSE.
       DO WHILE (.NOT.Ready)
          READ(ScratchFile,'(A)') ALine
-         IF (DebugLevel.GT.1) WRITE(*,'(A)') 'ALine = "'//TRIM(ALine)//'"'
+         IF (DebugLevel > 1) WRITE(*,'(A)') 'ALine = "'//TRIM(ALine)//'"'
 
          TheIndex = INDEX(ALine,'<scalingfactor>')
-         IF (TheIndex.GT.0) THEN
+         IF (TheIndex > 0) THEN
             READ(ALine((TheIndex+15):LEN_TRIM(ALine)),*) ScalingFactor
-            IF (DebugLevel.GT.1) WRITE(*,'(A,EN15.5)') 'Found scaling factor ',ScalingFactor
+            IF (DebugLevel > 1) WRITE(*,'(A,EN15.5)') 'Found scaling factor ',ScalingFactor
          ENDIF
 
-         Ready = (ALine(1:1).NE.'!')
+         Ready = (ALine(1:1) /= '!')
       ENDDO
       !
       ! Read the nuclide vector and take into account the optional scaling factor
@@ -151,9 +151,9 @@ CONTAINS
       Ready = .FALSE.
 
       DO WHILE (.NOT.Ready)
-         IF (DebugLevel.GT.1) WRITE(*,'(A)') 'ALine = "'//TRIM(ALine)//'"'
+         IF (DebugLevel > 1) WRITE(*,'(A)') 'ALine = "'//TRIM(ALine)//'"'
 
-         IF (ALine(1:1).NE.'!') THEN
+         IF (ALine(1:1) /= '!') THEN
             READ(ALine,*) MyName,MyActivity
 
             CALL MassNuc2NucMass(MyName)
@@ -162,12 +162,12 @@ CONTAINS
 
             iNuclide = GetNuclideNumber(MyName)
 
-            IF (iNuclide.EQ.0) THEN
+            IF (iNuclide == 0) THEN
                WRITE(*,'(A)') 'Could not recognize nuclide "'//TRIM(MyName)//'"! Exiting!'
                CALL EXIT()
             ENDIF
             MyCocktail%x(iNuclide) = ScalingFactor * MyActivity ! [Bq/10kt]
-            IF (DebugLevel.GT.0) THEN
+            IF (DebugLevel > 0) THEN
                WRITE(*,'(A,A,I4,A,EN20.10,A)') MyName,' = nuclide ',iNuclide,&
                & ' and has activity ',MyCocktail%x(iNuclide),' Bq/10kt'
             ENDIF
@@ -175,7 +175,7 @@ CONTAINS
 
          READ(ScratchFile,'(A)',END=10) ALine
 
-         Ready = (LEN_TRIM(ALine).EQ.0)
+         Ready = (LEN_TRIM(ALine) == 0)
       ENDDO ! loop until ready
 
       10 CONTINUE
@@ -209,7 +209,7 @@ CONTAINS
             FName = 'SparseMatrix_ENDF_'//TRIM(PinPointName)//'.dat'
          ENDIF
 
-         IF (DebugLevel.GT.0) WRITE(*,'(A)') 'Reading '//TRIM(FName)
+         IF (DebugLevel > 0) WRITE(*,'(A)') 'Reading '//TRIM(FName)
          CALL FLUSH(6)
          OPEN(ScratchFile, FILE=TransitionMatrixPath() // '/' // TRIM(FName), ACTION='READ')
 
@@ -228,7 +228,7 @@ CONTAINS
          ENDDO
          10  CONTINUE
 
-         IF (DebugLevel.GT.0) WRITE(*,'(A,I0,A)') TRIM(FName)//' has ',TransitionMatrix(iStartingTime)%N,' elements'
+         IF (DebugLevel > 0) WRITE(*,'(A,I0,A)') TRIM(FName)//' has ',TransitionMatrix(iStartingTime)%N,' elements'
 
          REWIND(ScratchFile)
          !
@@ -272,7 +272,7 @@ CONTAINS
       OPEN(ScratchFile,FILE=TRIM(Cocktail%MyDirectory)//TRIM(FName),ACTION='WRITE')
       WRITE(ScratchFile,'(A)') 'Nuclide    Activity[Bq]'
       DO iNuclide = 1,NNuclides
-         IF (Cocktail%x(iNuclide).GT.NegligibleActivity) THEN
+         IF (Cocktail%x(iNuclide) > NegligibleActivity) THEN
             WRITE(ScratchFile,'(A,1X,EN11.2)') NuclideSpecs(iNuclide)%NuclideName,Cocktail%x(iNuclide)
          ENDIF
       ENDDO
@@ -296,9 +296,9 @@ CONTAINS
 
       INTEGER, PARAMETER :: DebugLevel = 0
 
-      IF (DebugLevel.GT.0) THEN
+      IF (DebugLevel > 0) THEN
          DO iNuclide = 1,NNuclides
-            IF (InCocktail%x(iNuclide).GT.0._Float) THEN
+            IF (InCocktail%x(iNuclide) > 0._Float) THEN
                WRITE(*,'(A,A,A,I4,A,EN20.10,A)') 'MatureCocktail: ',&
             & NuclideSpecs(iNuclide)%NuclideName,' = nuclide ',iNuclide,&
                &   ' and has activity ',InCocktail%x(iNuclide),' Bq'
@@ -314,9 +314,9 @@ CONTAINS
          iMother = TheMatrix%Element(iElement)%i
          iDaughter = TheMatrix%Element(iElement)%j
          x = TheMatrix%Element(iElement)%x
-         IF (WithProgeny.OR.(iMother.EQ.iDaughter)) THEN
+         IF (WithProgeny.OR.(iMother == iDaughter)) THEN
 
-            IF ((DebugLevel.GT.0).AND.(InCocktail%x(iMother).GT.0._Float)) THEN
+            IF ((DebugLevel > 0).AND.(InCocktail%x(iMother) > 0._Float)) THEN
                WRITE(*,'(A,A,A,A,A,EN15.5,A,EN15.5,A,EN15.5)') 'Maturization of ',&
                & NuclideSpecs(iDaughter)%NuclideName,&
                & ' because of initial presence of ',&
@@ -328,7 +328,7 @@ CONTAINS
             ENDIF ! debug
 
             OutCocktail%x(iDaughter) = OutCocktail%x(iDaughter) + x*InCocktail%x(iMother)
-            IF (OutCocktail%x(iDaughter).LT.1.E-95_Float) OutCocktail%x(iDaughter) = 0._Float ! to prevent exponents with 3 digits, which print ugly...
+            IF (OutCocktail%x(iDaughter) < 1.E-95_Float) OutCocktail%x(iDaughter) = 0._Float ! to prevent exponents with 3 digits, which print ugly...
          ENDIF
       ENDDO ! loop over elements
    END SUBROUTINE MatureCocktail
@@ -376,16 +376,16 @@ CONTAINS
 
       DO iPinpoint = 0,NStartingTimes
 
-         IF (iPinpoint.EQ.0) THEN
+         IF (iPinpoint == 0) THEN
             ! According to pinpoint 0, there is only the head of chain, which is any fission product available at t=0.
             DO iNuclide = 1,NNuclides
 
-               MotherNatureOkay =      (MotherNature.EQ.AnyNature)&
-               &                  .OR.((MotherNature.EQ.NobleNature   ).AND.(NuclideSpecs(iNuclide)%NuclideGroup.EQ.1)) &
-               &                  .OR.((MotherNature.EQ.NonNobleNature).AND.(NuclideSpecs(iNuclide)%NuclideGroup.NE.1))
-               DaughterNatureOkay =    (DaughterNature.EQ.AnyNature)&
-               &                  .OR.((DaughterNature.EQ.NobleNature   ).AND.(NuclideSpecs(iNuclide)%NuclideGroup.EQ.1)) &
-               &                  .OR.((DaughterNature.EQ.NonNobleNature).AND.(NuclideSpecs(iNuclide)%NuclideGroup.NE.1))
+               MotherNatureOkay =      (MotherNature == AnyNature)&
+               &                  .OR.((MotherNature == NobleNature   ).AND.(NuclideSpecs(iNuclide)%NuclideGroup == 1)) &
+               &                  .OR.((MotherNature == NonNobleNature).AND.(NuclideSpecs(iNuclide)%NuclideGroup /= 1))
+               DaughterNatureOkay =    (DaughterNature == AnyNature)&
+               &                  .OR.((DaughterNature == NobleNature   ).AND.(NuclideSpecs(iNuclide)%NuclideGroup == 1)) &
+               &                  .OR.((DaughterNature == NonNobleNature).AND.(NuclideSpecs(iNuclide)%NuclideGroup /= 1))
 
                NaturesOkay = MotherNatureOkay .AND. DaughterNatureOkay
 
@@ -427,18 +427,18 @@ CONTAINS
                iMother = TransitionMatrix(iPinpoint)%Element(iElement)%i
                iDaughter = TransitionMatrix(iPinpoint)%Element(iElement)%j
 
-               MotherNatureOkay =      (MotherNature.EQ.AnyNature)&
-               &                  .OR.((MotherNature.EQ.NobleNature   ).AND.(NuclideSpecs(iMother)%NuclideGroup.EQ.1)) &
-               &                  .OR.((MotherNature.EQ.NonNobleNature).AND.(NuclideSpecs(iMother)%NuclideGroup.NE.1))
-               DaughterNatureOkay =    (DaughterNature.EQ.AnyNature)&
-               &                  .OR.((DaughterNature.EQ.NobleNature   ).AND.(NuclideSpecs(iDaughter)%NuclideGroup.EQ.1)) &
-               &                  .OR.((DaughterNature.EQ.NonNobleNature).AND.(NuclideSpecs(iDaughter)%NuclideGroup.NE.1))
+               MotherNatureOkay =      (MotherNature == AnyNature)&
+               &                  .OR.((MotherNature == NobleNature   ).AND.(NuclideSpecs(iMother)%NuclideGroup == 1)) &
+               &                  .OR.((MotherNature == NonNobleNature).AND.(NuclideSpecs(iMother)%NuclideGroup /= 1))
+               DaughterNatureOkay =    (DaughterNature == AnyNature)&
+               &                  .OR.((DaughterNature == NobleNature   ).AND.(NuclideSpecs(iDaughter)%NuclideGroup == 1)) &
+               &                  .OR.((DaughterNature == NonNobleNature).AND.(NuclideSpecs(iDaughter)%NuclideGroup /= 1))
 
                NaturesOkay = MotherNatureOkay .AND. DaughterNatureOkay
 
                IF (NaturesOkay) THEN
 
-                  IF (WithDaughters.OR.(iMother.EQ.iDaughter)) THEN
+                  IF (WithDaughters.OR.(iMother == iDaughter)) THEN
                      x = TransitionMatrix(iPinpoint)%Element(iElement)%x
 
                      DaughterActivity = x * MyStartCocktail%x(iMother)
@@ -476,13 +476,13 @@ CONTAINS
       !
       DO iPinpoint = 0,NStartingTimes
          DO iNuclide = 1,NNuclides
-            IF (PinAirDoseRate(iPinpoint,iNuclide).LE.0.1E-99_Float) &
+            IF (PinAirDoseRate(iPinpoint,iNuclide) <= 0.1E-99_Float) &
             & PinAirDoseRate(iPinpoint,iNuclide) = 0._Float
-            IF (PinGroundDoseRate(iPinpoint,iNuclide).LE.0.1E-99_Float) &
+            IF (PinGroundDoseRate(iPinpoint,iNuclide) <= 0.1E-99_Float) &
             & PinGroundDoseRate(iPinpoint,iNuclide) = 0._Float
-            IF (PinInhalationDoseRate(iPinpoint,iNuclide).LE.0.1E-99_Float) &
+            IF (PinInhalationDoseRate(iPinpoint,iNuclide) <= 0.1E-99_Float) &
             & PinInhalationDoseRate(iPinpoint,iNuclide) = 0._Float
-            IF (PinThyroidInhalationDoseRate(iPinpoint,iNuclide).LE.0.1E-99_Float) &
+            IF (PinThyroidInhalationDoseRate(iPinpoint,iNuclide) <= 0.1E-99_Float) &
             & PinThyroidInhalationDoseRate(iPinpoint,iNuclide) = 0._Float
          ENDDO ! loop over nuclides
       ENDDO ! loop over all pinpoints
@@ -492,24 +492,24 @@ CONTAINS
       !
       NParticipatingNuclides = 0
       DO iNuclide = 1,NNuclides
-         IF (SumAirDoseRate(iNuclide).GT.0._Float) THEN
+         IF (SumAirDoseRate(iNuclide) > 0._Float) THEN
             NParticipatingNuclides = NParticipatingNuclides + 1
             ParticipatingNuclide(NParticipatingNuclides) = iNuclide
-            IF (DebugLevel.GT.0) THEN
+            IF (DebugLevel > 0) THEN
                NProgeny = 0
                DO jNuclide = 1,NNuclides
-                  IF ((MotherDaughterMatrix(jNuclide,iNuclide).NE.0._Float).AND.(jNuclide.NE.iNuclide)) THEN
+                  IF ((MotherDaughterMatrix(jNuclide,iNuclide) /= 0._Float).AND.(jNuclide /= iNuclide)) THEN
                      NProgeny = NProgeny + 1
                   ENDIF ! found progeny
                ENDDO ! loop over possible progeny of head of chain
-               IF (NProgeny.EQ.0) THEN
+               IF (NProgeny == 0) THEN
                   WRITE(*,'(I4,1X,A7,7X,EN15.5,A)') NParticipatingNuclides,NuclideSpecs(iNuclide)%NuclideName,&
                   & MyStartCocktail%x(iNuclide),' [Bq]'
                ELSE
                   WRITE(*,'(I4,1X,A7,A,EN15.5,A)') NParticipatingNuclides,NuclideSpecs(iNuclide)%NuclideName,' chain:',&
                   &  MyStartCocktail%x(iNuclide),' [Bq]'
                   DO jNuclide = 1,NNuclides
-                     IF ((MotherDaughterMatrix(jNuclide,iNuclide).NE.0._Float).AND.(jNuclide.NE.iNuclide)) THEN
+                     IF ((MotherDaughterMatrix(jNuclide,iNuclide) /= 0._Float).AND.(jNuclide /= iNuclide)) THEN
                         WRITE(*,'(11X,A,1X,A7)') '+ progeny',NuclideSpecs(jNuclide)%NuclideName
                      ENDIF ! found progeny
                   ENDDO ! loop over possible progeny of head of chain
@@ -520,19 +520,19 @@ CONTAINS
       !
       ! option to Write pinpoint doses to file
       !
-      IF (DebugLevel.GT.0) THEN
+      IF (DebugLevel > 0) THEN
 
-         IF (MotherNature.EQ.AnyNature) THEN
+         IF (MotherNature == AnyNature) THEN
             NaturesName = ' '
-         ELSE IF (MotherNature.EQ.NobleNature) THEN
+         ELSE IF (MotherNature == NobleNature) THEN
             NaturesName = '_MNoble'
          ELSE
             NaturesName = '_MNonNoble'
          ENDIF
 
-         IF (DaughterNature.EQ.AnyNature) THEN
+         IF (DaughterNature == AnyNature) THEN
             NaturesName = TRIM(NaturesName)//' '
-         ELSE IF (DaughterNature.EQ.NobleNature) THEN
+         ELSE IF (DaughterNature == NobleNature) THEN
             NaturesName = TRIM(NaturesName)//'_DNoble'
          ELSE
             NaturesName = TRIM(NaturesName)//'_DNonNoble'
@@ -641,7 +641,7 @@ CONTAINS
       !
       NParticipatingNuclides = 0
       DO iNuclide = 1,NNuclides
-         IF (ANY(MyCocktail%x(iNuclide).GT.0._Float)) THEN
+         IF (ANY(MyCocktail%x(iNuclide) > 0._Float)) THEN
             NParticipatingNuclides = NParticipatingNuclides + 1
             ParticipatingNuclide(NParticipatingNuclides) = iNuclide
          ENDIF ! nuclide is participating
