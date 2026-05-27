@@ -12,9 +12,16 @@ module LibPinPoint
    !
    ! ____________________________________________________
    !
-   use LibDCC, only: DCCEffectiveDose
-   use LibENDF, only: MaxNuclides, NuclideSpecs
-   use LibUtil, only: DefaultLength
+   use LibDCC, only: DCCEffectiveDose, DCCGround, DCCInhalation, DCCThyroidInhalation, &
+      InitLibDCC, &
+      InAir, Age_Adult, Inhalation_public_adult, &
+      ReadTissueDCCs, ReadDCCEffectiveDose, ReadGroundDCCs, ReadInhalationDCCs, ReadThyroidInhalationDCCs
+   use LibENDF, only: MaxNuclides, NNuclides, NuclideSpecs, GetNuclideNumber, &
+      MotherDaughterMatrix, &
+      MassNuc2NucMass, EnsureHyphen, &
+      TransitionMatrixPath
+   use LibUtil, only: DefaultLength, ScratchFile, &
+      AllUpCase
    use LibXMath, only: Float, SparseMatrix
 
    implicit none

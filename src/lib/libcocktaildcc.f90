@@ -128,10 +128,13 @@ module LibCocktailDCC
    !
    ! An example of how to use libcocktaildcc can be found in test program test_cocktail_dcc.f90.
    !
-   use libxmath
-   use libutil
-   use libinterval
-   use libendf
+   use LibENDF, only: MaxNuclides, &
+      TransitionMatrixPath, MassNuc2NucMass
+   use LibInterval, only: ExponentialIntervalType, ExponentialIntervalInterpolate
+   use LibUtil, only: DefaultLength, ScratchFile, ScrotchFile,&
+      FileExists, &
+      AllUpCase, RemoveCharacter
+   use LibXMath, only: Float
 
    implicit none
 
