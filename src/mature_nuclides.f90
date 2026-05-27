@@ -9,7 +9,7 @@ program MatureNuclides
    implicit none
 
    type(CocktailType) :: StartCocktail,OutCocktail,CocktailBefore,CocktailAfter
-   character(DefaultLength) :: FName,TheDirectory,TheFile,TimeStampString,TimeUnitString,ProgenyString,&
+   character(DefaultLength) :: FName,TimeStampString,TimeUnitString,ProgenyString,&
    & DatasetString
    real(Float), dimension(0:NStartingTimes,MaxNuclides) :: MyActivity,MyRelevantActivity
    integer :: NArguements,iLocX,iDelay,iNuclide,NRelevantNuclides,jNuclide,iMother,iDaughter,iPinpoint,iElement
