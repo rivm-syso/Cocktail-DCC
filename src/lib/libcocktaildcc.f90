@@ -178,7 +178,6 @@ contains
       !
       use LibENDF, only: RIVMSourcesPath
 
-      logical, parameter :: CrashOnError = .FALSE.,DoSilent = .FALSE.
       character(DefaultLength) :: ALine,SourceFileName,CheckLookupFileName,Commando,FName,UtilityName
       integer :: TheIndex,Error
 
@@ -449,7 +448,7 @@ contains
       character(*), intent(in) :: SourceFileName
       integer, intent(in) :: iSourceTerm
 
-      integer :: iPathway,iPinpoint,MyPinpoint,PinpointN,iNuclide,TheIndex
+      integer :: iPinpoint,MyPinpoint,PinpointN,iNuclide,TheIndex
       character(DefaultLength) :: FName,DumStr
       real(Float) :: Dum,PinpointFirstDelay,PinpointDelayGrowthFactor
 

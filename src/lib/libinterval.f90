@@ -46,8 +46,8 @@ contains
       logical, intent(out) :: Error
       real(Float) :: ExponentialIntervalInterpolate
 
-      real(Float) :: Dum,LocX,CellX,ThePower,XLeft,XRight,YLeft,YRight,dx
-      integer :: i,NX,iLocX
+      real(Float) :: Dum,LocX,CellX,ThePower,XLeft,XRight,YLeft,YRight
+      integer :: NX,iLocX
       logical :: BothAreNonZero
 
       integer :: DebugLevel = 0

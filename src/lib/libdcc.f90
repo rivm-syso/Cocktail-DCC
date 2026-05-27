@@ -105,14 +105,6 @@ module LibDCC
 
    integer, parameter :: NDCCAges = 6
 
-   character(7), parameter, dimension(NDCCAges) :: DCCAgeName = &
-      & ['Adult  ',&
-      &   '15yr   ',&
-      &   '10yr   ',&
-      &   '5yr    ',&
-      &   '1yr    ',&
-      &   'Newborn']
-
    integer, parameter :: NGroundDepths = 9
 
    character(45), parameter, dimension(NGroundDepths) :: GroundDepthName = &
@@ -137,16 +129,6 @@ module LibDCC
    integer, parameter :: Inhalation_public_15_year = 7
    integer, parameter :: Inhalation_public_adult   = 8
 
-   character(14), parameter, dimension(NInhalationDCCs) :: InhalationDCCName = &
-      & ['worker 1um    ',&
-      &   'worker 5um    ',&
-      &   'public infant ',&
-      &   'public 1 year ',&
-      &   'public 5 year ',&
-      &   'public 10 year',&
-      &   'public 15 year',&
-      &   'public adult  ']
-
    type DCCVector
       real(Float), dimension(MaxNuclides) :: x
    end type DCCVector
@@ -157,8 +139,6 @@ module LibDCC
    type(DCCVector), dimension(InAir:InWater,NDCCAges) :: DCCEffectiveDose
    type(DCCVector) :: DCCEquivalentDoseInAir,DCCKermaRateInAir,DCCThyroidInhalation
    type(DCCVector), dimension(NInhalationDCCs) :: DCCInhalation
-
-   real(Float) :: BreathingRate = 1.2_Float ! [m3/h] Value can be overruled later
 
    type(NuclideType), dimension(0:MaxNuclides) :: RegularizedNuclideSpecs
    real(Float), dimension(MaxNuclides,MaxNuclides) :: RegularizedMotherDaughterMatrix
@@ -302,8 +282,6 @@ contains
       character(10) :: MyNuclideName
       logical :: IsDashLine
 
-      integer, parameter :: DebugLevel = 0
-
       do iImmersion = InAir,InWater
          FName = 'Nuclide-specific_EffectiveDose.txt'
          if (iImmersion == InAir) then
@@ -371,7 +349,7 @@ contains
       ! Read ground DCCs
       !
       character(DefaultLength) :: FName,ALine
-      integer :: iLine,jNuclide,iGroundDepth,iAge,DumLine, iSkip
+      integer :: iLine,jNuclide,iGroundDepth,iAge,iSkip
       character(10) :: MyNuclideName
       logical :: IsDashLine
 
@@ -436,7 +414,7 @@ contains
       ! Read inhalation DCCs
       !
       character(DefaultLength) :: FName,ALine
-      integer :: iLine,iNuclide,DumLine,iInhalationDCC
+      integer :: iLine,iNuclide,iInhalationDCC
       character(10) :: MyNuclideName
 
       FName = 'CoVeGa_v63_voorRapport_Inhalation.prn'
@@ -478,7 +456,7 @@ contains
       ! Read inhalation DCCs
       !
       character(DefaultLength) :: FName,ALine
-      integer :: iLine,iNuclide,DumLine
+      integer :: iLine,iNuclide
       character(10) :: MyNuclideName
       real(Float) :: Dum
 
