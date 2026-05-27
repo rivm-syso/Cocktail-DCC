@@ -30,8 +30,6 @@ module LibPinPoint
       real(Float), dimension(MaxNuclides) :: x
    end type CocktailType
 
-   character(DefaultLength) :: ProjectPath = './'
-
    real(Float), parameter :: FirstDelay = 60._Float ! seconds
    real(Float), parameter :: DelayGrowthFactor = 1.15_Float
    integer, parameter :: NStartingTimes = 200 ! There is also pinpoint 0, which is 0
@@ -49,9 +47,6 @@ contains
       logical, intent(in) :: UseICRP
 
       integer :: iStartingTime
-      real(Float) :: tMin
-      type(NuclideType), dimension(0:MaxNuclides) :: RegularizedNuclideSpecs
-      real(Float), dimension(MaxNuclides,MaxNuclides) :: RegularizedMotherDaughterMatrix
 
       integer, parameter :: DebugLevel = 0
       !
@@ -91,7 +86,7 @@ contains
 
       character(10) :: MyName
       character(DefaultLength) :: ALine
-      integer :: iLine,iNuclide,TheIndex,iCharacter
+      integer :: iNuclide,TheIndex,iCharacter
       logical :: Ready,IsNotABackSlash
       real(Float) :: MyActivity,ScalingFactor
 

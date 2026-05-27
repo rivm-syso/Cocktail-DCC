@@ -13,18 +13,13 @@ program nuclide_decay
    !
    ! Declarations
    !
-   integer, parameter :: NIntervals = 16
    type(NuclideType), dimension(0:MaxNuclides) :: RegularizedNuclideSpecs
    real(Float), dimension(MaxNuclides,MaxNuclides) :: RegularizedMotherDaughterMatrix,TheDecayMatrix
-   character(6), dimension(4), parameter :: TimeUnitName = (['second','minute','hour  ','day   '])
-   real(Float) :: tMin,Lambda,Yield,Dum,tMax
+   real(Float) :: tMin,Lambda
    integer :: MotherNuclide,DaughterNuclide,iNuclide,jNuclide,NArguements,NFirstMotherOrphans,iStartingTime,MyNuclide
-   integer, dimension(NIntervals) :: tStarType
-   logical :: IsUnbranchedFirstDaughter,HasIAEAEntry,HasRP122Entry,DoPrint,DoFull,JustStarted,&
-   & ENDFBinFileExists
+   logical :: DoPrint,DoFull
    real(dp), dimension(:,:), allocatable :: x,zDelay
-   character(DefaultLength) :: MyTime,ALine,FullSparseString
-   character(DefaultLength), dimension(20) :: RunlogText
+   character(DefaultLength) :: FullSparseString
    !
    ! Specify how the pinpoints i=1,N are made: t_i = t0*G^(i-1)
    ! There is also pinpoint 0, which is 0

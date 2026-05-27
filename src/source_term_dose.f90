@@ -18,8 +18,7 @@ program source_term_dose
    implicit none
 
    type(CocktailType) :: StartCocktail
-   character(DefaultLength) :: FName,TheDirectory,TheFile,WithDaughterString,MotherNatureString,DaughterNatureString
-   real(Float), dimension(0:NStartingTimes,MaxNuclides) :: PinAirDoseRate,PinGroundDoseRate,PinInhalationDoseRate
+   character(DefaultLength) :: FName,WithDaughterString,MotherNatureString,DaughterNatureString
    integer :: NArguements,MotherNature,DaughterNature
    logical :: WithDaughters,UseICRP
 
