@@ -12,10 +12,10 @@ module LibPinPoint
    !
    ! ____________________________________________________
    !
-   use libxmath
-   use libutil
-   use libdcc
-   use libendf
+   use LibDCC, only: DCCEffectiveDose
+   use LibENDF, only: MaxNuclides, NuclideSpecs
+   use LibUtil, only: DefaultLength
+   use LibXMath, only: Float, SparseMatrix
 
    implicit none
 

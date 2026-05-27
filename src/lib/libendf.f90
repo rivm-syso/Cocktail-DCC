@@ -11,8 +11,11 @@ module LibENDF
    ! The Netherlands
 
    use Matrix_Exponential
-   use LibUtil, only: DefaultLength, env_var
-   use LibXMath, only: Float
+   use LibUtil, only: DefaultLength, ScratchFile, &
+      env_var, FileExists, &
+      RemoveCharacter, Capitalize, CharacterIsADigit
+   use LibXMath, only: Float, dp, Inc, &
+      SparseMatrix, SparseLogicalMatrix, Matrix2SparseMatrix, LMatrix2SparseLMatrix, SparseMatrix2Matrix, SparseLMatrix2LMatrix
    implicit none
 
    private

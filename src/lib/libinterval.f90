@@ -5,8 +5,7 @@ module LibInterval
    ! PO Box 1,
    ! NL - 3720 BA Bilthoven
    ! The Netherlands
-   use libxmath
-   use libutil
+   use libxmath, only: Float
 
    implicit none
 
