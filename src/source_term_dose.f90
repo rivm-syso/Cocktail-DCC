@@ -9,11 +9,9 @@ program source_term_dose
 !
 ! AC difference with version AB: only ENDF data are used for decay, ICRP data only used for DCC values.
 !
-   use libxmath
-   use libutil
-   use libendf
-   use libpinpoint
-   use libdcc
+   use LibPinpoint, only: InitLibPinPoint, ReadRIVMSourceTermFile, CocktailType, &
+      GetPinpointCocktails, MakePinpointDoseRates
+   use LibUtil, only: AllLowCase, DefaultLength
 
    implicit none
 
