@@ -171,7 +171,7 @@ module LibENDF
       & 1000,& ! -invalid2-
       & 1000]  ! Unknown
 
-   real(Float), dimension(MaxNuclides,MaxNuclides) :: MotherDaughterMatrix,DecayMatrix
+   real(Float), dimension(MaxNuclides,MaxNuclides) :: MotherDaughterMatrix
 
    type OrphanType
       integer :: Mother,Daughter
@@ -602,8 +602,8 @@ contains
       ! When applicable, add a hyphen as separator between atom name and mass number
       !
       character(*), intent(inout) :: MyName
-      logical :: HasWrongFormat,IsMetastable,Ready,HasHyphen
-      character(10) :: MassName,NukeName
+      logical :: HasWrongFormat,Ready,HasHyphen
+      character(10) :: NukeName
       integer :: iCharacter
 
       HasWrongFormat = CharacterIsADigit(MyName(1:1))
@@ -703,7 +703,7 @@ contains
       ! Prepare some settings before use of this library
       !
       character(DefaultLength) :: FName,ALine
-      logical :: IsMetaStable,ValidLine,IsException
+      logical :: ValidLine,IsException
       integer :: iLine,MyAtomNumber
 
       integer, parameter :: DebugLevel = 0
@@ -865,11 +865,11 @@ contains
 
 
 
-   subroutine CheckRecordType(iNuclide,iLine,ALine)
+   subroutine CheckRecordType(iLine,ALine)
       !
       ! Assess which type of record this is
       !
-      integer, intent(in) :: iNuclide,iLine
+      integer, intent(in) :: iLine
       character(*), intent(in) :: ALine
 
       integer :: MatNumber,MFNumber,MTNumber
@@ -984,9 +984,8 @@ contains
       integer, intent(inout) :: iDecay
 
       character(DefaultLength) :: MyDecayModeLine
-      character(80) :: PartOfLine
-      integer :: TheIndex,iSubString,TheExponent,DaughterAtom,DaughterMass,MyDecayMode,MyMetastableMode,&
-      & MyAtomStep,MyMassStep,iParticle,iCompoundDecay,DaughterNuclide,iDaughter
+      integer :: DaughterAtom,DaughterMass,MyDecayMode,MyMetastableMode,MyAtomStep,MyMassStep,&
+         iParticle,iCompoundDecay,iDaughter
       logical, dimension(6) :: SubStringIsInteger
       integer, dimension(6) :: MyInteger
       real(Float), dimension(6) :: MyFloat
@@ -1221,7 +1220,7 @@ contains
          !
          ! Find the type of the record
          !
-         call CheckRecordType(iNuclide,iLine,ALine)
+         call CheckRecordType(iLine,ALine)
 
          if (iLine > 1) then
             IsNewChapter = (iRecordType(iLine) /= iRecordType(iLine-1))
@@ -1267,8 +1266,8 @@ contains
       character(*), intent(in) :: FName
 
       logical :: Ready,IsSFLine,DoingBullocks,PrevLineIsSF,IsNonVoid,LastFissionProductFound
-      integer :: iLine,SFLine,iMother,iDaughter,iParameter,NExpectedFissionProducts,NFissionProducts,iElement
-      character(DefaultLength) :: ALine,DumString
+      integer :: iLine,SFLine,iMother,NExpectedFissionProducts,NFissionProducts,iElement
+      character(DefaultLength) :: ALine
       character(11), dimension(12) :: MySubString
       logical, dimension(12) :: SubStringIsInteger
       integer, dimension(12) :: MyInteger
@@ -1276,8 +1275,6 @@ contains
       real(Float), dimension(12) :: MyFloat
       real(Float) :: TotalYield
       real(Float), dimension(3) :: MyBranchingRatio
-
-      integer, parameter :: DebugLevel = 0
 
       character(DefaultLength), parameter :: ENDFSpontaneousPath = './build/external/ENDFB_spontaneous/'
 
@@ -1390,7 +1387,7 @@ contains
       type(NuclideType), dimension(0:MaxNuclides), intent(in) :: MyNuclideSpecs
       real(Float), dimension(MaxNuclides,MaxNuclides), intent(out) :: MyMotherDaughterMatrix
       character(*), intent(in) :: OutName
-      integer :: DaughterNuclide,MotherNuclide,NNonZero,HerDaughterNuclide,iDaughter,iGrandDaughter
+      integer :: DaughterNuclide,MotherNuclide,NNonZero,iDaughter
       character(30) :: FormatString
       real(Float) :: Ln2
 
@@ -1537,7 +1534,6 @@ contains
       real(Float) :: tMinSug
       logical :: ENDFBinFileExists,IsDifferenttMin
       type(SparseLogicalMatrix) :: SparseIsRelated,SparseRegularizedIsRelated
-      integer :: MostDaughters,iNuclide
       character(DefaultLength) :: FName
 
       integer, parameter :: DebugLevel = 0
@@ -2243,23 +2239,19 @@ contains
 
 
 
-   subroutine MakeEvolutionMatrix(iNuclide,RegularizedMotherDaughterMatrix,x,NSecondsDelay,zDelay)
+   subroutine MakeEvolutionMatrix(RegularizedMotherDaughterMatrix,x,NSecondsDelay,zDelay)
       !================================================================================================================
       !
       ! Construct exponential of mother/daughter matrix of this family
       !
       !================================================================================================================
-      integer, intent(in) :: iNuclide
       real(Float), intent(in) :: NSecondsDelay
       real(Float), dimension(MaxNuclides,MaxNuclides), intent(in) :: RegularizedMotherDaughterMatrix
       real(dp), dimension(:,:), allocatable, intent(out) :: zDelay
       real(dp), dimension(:,:), allocatable, intent(out) :: x
 
-      integer :: MotherNuclide,DaughterNuclide,ErrorCode,iSecond,iMinute,iHour,iDay,jNuclide
+      integer :: MotherNuclide,DaughterNuclide,ErrorCode
       real(dp), dimension(:,:), allocatable :: yDelay
-      character(DefaultLength) :: MyFormat,FName
-
-      integer, parameter :: DebugLevel = 0
 
       if (ALLOCATED(x)) deallocate(x)
       allocate(x(NuclideFamily%NFamily,NuclideFamily%NFamily))
@@ -2308,8 +2300,8 @@ contains
       integer, intent(out) :: NFirstMotherOrphans
 
       integer :: iOrphan,NAdded,jOrphan,iIteration,iiNuclide,jjNuclide,MotherNuclide,&
-      & GhostNuclide,NAddedRegular,NAddedOrphans
-      logical :: Ready,NotAlreadyAMember,IsMotherOfNewOrphan,HaveCandidateMother,ItsMotherIs_ii
+      & NAddedRegular,NAddedOrphans
+      logical :: Ready,NotAlreadyAMember,ItsMotherIs_ii
       logical, dimension(MaxNuclides) :: TooFastFullyChecked
 
       integer, parameter :: DebugLevel = 0

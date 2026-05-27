@@ -125,8 +125,6 @@ contains
       integer :: Error,SYSTEM !,ThePlace
       logical, intent(in) :: CrashOnError,DoSilent
       character(DefaultLength) :: ReversedCommand
-
-      integer, parameter :: DebugLevel = 0
       !
       ! Make a copy
       !

@@ -179,7 +179,7 @@ program nuclide_decay
 
             TheDecayMatrix = 0._Float
 
-            call MakeEvolutionMatrix(iNuclide,RegularizedMotherDaughterMatrix,x,AvailableDelay(iStartingTime),zDelay)
+            call MakeEvolutionMatrix(RegularizedMotherDaughterMatrix,x,AvailableDelay(iStartingTime),zDelay)
             !
             ! Add decay contribution of this mother to output decay matrix
             !
