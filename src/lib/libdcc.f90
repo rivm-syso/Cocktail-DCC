@@ -11,10 +11,11 @@ module LibDCC
    ! The Netherlands
    ! ____________________________________________________
    !
-   use libxmath
-   use libutil
-   use libendf
-   use LibENDF, only: RIVMSourcesPath, isGas
+   use LibENDF, only: RIVMSourcesPath, isGas, &
+      ReadNProcessENDFNuclideSpecs, ReadNuclideSpecs, NuclideSpecs, GetNuclideNumber, NuclideType, MaxNuclides
+   use LibUtil, only: DefaultLength, ScratchFile, &
+      Male, Female, GenderName
+   use LibXMath, only: Float
    implicit none
 
    private

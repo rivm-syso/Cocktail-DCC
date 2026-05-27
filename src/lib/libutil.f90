@@ -12,7 +12,6 @@ module LibUtil
    ! The Netherlands
    ! ____________________________________________________
    !
-   use libxmath
    implicit none
 
    private

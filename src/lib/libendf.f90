@@ -10,10 +10,9 @@ module LibENDF
    ! NL - 3720 BA Bilthoven
    ! The Netherlands
 
-   use libxmath
-   use libutil
    use Matrix_Exponential
-   use LibUtil, only: env_var
+   use LibUtil, only: DefaultLength, env_var
+   use LibXMath, only: Float
    implicit none
 
    private
