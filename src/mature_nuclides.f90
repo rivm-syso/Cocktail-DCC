@@ -1,10 +1,14 @@
 program MatureNuclides
    ! This utility reads a nuclide vector at t=0 from file and a delay.
    ! It returns the aged cocktail.
-   use libxmath
-   use libutil
-   use libendf
-   use libpinpoint
+   use libxmath, only: Float
+   use libutil, only: DefaultLength, ScratchFile, AllUpCase
+   use libendf, only: MaxNuclides, NNuclides, NuclideSpecs
+   use libpinpoint, only: InitLibPinPoint, ReadRIVMSourceTermFile, CocktailType, &
+      TransitionMatrix, MatureCocktail, &
+      NStartingTimes, &
+      DelayGrowthFactor, FirstDelay, AvailableDelay, &
+      SaveCocktail2
 
    implicit none
 
