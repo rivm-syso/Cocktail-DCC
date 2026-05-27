@@ -3,10 +3,14 @@ program nuclide_decay
    ! This utility constructs the decay matrix for (a vector of) all ENDF nuclides for a given arbitrary delay.
    ! All different delay pinpoints used in the cocktail DCC library are handled in 1 go!
    !
-   use libxmath
-   use libutil
-   use libinterval
-   use libendf
+   use LibENDF, only: MaxNuclides, NNuclides, NuclideType, NuclideSpecs, NuclideFamily, &
+      ReadNProcessENDFNuclideSpecs, &
+      CollectProgeny, ListTransitions, TransitionMatrixPath, MakeEvolutionMatrix, &
+      Orphanage, AddOrphansBelow
+   use LibInterval, only:
+   use LibPinPoint, only: NStartingTimes, DelayGrowthFactor, FirstDelay
+   use LibUtil, only: DefaultLength, ScrotchFile
+   use LibXMath, only: Float, dp
    use Matrix_Exponential
 
    implicit none
@@ -24,9 +28,10 @@ program nuclide_decay
    ! Specify how the pinpoints i=1,N are made: t_i = t0*G^(i-1)
    ! There is also pinpoint 0, which is 0
    !
-   real(Float), parameter :: FirstDelay = 60._Float ! seconds
-   real(Float), parameter :: DelayGrowthFactor = 1.15_Float
-   integer, parameter :: NStartingTimes = 200
+   ! Specifications are done in libPinpoint, these would just overwrite those
+   !real(Float), parameter :: FirstDelay = 60._Float ! seconds
+   !real(Float), parameter :: DelayGrowthFactor = 1.15_Float
+   !integer, parameter :: NStartingTimes = 200
    real(Float), parameter :: VerySmallNumber = 1.E-95_Float
 
    character(6), dimension(0:NStartingTimes) :: PinPointName
