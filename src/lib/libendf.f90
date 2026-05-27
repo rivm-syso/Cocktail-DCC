@@ -1399,7 +1399,7 @@ contains
          write(*,'(A,I4)') 'MakeMyMotherDaughterMatrix: NNuclides = ',NNuclides
       endif
 
-      ln2 = LOG(2.)
+      ln2 = LOG(2._Float)
       !
       ! Initialize diagonal with -1, rest at zero
       !
@@ -1453,7 +1453,7 @@ contains
          NNonZero = 0
          do DaughterNuclide = 1,NNuclides
             do MotherNuclide = 1,NNuclides
-               if (abs(MyMotherDaughterMatrix(DaughterNuclide,MotherNuclide)) > 1.E-24) call Inc(NNonZero)
+               if (abs(MyMotherDaughterMatrix(DaughterNuclide,MotherNuclide)) > 1.E-24_Float) call Inc(NNonZero)
             enddo
          enddo
          !
@@ -1465,7 +1465,7 @@ contains
          668  format(I10,1X,I10,'  = NNuclides and NNonZero')
          do DaughterNuclide = 1,NNuclides
             do MotherNuclide = 1,NNuclides
-               if (abs(MyMotherDaughterMatrix(DaughterNuclide,MotherNuclide)) > 1.E-24) then
+               if (abs(MyMotherDaughterMatrix(DaughterNuclide,MotherNuclide)) > 1.E-24_Float) then
                   write(ScratchFile,667) &
                      & DaughterNuclide,MotherNuclide,MyMotherDaughterMatrix(DaughterNuclide,MotherNuclide)
                      667 format(I4,1X,I4,1X,G10.4)

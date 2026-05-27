@@ -448,12 +448,12 @@ contains
                      PinAirDoseRate(iPinpoint,iMother) = PinAirDoseRate(iPinpoint,iMother) &
                      & +   DaughterActivity &
                      &   * DCCEffectiveDose(InAir,Age_Adult)%x(iDaughter) &
-                     &   * 1.E-9/3600._Float ! Conversion of nSv/h to Sv/s
+                     &   * 1.E-9_Float/3600._Float ! Conversion of nSv/h to Sv/s
 
                      PinGroundDoseRate(iPinpoint,iMother) = PinGroundDoseRate(iPinpoint,iMother) &
                      & +   DaughterActivity &
                      &   * DCCGround(1,Age_Adult)%x(iDaughter) &
-                     &   * 1.E-9/3600._Float ! Conversion of nSv/h to Sv/s
+                     &   * 1.E-9_Float/3600._Float ! Conversion of nSv/h to Sv/s
 
                      PinInhalationDoseRate(iPinpoint,iMother) = PinInhalationDoseRate(iPinpoint,iMother) &
                      & +   DaughterActivity &

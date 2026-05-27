@@ -155,7 +155,7 @@ contains
       type( Vector2 ), intent( in ) :: xVector2
       real( Float ), intent( in ) :: xFloat
 
-      DivideVector2Float = xVector2*(1./xFloat)
+      DivideVector2Float = xVector2*(1._Float/xFloat)
    end function DivideVector2Float
 
 
@@ -167,7 +167,7 @@ contains
       type( Vector ), intent( in ) :: xVector
       real( Float ), intent( in ) :: xFloat
 
-      DivideVectorFloat = xVector*(1./xFloat)
+      DivideVectorFloat = xVector*(1._Float/xFloat)
    end function DivideVectorFloat
 
 
