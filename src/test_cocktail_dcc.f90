@@ -11,9 +11,12 @@ program test_cocktail_dcc
    !
    ! Sample program showing how to use the functionality made available by module libcocktaildcc
    !
-   use libxmath
-   use libutil
-   use libcocktaildcc
+   use libcocktaildcc, only: GetCocktailDCC, GetCocktailNuclide, &
+      PathwayAir, PathwayInhalation, PathwayName, &
+      iRegularDCC,iCumulativeDCC, DCCTypeName, &
+      NSourceTerms, NPathways, &
+      SourceTermName
+   use libxmath, only: Float
 
    implicit none
 
