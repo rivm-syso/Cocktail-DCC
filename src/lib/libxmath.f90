@@ -1,4 +1,4 @@
-MODULE LibXMath
+module LibXMath
    !
    ! Extended mathematics
    !
@@ -15,412 +15,412 @@ MODULE LibXMath
    !
    ! ____________________________________________________
    !
-   IMPLICIT NONE
+   implicit none
 
-   PRIVATE
+   private
 
-   PUBLIC :: Float, Vector2, Inc,Vector,dp,&
+   public :: Float, Vector2, Inc,Vector,dp,&
       & OPERATOR(*), OPERATOR(/), OPERATOR(+), OPERATOR(-),&
       & SparseMatrix,SparseMatrixElement,Matrix2SparseMatrix,SparseMatrix2Matrix,&
       & SparseLogicalMatrixElement,SparseLogicalMatrix,LMatrix2SparseLMatrix,SparseLMatrix2LMatrix
    !
    ! From now on only use "REAL(float)" for reals
    !
-   ! The number of bytes associated with 6 digits precision, usually stored in 4 bytes, default REAL
+   ! The number of bytes associated with 6 digits precision, usually stored in 4 bytes, default real
    !
-   INTEGER,PARAMETER :: Float  = SELECTED_REAL_KIND(12, 60)
+   integer,parameter :: Float  = selected_real_kind(12, 60)
    !
    ! The number of bytes associated with 15 digits precision, usually stored in 8 bytes, default DOUBLE PRECISION
    !
-   INTEGER, PARAMETER  :: dp = SELECTED_REAL_KIND(12, 60)
+   integer, parameter  :: dp = selected_real_kind(12, 60)
    !
    ! 2D problems can use the following type:
    !
-   TYPE Vector2
-      REAL(Float) :: x(2)
-   END TYPE Vector2
+   type Vector2
+      real(Float) :: x(2)
+   end type Vector2
 
-   TYPE Vector
-      REAL(Float) :: x(3)
-   END TYPE Vector
+   type Vector
+      real(Float) :: x(3)
+   end type Vector
 
-   INTERFACE OPERATOR (*)
-      MODULE PROCEDURE MultiplyFloatVector2
-      MODULE PROCEDURE MultiplyFloatVector
-      MODULE PROCEDURE MultiplyVector2Float
-      MODULE PROCEDURE MultiplyVectorFloat
-      MODULE PROCEDURE MultiplyVector2Vector2
-      MODULE PROCEDURE MultiplyVectorVector
-   END INTERFACE
+   interface OPERATOR (*)
+      module PROCEDURE MultiplyFloatVector2
+      module PROCEDURE MultiplyFloatVector
+      module PROCEDURE MultiplyVector2Float
+      module PROCEDURE MultiplyVectorFloat
+      module PROCEDURE MultiplyVector2Vector2
+      module PROCEDURE MultiplyVectorVector
+   end interface
 
-   INTERFACE OPERATOR (/)
-      MODULE PROCEDURE DivideVector2Float
-      MODULE PROCEDURE DivideVectorFloat
-      MODULE PROCEDURE DivideVector2Vector2
-      MODULE PROCEDURE DivideVectorVector
-   END INTERFACE
+   interface OPERATOR (/)
+      module PROCEDURE DivideVector2Float
+      module PROCEDURE DivideVectorFloat
+      module PROCEDURE DivideVector2Vector2
+      module PROCEDURE DivideVectorVector
+   end interface
 
-   INTERFACE OPERATOR (+)
-      MODULE PROCEDURE AddVector2Vector2
-      MODULE PROCEDURE AddVectorVector
-   END INTERFACE
+   interface OPERATOR (+)
+      module PROCEDURE AddVector2Vector2
+      module PROCEDURE AddVectorVector
+   end interface
 
-   INTERFACE OPERATOR (-)
-      MODULE PROCEDURE SubtractVector2Vector2
-      MODULE PROCEDURE SubtractVectorVector
-   END INTERFACE
+   interface OPERATOR (-)
+      module PROCEDURE SubtractVector2Vector2
+      module PROCEDURE SubtractVectorVector
+   end interface
 
-   TYPE SparseMatrixElement
-      INTEGER :: i,j
-      REAL(Float) :: x
-   END TYPE SparseMatrixElement
+   type SparseMatrixElement
+      integer :: i,j
+      real(Float) :: x
+   end type SparseMatrixElement
 
-   TYPE SparseMatrix
-      INTEGER :: N,NMax ! N is the number of elements, NMax >=N can be used to allocate on beforehand
-      TYPE(SparseMatrixElement), ALLOCATABLE, DIMENSION(:) :: Element
-   END TYPE SparseMatrix
+   type SparseMatrix
+      integer :: N,NMax ! N is the number of elements, NMax >=N can be used to allocate on beforehand
+      type(SparseMatrixElement), allocatable, dimension(:) :: Element
+   end type SparseMatrix
 
-   TYPE SparseLogicalMatrixElement
-      INTEGER :: i,j
-   END TYPE SparseLogicalMatrixElement
+   type SparseLogicalMatrixElement
+      integer :: i,j
+   end type SparseLogicalMatrixElement
 
-   TYPE SparseLogicalMatrix
-      INTEGER :: N,NMax ! N is the number of elements, NMax >=N can be used to allocate on beforehand
-      TYPE(SparseLogicalMatrixElement), ALLOCATABLE, DIMENSION(:) :: Element
-   END TYPE SparseLogicalMatrix
+   type SparseLogicalMatrix
+      integer :: N,NMax ! N is the number of elements, NMax >=N can be used to allocate on beforehand
+      type(SparseLogicalMatrixElement), allocatable, dimension(:) :: Element
+   end type SparseLogicalMatrix
    !
-   ! The following parameter can be set for debugging this MODULE
+   ! The following parameter can be set for debugging this module
    !
-   INTEGER, PARAMETER :: DebugLevel = 0
+   integer, parameter :: DebugLevel = 0
    !
    ! Below this line you'll get the real implementations
    !
-CONTAINS
-   FUNCTION MultiplyFloatVector2( xFloat, xVector2 )
+contains
+   function MultiplyFloatVector2( xFloat, xVector2 )
       !
-      ! Multiply a REAL(Float) with a Vector2
+      ! Multiply a real(Float) with a Vector2
       !
-      TYPE( Vector2 ) MultiplyFloatVector2, DumVec2
-      TYPE( Vector2 ), INTENT( IN ) :: xVector2
-      REAL( Float ), INTENT( IN ) :: xFloat
+      type( Vector2 ) MultiplyFloatVector2, DumVec2
+      type( Vector2 ), intent( in ) :: xVector2
+      real( Float ), intent( in ) :: xFloat
 
-      DumVec2 = Vector2((/xFloat*xVector2%x(1),xFloat*xVector2%x(2)/))
+      DumVec2 = Vector2([xFloat*xVector2%x(1),xFloat*xVector2%x(2)])
       MultiplyFloatVector2 = DumVec2
-   END FUNCTION MultiplyFloatVector2
+   end function MultiplyFloatVector2
 
 
 
-   FUNCTION MultiplyFloatVector( xFloat, xVector )
+   function MultiplyFloatVector( xFloat, xVector )
       !
-      ! Multiply a REAL(Float) with a Vector
+      ! Multiply a real(Float) with a Vector
       !
-      TYPE( Vector ) MultiplyFloatVector, DumVec
-      TYPE( Vector ), INTENT( IN ) :: xVector
-      REAL( Float ), INTENT( IN ) :: xFloat
+      type( Vector ) MultiplyFloatVector, DumVec
+      type( Vector ), intent( in ) :: xVector
+      real( Float ), intent( in ) :: xFloat
 
-      DumVec = Vector((/xFloat*xVector%x(1),xFloat*xVector%x(2),xFloat*xVector%x(3)/))
+      DumVec = Vector([xFloat*xVector%x(1),xFloat*xVector%x(2),xFloat*xVector%x(3)])
       MultiplyFloatVector = DumVec
-   END FUNCTION MultiplyFloatVector
+   end function MultiplyFloatVector
 
 
-   FUNCTION MultiplyVector2Float( xVector2,xFloat )
+   function MultiplyVector2Float( xVector2,xFloat )
       !
-      ! Multiply a Vector2 with a REAL(Float)
+      ! Multiply a Vector2 with a real(Float)
       !
-      TYPE( Vector2 ) MultiplyVector2Float
-      TYPE( Vector2 ), INTENT( IN ) :: xVector2
-      REAL( Float ), INTENT( IN ) :: xFloat
+      type( Vector2 ) MultiplyVector2Float
+      type( Vector2 ), intent( in ) :: xVector2
+      real( Float ), intent( in ) :: xFloat
 
       MultiplyVector2Float = xFloat*xVector2
-   END FUNCTION MultiplyVector2Float
+   end function MultiplyVector2Float
 
 
-   FUNCTION MultiplyVectorFloat( xVector,xFloat )
+   function MultiplyVectorFloat( xVector,xFloat )
       !
-      ! Multiply a Vector with a REAL(Float)
+      ! Multiply a Vector with a real(Float)
       !
-      TYPE( Vector ) MultiplyVectorFloat
-      TYPE( Vector ), INTENT( IN ) :: xVector
-      REAL( Float ), INTENT( IN ) :: xFloat
+      type( Vector ) MultiplyVectorFloat
+      type( Vector ), intent( in ) :: xVector
+      real( Float ), intent( in ) :: xFloat
 
       MultiplyVectorFloat = xFloat*xVector
-   END FUNCTION MultiplyVectorFloat
+   end function MultiplyVectorFloat
 
 
-   FUNCTION DivideVector2Float( xVector2,xFloat )
+   function DivideVector2Float( xVector2,xFloat )
       !
-      ! Divide a Vector2 by a REAL(Float)
+      ! Divide a Vector2 by a real(Float)
       !
-      TYPE( Vector2 ) DivideVector2Float
-      TYPE( Vector2 ), INTENT( IN ) :: xVector2
-      REAL( Float ), INTENT( IN ) :: xFloat
+      type( Vector2 ) DivideVector2Float
+      type( Vector2 ), intent( in ) :: xVector2
+      real( Float ), intent( in ) :: xFloat
 
-      DivideVector2Float = xVector2*(1./xFloat)
-   END FUNCTION DivideVector2Float
+      DivideVector2Float = xVector2*(1._Float/xFloat)
+   end function DivideVector2Float
 
 
-   FUNCTION DivideVectorFloat( xVector,xFloat )
+   function DivideVectorFloat( xVector,xFloat )
       !
-      ! Divide a Vector by a REAL(Float)
+      ! Divide a Vector by a real(Float)
       !
-      TYPE( Vector ) DivideVectorFloat
-      TYPE( Vector ), INTENT( IN ) :: xVector
-      REAL( Float ), INTENT( IN ) :: xFloat
+      type( Vector ) DivideVectorFloat
+      type( Vector ), intent( in ) :: xVector
+      real( Float ), intent( in ) :: xFloat
 
-      DivideVectorFloat = xVector*(1./xFloat)
-   END FUNCTION DivideVectorFloat
+      DivideVectorFloat = xVector*(1._Float/xFloat)
+   end function DivideVectorFloat
 
 
-   FUNCTION MultiplyVector2Vector2( xVector2, yVector2 )
+   function MultiplyVector2Vector2( xVector2, yVector2 )
       !
       ! Multiply two Vector2 type of variables
       !
-      TYPE( Vector2 ) MultiplyVector2Vector2, DumVec2
-      TYPE( Vector2 ), INTENT( IN ) :: xVector2,yVector2
+      type( Vector2 ) MultiplyVector2Vector2, DumVec2
+      type( Vector2 ), intent( in ) :: xVector2,yVector2
 
-      DumVec2 = Vector2((/xVector2%x(1)*yVector2%x(1),xVector2%x(2)*yVector2%x(2)/))
+      DumVec2 = Vector2([xVector2%x(1)*yVector2%x(1),xVector2%x(2)*yVector2%x(2)])
       MultiplyVector2Vector2 = DumVec2
-   END FUNCTION MultiplyVector2Vector2
+   end function MultiplyVector2Vector2
 
 
-   FUNCTION DivideVector2Vector2( xVector2, yVector2 )
+   function DivideVector2Vector2( xVector2, yVector2 )
       !
       ! Divide two Vector2 type of variables
       !
-      TYPE( Vector2 ) DivideVector2Vector2, DumVec2
-      TYPE( Vector2 ), INTENT( IN ) :: xVector2,yVector2
+      type( Vector2 ) DivideVector2Vector2, DumVec2
+      type( Vector2 ), intent( in ) :: xVector2,yVector2
 
-      DumVec2 = Vector2((/xVector2%x(1)/yVector2%x(1),xVector2%x(2)/yVector2%x(2)/))
+      DumVec2 = Vector2([xVector2%x(1)/yVector2%x(1),xVector2%x(2)/yVector2%x(2)])
       DivideVector2Vector2 = DumVec2
-   END FUNCTION DivideVector2Vector2
+   end function DivideVector2Vector2
 
 
-   FUNCTION DivideVectorVector( xVector, yVector )
+   function DivideVectorVector( xVector, yVector )
       !
       ! Divide two Vector type of variables
       !
-      TYPE( Vector ) DivideVectorVector, DumVec
-      TYPE( Vector ), INTENT( IN ) :: xVector,yVector
+      type( Vector ) DivideVectorVector, DumVec
+      type( Vector ), intent( in ) :: xVector,yVector
 
-      DumVec = Vector((/xVector%x(1)/yVector%x(1),xVector%x(2)/yVector%x(2),xVector%x(3)/yVector%x(3)/))
+      DumVec = Vector([xVector%x(1)/yVector%x(1),xVector%x(2)/yVector%x(2),xVector%x(3)/yVector%x(3)])
       DivideVectorVector = DumVec
-   END FUNCTION DivideVectorVector
+   end function DivideVectorVector
 
 
-   FUNCTION MultiplyVectorVector( xVector, yVector )
+   function MultiplyVectorVector( xVector, yVector )
       !
       ! Multiply two Vector type of variables
       !
-      TYPE( Vector ) MultiplyVectorVector, DumVec
-      TYPE( Vector ), INTENT( IN ) :: xVector,yVector
+      type( Vector ) MultiplyVectorVector, DumVec
+      type( Vector ), intent( in ) :: xVector,yVector
 
-      DumVec = Vector((/xVector%x(1)*yVector%x(1),xVector%x(2)*yVector%x(2),xVector%x(3)*yVector%x(3)/))
+      DumVec = Vector([xVector%x(1)*yVector%x(1),xVector%x(2)*yVector%x(2),xVector%x(3)*yVector%x(3)])
       MultiplyVectorVector = DumVec
-   END FUNCTION MultiplyVectorVector
+   end function MultiplyVectorVector
 
 
-   FUNCTION AddVector2Vector2( xVector2, yVector2 )
+   function AddVector2Vector2( xVector2, yVector2 )
       !
       ! Add two Vector2 type of variables
       !
-      TYPE( Vector2 ) AddVector2Vector2, DumVec2
-      TYPE( Vector2 ), INTENT( IN ) :: xVector2,yVector2
+      type( Vector2 ) AddVector2Vector2, DumVec2
+      type( Vector2 ), intent( in ) :: xVector2,yVector2
 
-      DumVec2 = Vector2((/xVector2%x(1)+yVector2%x(1),xVector2%x(2)+yVector2%x(2)/))
+      DumVec2 = Vector2([xVector2%x(1)+yVector2%x(1),xVector2%x(2)+yVector2%x(2)])
       AddVector2Vector2 = DumVec2
-   END FUNCTION AddVector2Vector2
+   end function AddVector2Vector2
 
 
-   FUNCTION AddVectorVector( xVector, yVector )
+   function AddVectorVector( xVector, yVector )
       !
       ! Add two Vector type of variables
       !
-      TYPE( Vector ) AddVectorVector, DumVec
-      TYPE( Vector ), INTENT( IN ) :: xVector,yVector
+      type( Vector ) AddVectorVector, DumVec
+      type( Vector ), intent( in ) :: xVector,yVector
 
-      DumVec = Vector((/xVector%x(1)+yVector%x(1),xVector%x(2)+yVector%x(2),xVector%x(3)+yVector%x(3)/))
+      DumVec = Vector([xVector%x(1)+yVector%x(1),xVector%x(2)+yVector%x(2),xVector%x(3)+yVector%x(3)])
       AddVectorVector = DumVec
-   END FUNCTION AddVectorVector
+   end function AddVectorVector
 
 
-   FUNCTION SubtractVector2Vector2( xVector2, yVector2 )
+   function SubtractVector2Vector2( xVector2, yVector2 )
       !
       ! Subtract two Vector2 type of variables
       !
-      TYPE( Vector2 ) SubtractVector2Vector2
-      TYPE( Vector2 ), INTENT( IN ) :: xVector2,yVector2
+      type( Vector2 ) SubtractVector2Vector2
+      type( Vector2 ), intent( in ) :: xVector2,yVector2
 
       SubtractVector2Vector2 = xVector2 + (-1.0_Float)*yVector2
-   END FUNCTION SubtractVector2Vector2
+   end function SubtractVector2Vector2
 
 
-   FUNCTION SubtractVectorVector( xVector, yVector )
+   function SubtractVectorVector( xVector, yVector )
       !
       ! Subtract two Vector type of variables
       !
-      TYPE( Vector ) SubtractVectorVector
-      TYPE( Vector ), INTENT( IN ) :: xVector,yVector
+      type( Vector ) SubtractVectorVector
+      type( Vector ), intent( in ) :: xVector,yVector
 
       SubtractVectorVector = xVector + (-1.0_Float)*yVector
-   END FUNCTION SubtractVectorVector
+   end function SubtractVectorVector
 
 
 
-   SUBROUTINE Inc(x)
-      INTEGER, INTENT(INOUT) :: x
+   subroutine Inc(x)
+      integer, intent(inout) :: x
       x = x+1
-   END SUBROUTINE Inc
+   end subroutine Inc
 
 
 
-   FUNCTION Matrix2SparseMatrix(A)
+   function Matrix2SparseMatrix(A)
       !
       ! Convert regular matrix to sparse matrix
       !
-      REAL(Float), DIMENSION(:,:), INTENT(IN) :: A
+      real(Float), dimension(:,:), intent(in) :: A
 
-      TYPE(SparseMatrix) :: ASparse,Matrix2SparseMatrix
-      INTEGER :: N,i,j,NNonZero,iElement
+      type(SparseMatrix) :: ASparse,Matrix2SparseMatrix
+      integer :: N,i,j,NNonZero,iElement
 
       N = SIZE(A,1)
       !
       ! Count non-zero elements
       !
       NNonZero = 0
-      DO i = 1,N
-         DO j = 1,N
-            IF (A(j,i).NE.0._Float) NNonZero = NNonZero + 1
-         ENDDO
-      ENDDO
+      do i = 1,N
+         do j = 1,N
+            if (A(j,i) /= 0._Float) NNonZero = NNonZero + 1
+         enddo
+      enddo
 
       ASparse%N = NNonZero
       !
       ! Fill sparse array
       !
-      IF (ALLOCATED(ASparse%Element)) DEALLOCATE(ASparse%Element)
+      if (ALLOCATED(ASparse%Element)) deallocate(ASparse%Element)
       ASparse%NMax = NNonZero
-      ALLOCATE(ASparse%Element(NNonZero))
+      allocate(ASparse%Element(NNonZero))
 
       iElement = 0
 
-      DO i = 1,N
-         DO j = 1,N
-            IF (A(j,i).NE.0._Float) THEN
+      do i = 1,N
+         do j = 1,N
+            if (A(j,i) /= 0._Float) then
             iElement = iElement + 1
             ASparse%Element(iElement)%i = i
             ASparse%Element(iElement)%j = j
             ASparse%Element(iElement)%x = A(j,i)
-            ENDIF
-         ENDDO
-      ENDDO
+            endif
+         enddo
+      enddo
       !
       ! Pass result
       !
       Matrix2SparseMatrix = ASparse
-   END FUNCTION Matrix2SparseMatrix
+   end function Matrix2SparseMatrix
 
 
 
-   SUBROUTINE SparseMatrix2Matrix(ASparse,A)
+   subroutine SparseMatrix2Matrix(ASparse,A)
       !
       ! Convert sparse matrix to regular matrix
       !
-      TYPE(SparseMatrix), INTENT(IN) :: ASparse
-      REAL(Float), DIMENSION(:,:), INTENT(INOUT) :: A
+      type(SparseMatrix), intent(in) :: ASparse
+      real(Float), dimension(:,:), intent(inout) :: A
 
-      INTEGER :: iElement
+      integer :: iElement
 
-      INTEGER, PARAMETER :: DebugLevel = 0
+      integer, parameter :: DebugLevel = 0
       !
       ! Fill array
       !
       A = 0._Float
 
-      IF (DebugLevel.GT.0) THEN
-         WRITE(*,'(A,L1,1X,I0,1X,I0)') 'SparseMatrix2Matrix: ',ALLOCATED(ASparse%Element),ASparse%NMax,ASparse%N
-      ENDIF
+      if (DebugLevel > 0) then
+         write(*,'(A,L1,1X,I0,1X,I0)') 'SparseMatrix2Matrix: ',ALLOCATED(ASparse%Element),ASparse%NMax,ASparse%N
+      endif
 
-      DO iElement = 1,ASparse%N
-         IF (DebugLevel.GT.0) THEN
-            WRITE(*,'(A,I4,1X,I4,1X,EN20.10)') 'i,j,x = ',ASparse%Element(iElement)
-         ENDIF
+      do iElement = 1,ASparse%N
+         if (DebugLevel > 0) then
+            write(*,'(A,I4,1X,I4,1X,EN20.10)') 'i,j,x = ',ASparse%Element(iElement)
+         endif
          A(ASparse%Element(iElement)%j,ASparse%Element(iElement)%i) = ASparse%Element(iElement)%x
-      ENDDO
-   END SUBROUTINE SparseMatrix2Matrix
+      enddo
+   end subroutine SparseMatrix2Matrix
 
 
 
-   FUNCTION LMatrix2SparseLMatrix(A)
+   function LMatrix2SparseLMatrix(A)
       !
       ! Convert regular matrix to sparse matrix
       !
-      LOGICAL, DIMENSION(:,:), INTENT(IN) :: A
+      logical, dimension(:,:), intent(in) :: A
 
-      TYPE(SparseLogicalMatrix) :: LASparse,LMatrix2SparseLMatrix
-      INTEGER :: N,i,j,NNonZero,iElement
+      type(SparseLogicalMatrix) :: LASparse,LMatrix2SparseLMatrix
+      integer :: N,i,j,NNonZero,iElement
 
       N = SIZE(A,1)
       !
       ! Count non-zero elements
       !
       NNonZero = 0
-      DO i = 1,N
-         DO j = 1,N
-            IF (A(j,i)) NNonZero = NNonZero + 1
-         ENDDO
-      ENDDO
+      do i = 1,N
+         do j = 1,N
+            if (A(j,i)) NNonZero = NNonZero + 1
+         enddo
+      enddo
 
       LASparse%N = NNonZero
       !
       ! Fill sparse array
       !
-      IF (ALLOCATED(LASparse%Element)) DEALLOCATE(LASparse%Element)
+      if (ALLOCATED(LASparse%Element)) deallocate(LASparse%Element)
       LASparse%NMax = NNonZero
-      ALLOCATE(LASparse%Element(NNonZero))
+      allocate(LASparse%Element(NNonZero))
 
       iElement = 0
 
-      DO i = 1,N
-         DO j = 1,N
-            IF (A(j,i)) THEN
+      do i = 1,N
+         do j = 1,N
+            if (A(j,i)) then
             iElement = iElement + 1
             LASparse%Element(iElement)%i = i
             LASparse%Element(iElement)%j = j
-            ENDIF
-         ENDDO
-      ENDDO
+            endif
+         enddo
+      enddo
       !
       ! Pass result
       !
       LMatrix2SparseLMatrix = LASparse
-   END FUNCTION LMatrix2SparseLMatrix
+   end function LMatrix2SparseLMatrix
 
 
 
-   SUBROUTINE SparseLMatrix2LMatrix(LASparse,LA)
+   subroutine SparseLMatrix2LMatrix(LASparse,LA)
       !
       ! Convert sparse matrix to regular matrix
       !
-      TYPE(SparseLogicalMatrix), INTENT(IN) :: LASparse
-      LOGICAL, DIMENSION(:,:), INTENT(INOUT) :: LA
+      type(SparseLogicalMatrix), intent(in) :: LASparse
+      logical, dimension(:,:), intent(inout) :: LA
 
-      INTEGER :: iElement
+      integer :: iElement
 
-      INTEGER, PARAMETER :: DebugLevel = 0
+      integer, parameter :: DebugLevel = 0
       !
       ! Fill array
       !
       LA = .FALSE.
 
-      IF (DebugLevel.GT.0) THEN
-         WRITE(*,'(A,L1,1X,I0,1X,I0)') 'SparseLMatrix2LMatrix: ',ALLOCATED(LASparse%Element),LASparse%NMax,LASparse%N
-      ENDIF
+      if (DebugLevel > 0) then
+         write(*,'(A,L1,1X,I0,1X,I0)') 'SparseLMatrix2LMatrix: ',ALLOCATED(LASparse%Element),LASparse%NMax,LASparse%N
+      endif
 
-      DO iElement = 1,LASparse%N
-         IF (DebugLevel.GT.0) THEN
-            WRITE(*,'(A,I4,1X,I4)') 'i,j = ',LASparse%Element(iElement)%i,LASparse%Element(iElement)%j
-         ENDIF
+      do iElement = 1,LASparse%N
+         if (DebugLevel > 0) then
+            write(*,'(A,I4,1X,I4)') 'i,j = ',LASparse%Element(iElement)%i,LASparse%Element(iElement)%j
+         endif
          LA(LASparse%Element(iElement)%j,LASparse%Element(iElement)%i) = .TRUE.
-      ENDDO
-   END SUBROUTINE SparseLMatrix2LMatrix
-END MODULE LibXMath
+      enddo
+   end subroutine SparseLMatrix2LMatrix
+end module LibXMath

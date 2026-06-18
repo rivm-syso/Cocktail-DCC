@@ -1,23 +1,27 @@
-PROGRAM MatureNuclides
+program MatureNuclides
    ! This utility reads a nuclide vector at t=0 from file and a delay.
    ! It returns the aged cocktail.
-   USE libxmath
-   USE libutil
-   USE libendf
-   USE libpinpoint
+   use libxmath, only: Float
+   use libutil, only: DefaultLength, ScratchFile, AllUpCase
+   use libendf, only: MaxNuclides, NNuclides, NuclideSpecs
+   use libpinpoint, only: InitLibPinPoint, ReadRIVMSourceTermFile, CocktailType, &
+      TransitionMatrix, MatureCocktail, &
+      NStartingTimes, &
+      DelayGrowthFactor, FirstDelay, AvailableDelay, &
+      SaveCocktail2
 
-   IMPLICIT NONE
+   implicit none
 
-   TYPE(CocktailType) :: StartCocktail,OutCocktail,CocktailBefore,CocktailAfter
-   CHARACTER(DefaultLength) :: FName,TheDirectory,TheFile,TimeStampString,TimeUnitString,ProgenyString,&
+   type(CocktailType) :: StartCocktail,OutCocktail,CocktailBefore,CocktailAfter
+   character(DefaultLength) :: FName,TimeStampString,TimeUnitString,ProgenyString,&
    & DatasetString
-   REAL(Float), DIMENSION(0:NStartingTimes,MaxNuclides) :: MyActivity,MyRelevantActivity
-   INTEGER :: NArguements,iLocX,iDelay,iNuclide,NRelevantNuclides,jNuclide,iMother,iDaughter,iPinpoint,iElement
-   REAL(Float) :: NSecondsDelay,LocX,Alpha,x,Ln2
-   LOGICAL, DIMENSION(MaxNuclides) :: IsRelatedToCocktail
-   CHARACTER(10), DIMENSION(MaxNuclides) :: MyName
-   LOGICAL :: WithProgeny,UseICRP,MakeWholeSeries
-   INTEGER, DIMENSION(MaxNuclides) :: MyNuclide
+   real(Float), dimension(0:NStartingTimes,MaxNuclides) :: MyActivity,MyRelevantActivity
+   integer :: NArguements,iLocX,iDelay,iNuclide,NRelevantNuclides,jNuclide,iMother,iDaughter,iPinpoint,iElement
+   real(Float) :: NSecondsDelay,LocX,Alpha,x,Ln2
+   logical, dimension(MaxNuclides) :: IsRelatedToCocktail
+   character(10), dimension(MaxNuclides) :: MyName
+   logical :: WithProgeny,UseICRP,MakeWholeSeries
+   integer, dimension(MaxNuclides) :: MyNuclide
    !
    ! Get commmand line arguement:
    !
@@ -25,117 +29,117 @@ PROGRAM MatureNuclides
 
    NArguements = IARGC()
 
-   IF (.NOT.((NArguements.EQ.3).OR.(NArguements.EQ.5))) THEN
-      WRITE(*,'(A)') 'Call:'
-      WRITE(*,*)
-      WRITE(*,'(A)') 'mature_nuclides.exe <fname> <withprogeny/noprogeny> <Time step> <time unit> <ICRP/ENDF>'
-      WRITE(*,*)
-      WRITE(*,'(A)') 'where:'
-      WRITE(*,'(A)') '<fname> is the name of a file with the nuclide vector at t=0'
-      WRITE(*,'(A)') 'Choose 1 option of <withprogeny/noprogeny> for in/exclusion of progeny'
-      WRITE(*,'(A)') '<Time step> is a real value indicating the delay, '
-      WRITE(*,'(A)') '<Time unit> can be year, week, day, hour, minute or second,'
-      WRITE(*,'(A)') '<ICRP/ENDF> indicates which nuclide dataset should be used,'
-      WRITE(*,*)
-      WRITE(*,'(A)') 'or:'
-      WRITE(*,*)
-      WRITE(*,'(A)') 'mature_nuclides.exe <fname> <withprogeny/noprogeny> <ICRP/ENDF>'
-      WRITE(*,*)
-      WRITE(*,'(A)') 'to generate a file with the time series for all nuclides, where:'
-      WRITE(*,'(A)') '<fname> is the name of a file with the nuclide vector at t=0'
-      WRITE(*,'(A)') 'Chose 1 option of <withprogeny/noprogeny> for in/exclusion of progeny,'
-      WRITE(*,'(A)') '<ICRP/ENDF> indicates which nuclide dataset should be used.'
+   if (.NOT.((NArguements == 3).OR.(NArguements == 5))) then
+      write(*,'(A)') 'Call:'
+      write(*,*)
+      write(*,'(A)') 'mature_nuclides.exe <fname> <withprogeny/noprogeny> <Time step> <time unit> <ICRP/ENDF>'
+      write(*,*)
+      write(*,'(A)') 'where:'
+      write(*,'(A)') '<fname> is the name of a file with the nuclide vector at t=0'
+      write(*,'(A)') 'Choose 1 option of <withprogeny/noprogeny> for in/exclusion of progeny'
+      write(*,'(A)') '<Time step> is a real value indicating the delay, '
+      write(*,'(A)') '<Time unit> can be year, week, day, hour, minute or second,'
+      write(*,'(A)') '<ICRP/ENDF> indicates which nuclide dataset should be used,'
+      write(*,*)
+      write(*,'(A)') 'or:'
+      write(*,*)
+      write(*,'(A)') 'mature_nuclides.exe <fname> <withprogeny/noprogeny> <ICRP/ENDF>'
+      write(*,*)
+      write(*,'(A)') 'to generate a file with the time series for all nuclides, where:'
+      write(*,'(A)') '<fname> is the name of a file with the nuclide vector at t=0'
+      write(*,'(A)') 'Chose 1 option of <withprogeny/noprogeny> for in/exclusion of progeny,'
+      write(*,'(A)') '<ICRP/ENDF> indicates which nuclide dataset should be used.'
 
-      CALL EXIT()
-   ENDIF
+      call exit()
+   endif
 
-   CALL GETARG(1,FName)
-   CALL GETARG(2,ProgenyString)
-   CALL AllUpCase(ProgenyString)
-   WithProgeny = (INDEX(ProgenyString,'NO').EQ.0)
+   call GETARG(1,FName)
+   call GETARG(2,ProgenyString)
+   call AllUpCase(ProgenyString)
+   WithProgeny = (INDEX(ProgenyString,'NO') == 0)
 
-   IF (WithProgeny) THEN
-      WRITE(*,'(A)') 'Decay will include the generation of progeny!'
-   ELSE
-      WRITE(*,'(A)') 'Decay will NOT include the generation of progeny! Any decay is final loss!'
-   ENDIF
+   if (WithProgeny) then
+      write(*,'(A)') 'Decay will include the generation of progeny!'
+   else
+      write(*,'(A)') 'Decay will NOT include the generation of progeny! Any decay is final loss!'
+   endif
 
-   MakeWholeSeries = (NArguements.EQ.3)
+   MakeWholeSeries = (NArguements == 3)
 
-   IF (MakeWholeSeries) THEN
-      CALL GETARG(3,DatasetString)
-      WRITE(*,'(A)') 'Going to construct time series for all nuclides!'
-   ELSE
-      CALL GETARG(3,TimeStampString)
-      WRITE(*,'(A)') 'You specified the following TimeStampString: '//TRIM(TimeStampString)
+   if (MakeWholeSeries) then
+      call GETARG(3,DatasetString)
+      write(*,'(A)') 'Going to construct time series for all nuclides!'
+   else
+      call GETARG(3,TimeStampString)
+      write(*,'(A)') 'You specified the following TimeStampString: '//trim(TimeStampString)
 
-      READ(TimeStampString,*) NSecondsDelay
+      read(TimeStampString,*) NSecondsDelay
 
-      CALL GETARG(4,TimeUnitString)
-      WRITE(*,'(A)') 'You specified the following TimeUnitString : '//TRIM(TimeUnitString)
+      call GETARG(4,TimeUnitString)
+      write(*,'(A)') 'You specified the following TimeUnitString : '//trim(TimeUnitString)
 
-      IF (INDEX(TimeUnitString,'year').GT.0) THEN
+      if (INDEX(TimeUnitString,'year') > 0) then
          NSecondsDelay = 365._Float*24._Float*3600._Float*NSecondsDelay
-      ELSE IF (INDEX(TimeUnitString,'week').GT.0) THEN
+      else if (INDEX(TimeUnitString,'week') > 0) then
          NSecondsDelay = 7._Float*24._Float*3600._Float*NSecondsDelay
-      ELSE IF (INDEX(TimeUnitString,'day').GT.0) THEN
+      else if (INDEX(TimeUnitString,'day') > 0) then
          NSecondsDelay = 24._Float*3600._Float*NSecondsDelay
-      ELSE IF (INDEX(TimeUnitString,'hour').GT.0) THEN
+      else if (INDEX(TimeUnitString,'hour') > 0) then
          NSecondsDelay = 3600._Float*NSecondsDelay
-      ELSE IF (INDEX(TimeUnitString,'minute').GT.0) THEN
+      else if (INDEX(TimeUnitString,'minute') > 0) then
          NSecondsDelay = 60._Float*NSecondsDelay
-      ELSE IF (INDEX(TimeUnitString,'second').EQ.0) THEN
-         WRITE(*,'(A)') 'Wrong TimeUnitString: "'//TRIM(TimeUnitString)//'"'
-         CALL EXIT()
-      ENDIF
-      CALL GETARG(5,DatasetString)
-      WRITE(*,'(A,EN20.10,A)') 'Delay '//TRIM(TimeStampString)//TRIM(TimeUnitString)//' is ',NSecondsDelay,' seconds'
-   ENDIF ! 2 or 3 parameters
+      else if (INDEX(TimeUnitString,'second') == 0) then
+         write(*,'(A)') 'Wrong TimeUnitString: "'//trim(TimeUnitString)//'"'
+         call exit()
+      endif
+      call GETARG(5,DatasetString)
+      write(*,'(A,EN20.10,A)') 'Delay '//trim(TimeStampString)//trim(TimeUnitString)//' is ',NSecondsDelay,' seconds'
+   endif ! 2 or 3 parameters
 
-   CALL AllUpCase(DatasetString)
-   UseICRP = (INDEX(DatasetString,'ICRP').GT.0)
+   call AllUpCase(DatasetString)
+   UseICRP = (INDEX(DatasetString,'ICRP') > 0)
 
-   IF (UseICRP) THEN
-      WRITE(*,'(A)') 'Going to use the nuclide dataset from ICRP-107!'
-   ELSE
-      WRITE(*,'(A)') 'Going to use the nuclide dataset from ENDF-VIII!'
-   ENDIF
+   if (UseICRP) then
+      write(*,'(A)') 'Going to use the nuclide dataset from ICRP-107!'
+   else
+      write(*,'(A)') 'Going to use the nuclide dataset from ENDF-VIII!'
+   endif
 
-   WRITE(*,*)
+   write(*,*)
    !
    ! Initialize
    !
-   CALL InitLibPinPoint(UseICRP)
+   call InitLibPinPoint(UseICRP)
    !
    ! Specify source term at t=0:
    !
-   CALL ReadRIVMSourceTermFile(FName,StartCocktail)
+   call ReadRIVMSourceTermFile(FName,StartCocktail)
    !
    ! Show which nuclide in the cocktail is generated by which other nuclide:
    !
    iPinPoint = 1
 
-   DO iNuclide = 1,NNuclides
-      DO iElement = 1,TransitionMatrix(iPinpoint)%N
+   do iNuclide = 1,NNuclides
+      do iElement = 1,TransitionMatrix(iPinpoint)%N
          iMother = TransitionMatrix(iPinpoint)%Element(iElement)%i
          iDaughter = TransitionMatrix(iPinpoint)%Element(iElement)%j
          x = TransitionMatrix(iPinpoint)%Element(iElement)%x
-         IF ((iDaughter.EQ.iNuclide)&
-         &    .AND.(StartCocktail%x(iMother).GT.0._Float)&
-         &    .AND.(iMother.NE.iDaughter)) THEN
-            WRITE(*,'(A,A,A,A,A,F15.10)') 'Nuclide ',NuclideSpecs(iDaughter)%NuclideName,&
+         if ((iDaughter == iNuclide)&
+         &    .AND.(StartCocktail%x(iMother) > 0._Float)&
+         &    .AND.(iMother /= iDaughter)) then
+            write(*,'(A,A,A,A,A,F15.10)') 'Nuclide ',NuclideSpecs(iDaughter)%NuclideName,&
             & ' is generated by ',&
             & NuclideSpecs(iMother)%NuclideName,' with element ',x
-         ENDIF ! Found a sparse matrix element with the present nuclide as daughter
-      ENDDO ! Sparse matrix elements
-   ENDDO ! loop over nuclides that candidate as progeny
+         endif ! Found a sparse matrix element with the present nuclide as daughter
+      enddo ! Sparse matrix elements
+   enddo ! loop over nuclides that candidate as progeny
 
-   WRITE(*,*)
+   write(*,*)
    !
    ! Now do the actual ageing
    !
-   WRITE(*,'(A)') 'Constructing matured nuclide set for cocktail "'//TRIM(StartCocktail%MyName)&
-   & //'" in directory "'//TRIM(StartCocktail%MyDirectory)//'"'
+   write(*,'(A)') 'Constructing matured nuclide set for cocktail "'//trim(StartCocktail%MyName)&
+   & //'" in directory "'//trim(StartCocktail%MyDirectory)//'"'
 
    IsRelatedToCocktail = .FALSE.
    !
@@ -144,107 +148,107 @@ PROGRAM MatureNuclides
    MyActivity = 0._Float
    MyNuclide = 0
 
-   DO iDelay = 0,NStartingTimes
-      IF (iDelay.EQ.0) THEN
+   do iDelay = 0,NStartingTimes
+      if (iDelay == 0) then
          OutCocktail = StartCocktail
-      ELSE
-         CALL MatureCocktail(StartCocktail,TransitionMatrix(iDelay),WithProgeny,OutCocktail)
-      ENDIF
+      else
+         call MatureCocktail(StartCocktail,TransitionMatrix(iDelay),WithProgeny,OutCocktail)
+      endif
 
-      DO iNuclide = 1,NNuclides
+      do iNuclide = 1,NNuclides
          MyActivity(iDelay,iNuclide) = OutCocktail%x(iNuclide)
-         IsRelatedToCocktail(iNuclide) = IsRelatedToCocktail(iNuclide).OR.(MyActivity(iDelay,iNuclide).GT.0._Float)
-      ENDDO ! loop over nuclides
-   ENDDO ! loop over timsteps
+         IsRelatedToCocktail(iNuclide) = IsRelatedToCocktail(iNuclide).OR.(MyActivity(iDelay,iNuclide) > 0._Float)
+      enddo ! loop over nuclides
+   enddo ! loop over timsteps
 
    NRelevantNuclides = 0
-   DO iNuclide = 1,NNuclides
-      IF (IsRelatedToCocktail(iNuclide)) THEN
+   do iNuclide = 1,NNuclides
+      if (IsRelatedToCocktail(iNuclide)) then
          NRelevantNuclides = NRelevantNuclides + 1
          MyName(NRelevantNuclides) = NuclideSpecs(iNuclide)%NuclideName
          MyNuclide(NRelevantNuclides) = iNuclide
-      ENDIF
-   ENDDO ! loop over nuclides
-   WRITE(*,'(A,I0,A)') 'Found ',NRelevantNuclides,' relevant nuclides!'
+      endif
+   enddo ! loop over nuclides
+   write(*,'(A,I0,A)') 'Found ',NRelevantNuclides,' relevant nuclides!'
 
    MyRelevantActivity = 0._Float
 
-   DO iDelay = 0,NStartingTimes
+   do iDelay = 0,NStartingTimes
       jNuclide = 0
-      DO iNuclide = 1,NNuclides
-         IF (IsRelatedToCocktail(iNuclide)) THEN
+      do iNuclide = 1,NNuclides
+         if (IsRelatedToCocktail(iNuclide)) then
          jNuclide = jNuclide + 1
          MyRelevantActivity(iDelay,jNuclide) = MyActivity(iDelay,iNuclide)
-         ENDIF
-      ENDDO ! loop over nuclides
-   ENDDO ! loop over delays
+         endif
+      enddo ! loop over nuclides
+   enddo ! loop over delays
 
-   IF (MakeWholeSeries) THEN
-      IF (WithProgeny) THEN
-         IF (UseICRP) THEN
-            FName = TRIM(StartCocktail%MyName)//'_with_ICRP_series.dat'
-         ELSE
-            FName = TRIM(StartCocktail%MyName)//'_with_ENDF_series.dat'
-         ENDIF
-      ELSE
-         IF (UseICRP) THEN
-            FName = TRIM(StartCocktail%MyName)//'_without_ICRP_series.dat'
-         ELSE
-            FName = TRIM(StartCocktail%MyName)//'_without_ENDF_series.dat'
-         ENDIF
-      ENDIF
+   if (MakeWholeSeries) then
+      if (WithProgeny) then
+         if (UseICRP) then
+            FName = trim(StartCocktail%MyName)//'_with_ICRP_series.dat'
+         else
+            FName = trim(StartCocktail%MyName)//'_with_ENDF_series.dat'
+         endif
+      else
+         if (UseICRP) then
+            FName = trim(StartCocktail%MyName)//'_without_ICRP_series.dat'
+         else
+            FName = trim(StartCocktail%MyName)//'_without_ENDF_series.dat'
+         endif
+      endif
 
-      OPEN(ScratchFile,FILE=FNAME,FORM='FORMATTED',ACTION='WRITE')
+      open(ScratchFile,file=FNAME,form='FORMATTED',action='WRITE')
 
-      WRITE(ScratchFile,'(A,1X,1300A12)') 'Time[s]     ',(MyName(jNuclide),jNuclide = 1,NRelevantNuclides)
+      write(ScratchFile,'(A,1X,1300A12)') 'Time[s]     ',(MyName(jNuclide),jNuclide = 1,NRelevantNuclides)
 
-      DO iDelay = 0,NStartingTimes
-         WRITE(ScratchFile,'(EN11.2,1300(1X,EN11.2))') AvailableDelay(iDelay),&
+      do iDelay = 0,NStartingTimes
+         write(ScratchFile,'(EN11.2,1300(1X,EN11.2))') AvailableDelay(iDelay),&
          & (MyRelevantActivity(iDelay,jNuclide),jNuclide = 1,NRelevantNuclides)
 
          !
          ! !!!!!!!!!! The line below is a hack to write amounts instead of activities !!!!!!!!!!!!!!!!!!
          !
-         !       WRITE(ScratchFile,'(EN11.2,1300(1X,EN11.2))') AvailableDelay(iDelay),&
+         !       write(ScratchFile,'(EN11.2,1300(1X,EN11.2))') AvailableDelay(iDelay),&
          !	   & (     MyRelevantActivity(iDelay,jNuclide)/(Ln2/NuclideSpecs(MyNuclide(jNuclide))%HalfTime),&
          !	   & jNuclide = 1,NRelevantNuclides)
-      ENDDO ! loop over delays
+      enddo ! loop over delays
 
-      CLOSE(ScratchFile)
-   ELSE
+      close(ScratchFile)
+   else
       !
       ! Construct mature cocktail on the basis of the nearest pinpoint, which are 15% in delay apart.
       !
       LocX = 1._Float + LOG(NSecondsDelay/FirstDelay)/LOG(DelayGrowthFactor)
       iLocX = NINT(LocX)
 
-      CALL MatureCocktail(StartCocktail,TransitionMatrix(iLocX  ),WithProgeny,CocktailBefore)
-      CALL MatureCocktail(StartCocktail,TransitionMatrix(iLocX+1),WithProgeny,CocktailAfter )
+      call MatureCocktail(StartCocktail,TransitionMatrix(iLocX  ),WithProgeny,CocktailBefore)
+      call MatureCocktail(StartCocktail,TransitionMatrix(iLocX+1),WithProgeny,CocktailAfter )
 
       Alpha = (AvailableDelay(iLocX+1)-NSecondsDelay)/(AvailableDelay(iLocX+1)-AvailableDelay(iLocX))
 
       OutCocktail%MyName = StartCocktail%MyName
       OutCocktail%MyDirectory = StartCocktail%MyDirectory
-      DO iNuclide = 1,NNuclides
+      do iNuclide = 1,NNuclides
          OutCocktail%x(iNuclide) = Alpha*CocktailBefore%x(iNuclide) &
          &                      + (1._Float-Alpha)*CocktailAfter%x(iNuclide)
-      ENDDO
+      enddo
 
-      IF (WithProgeny) THEN
-         IF (UseICRP) THEN
-            FName = '_with_ICRP_'//TRIM(TimeStampString)//'_'//TRIM(TimeUnitString)
-         ELSE
-            FName = '_with_ENDF_'//TRIM(TimeStampString)//'_'//TRIM(TimeUnitString)
-         ENDIF
-      ELSE
-         IF (UseICRP) THEN
-            FName = '_without_ICRP_'//TRIM(TimeStampString)//'_'//TRIM(TimeUnitString)
-         ELSE
-            FName = '_without_ENDF_'//TRIM(TimeStampString)//'_'//TRIM(TimeUnitString)
-         ENDIF
-      ENDIF
+      if (WithProgeny) then
+         if (UseICRP) then
+            FName = '_with_ICRP_'//trim(TimeStampString)//'_'//trim(TimeUnitString)
+         else
+            FName = '_with_ENDF_'//trim(TimeStampString)//'_'//trim(TimeUnitString)
+         endif
+      else
+         if (UseICRP) then
+            FName = '_without_ICRP_'//trim(TimeStampString)//'_'//trim(TimeUnitString)
+         else
+            FName = '_without_ENDF_'//trim(TimeStampString)//'_'//trim(TimeUnitString)
+         endif
+      endif
 
-      CALL SaveCocktail2(OutCocktail,FName)
+      call SaveCocktail2(OutCocktail,FName)
 
-   ENDIF
-END PROGRAM MatureNuclides
+   endif
+end program MatureNuclides

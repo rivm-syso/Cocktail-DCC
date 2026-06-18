@@ -1,4 +1,4 @@
-MODULE LibUtil
+module LibUtil
    !
    ! General purpose utility routines
    !
@@ -12,12 +12,11 @@ MODULE LibUtil
    ! The Netherlands
    ! ____________________________________________________
    !
-   USE libxmath
-   IMPLICIT NONE
+   implicit none
 
-   PRIVATE
+   private
    public :: env_var
-   PUBLIC :: RunShellCommand,FileExists,ListModules,PathAndName,MSYSDir,&
+   public :: RunShellCommand,FileExists,ListModules,PathAndName,MSYSDir,&
       & UpCase,LowCase,Capitalize,DeCapitalize,CutStringInTwo,&
       & AllUpCase,AllLowCase,DefaultLength,ScratchFile,ScrotchFile,&
       & Male,Female,GenderName,RemoveCharacter,CharacterIsADigit
@@ -26,45 +25,45 @@ MODULE LibUtil
    ! etcetera. Only use it if you are SURE that you will close
    ! it immediatelly!
    !
-   INTEGER, PARAMETER :: ScratchFile = 17
-   INTEGER, PARAMETER :: ScrotchFile = 18
+   integer, parameter :: ScratchFile = 17
+   integer, parameter :: ScrotchFile = 18
    !
    ! Gender
    !
-   INTEGER, PARAMETER :: Male = 1
-   INTEGER, PARAMETER :: Female = 2
+   integer, parameter :: Male = 1
+   integer, parameter :: Female = 2
 
-   CHARACTER(6), DIMENSION(2), PARAMETER :: GenderName = ((/'male  ','female'/))
+   character(6), dimension(2), parameter :: GenderName = (['male  ','female'])
    !
    ! To accommodate for long file- and directory names, by default such strings
    ! have the following length:
    !
-   INTEGER, PARAMETER :: DefaultLength = 512 ! With 256 you get problems when wgrib is asked to take action...
+   integer, parameter :: DefaultLength = 512 ! With 256 you get problems when wgrib is asked to take action...
    !
    ! If you call these sources from MinGW/MSYS, then SYSTEM-calls require the path to MSYS.
    ! The default path is set here. With a setting in a settings-file the default can be overruled.
    !
-   CHARACTER(DefaultLength) :: MSYSDir = 'c:/MinGW/msys/1.0/bin'
+   character(DefaultLength) :: MSYSDir = 'c:/MinGW/msys/1.0/bin'
    !!
    ! There are always problems with directory/filename combinations:
    ! Do you have to end the path with a (back-)slash or not?
    ! To solve this problem, a new datatype is created, plus a routine
    ! that glues them together.
-   TYPE PathNameType
-      CHARACTER(DefaultLength) :: Path,Name
-   END TYPE PathNameType
+   type PathNameType
+      character(DefaultLength) :: Path,Name
+   end type PathNameType
    !
    ! To discriminate between forward-slash and backslash, you can refer to the following:
    !
-   INTEGER, PARAMETER :: System_Linux = 1
-   INTEGER, PARAMETER :: System_Windows = 2
-   INTEGER :: TheSystem = System_Linux
+   integer, parameter :: System_Linux = 1
+   integer, parameter :: System_Windows = 2
+   integer :: TheSystem = System_Linux
    !
-   ! The following parameter can be set for debugging this MODULE
+   ! The following parameter can be set for debugging this module
    !
-   INTEGER, PARAMETER :: DebugLevel = 0
+   integer, parameter :: DebugLevel = 0
 
-CONTAINS
+contains
    subroutine env_var(name, val)
       character(*), intent(in) :: name
       character(:), allocatable, intent(out) :: val
@@ -89,311 +88,309 @@ CONTAINS
       endif
    end subroutine
 
-   FUNCTION CharacterIsADigit(Ch)
-      CHARACTER(1), INTENT(IN) :: Ch
-      LOGICAL :: CharacterIsADigit
-      CharacterIsADigit = (INDEX('0123456789',Ch).NE.0)
-   END FUNCTION CharacterIsADigit
+   function CharacterIsADigit(Ch)
+      character(1), intent(in) :: Ch
+      logical :: CharacterIsADigit
+      CharacterIsADigit = (INDEX('0123456789',Ch) /= 0)
+   end function CharacterIsADigit
 
 
 
-   FUNCTION PathAndName(PathName)
+   function PathAndName(PathName)
       !
       ! Return a single string resulting from glueing together directory and filename.
       ! Take a very close look at the slash between them!
       !
-      TYPE(PathNameType), INTENT(IN) :: PathName
+      type(PathNameType), intent(in) :: PathName
 
-      INTEGER :: TheEnd
-      CHARACTER(DefaultLength) :: PathAndName
+      integer :: TheEnd
+      character(DefaultLength) :: PathAndName
 
-      TheEnd = LEN_TRIM(PathName%Path)
-      IF (PathName%Path(TheEnd:TheEnd).EQ.'/') THEN
-         PathAndName = TRIM(PathName%Path)//TRIM(PathName%Name)
-      ELSE
-         PathAndName = TRIM(PathName%Path)//'/'//TRIM(PathName%Name)
-      ENDIF
-   END FUNCTION PathAndName
+      TheEnd = len_trim(PathName%Path)
+      if (PathName%Path(TheEnd:TheEnd) == '/') then
+         PathAndName = trim(PathName%Path)//trim(PathName%Name)
+      else
+         PathAndName = trim(PathName%Path)//'/'//trim(PathName%Name)
+      endif
+   end function PathAndName
 
 
 
-   SUBROUTINE RunShellCommand(Commando,CrashOnError,DoSilent)
+   subroutine RunShellCommand(Commando,CrashOnError,DoSilent)
       !
       ! Perform an external shell-command and if necessary halt on error
       !
-      CHARACTER(*), INTENT(IN) :: Commando
-      INTEGER :: Error,SYSTEM !,ThePlace
-      LOGICAL, INTENT(IN) :: CrashOnError,DoSilent
-      CHARACTER(DefaultLength) :: ReversedCommand
-
-      INTEGER, PARAMETER :: DebugLevel = 0
+      character(*), intent(in) :: Commando
+      integer :: Error,SYSTEM !,ThePlace
+      logical, intent(in) :: CrashOnError,DoSilent
+      character(DefaultLength) :: ReversedCommand
       !
       ! Make a copy
       !
-      ReversedCommand = TRIM(MSYSDir)//'/'//TRIM(Commando)
+      ReversedCommand = trim(MSYSDir)//'/'//trim(Commando)
       !
       ! Try the command
       !
-      IF (TheSystem.EQ.System_Windows) THEN
-         IF (.NOT.DoSilent) WRITE(*,10) TRIM(ReversedCommand)
-         Error = SYSTEM(TRIM(ReversedCommand))
-      ELSE
-         IF (.NOT.DoSilent) WRITE(*,10) TRIM(Commando)
-         Error = SYSTEM(TRIM(Commando))
-      ENDIF
-      10 FORMAT('RunShellCommand : "',A,'"')
+      if (TheSystem == System_Windows) then
+         if (.NOT.DoSilent) write(*,10) trim(ReversedCommand)
+         Error = SYSTEM(trim(ReversedCommand))
+      else
+         if (.NOT.DoSilent) write(*,10) trim(Commando)
+         Error = SYSTEM(trim(Commando))
+      endif
+      10 format('RunShellCommand : "',A,'"')
       !
       ! If failure, try with reversed slashes
       !
-      IF (Error.NE.0) THEN
-         IF (.NOT.DoSilent) WRITE(*,'(A)') 'Failure in shell-command. Retrying with path c:/msys/1.0/bin/ prepended...'
+      if (Error /= 0) then
+         if (.NOT.DoSilent) write(*,'(A)') 'Failure in shell-command. Retrying with path c:/msys/1.0/bin/ prepended...'
 
-         IF (TheSystem.EQ.System_Windows) THEN
-            IF (.NOT.DoSilent) WRITE(*,10) TRIM(Commando)
-            Error = SYSTEM(TRIM(Commando))
-            IF (Error.EQ.0) THEN
+         if (TheSystem == System_Windows) then
+            if (.NOT.DoSilent) write(*,10) trim(Commando)
+            Error = SYSTEM(trim(Commando))
+            if (Error == 0) then
                TheSystem = System_Linux ! Switch system mode to Linux
-               WRITE(*,*)
-               WRITE(*,'(A)') '--> System reacts better to original way of calling: changing to Linux-mode!'
-               WRITE(*,*)
-            ENDIF
-         ELSE
-            IF (.NOT.DoSilent) WRITE(*,10) TRIM(ReversedCommand)
-            Error = SYSTEM(TRIM(ReversedCommand))
-            IF (Error.EQ.0) THEN
+               write(*,*)
+               write(*,'(A)') '--> System reacts better to original way of calling: changing to Linux-mode!'
+               write(*,*)
+            endif
+         else
+            if (.NOT.DoSilent) write(*,10) trim(ReversedCommand)
+            Error = SYSTEM(trim(ReversedCommand))
+            if (Error == 0) then
                TheSystem = System_Windows ! Switch system mode to Windows
-               WRITE(*,*)
-               WRITE(*,'(A)') '--> System reacts better to MSYS-specific calling; changing to Windows-mode!'
-               WRITE(*,*)
-            ENDIF
-         ENDIF
+               write(*,*)
+               write(*,'(A)') '--> System reacts better to MSYS-specific calling; changing to Windows-mode!'
+               write(*,*)
+            endif
+         endif
 
-         IF (Error.NE.0) THEN
-            IF (.NOT.DoSilent) WRITE(*,*) '... sorry, second attempt of shell-command failed either!'
-            IF (.NOT.DoSilent) WRITE(*,20) Error
-            20    FORMAT('Error ',I7,' in execution of command')
-            IF (CrashOnError) STOP
-         ENDIF
-      ENDIF
+         if (Error /= 0) then
+            if (.NOT.DoSilent) write(*,*) '... sorry, second attempt of shell-command failed either!'
+            if (.NOT.DoSilent) write(*,20) Error
+            20    format('Error ',I7,' in execution of command')
+            if (CrashOnError) stop
+         endif
+      endif
 
-      IF ((Error.EQ.0).AND.(.NOT.DoSilent)) WRITE(*,30)
-      30  FORMAT('Shell-command succeeded!')
+      if ((Error == 0).AND.(.NOT.DoSilent)) write(*,30)
+      30  format('Shell-command succeeded!')
 
-   END SUBROUTINE RunShellCommand
+   end subroutine RunShellCommand
 
 
 
-   FUNCTION FileExists(InName)
+   function FileExists(InName)
       !
       ! Check if a certain file exists
       !
-      LOGICAL ThisFileExists,FileExists
-      CHARACTER(*), INTENT(IN) :: InName
-      INQUIRE(FILE=TRIM(InName),EXIST=ThisFileExists)
+      logical ThisFileExists,FileExists
+      character(*), intent(in) :: InName
+      inquire(file=trim(InName),exist=ThisFileExists)
       FileExists = ThisFileExists
-   END FUNCTION FileExists
+   end function FileExists
 
 
 
-   FUNCTION PathNameExists(PathName)
+   function PathNameExists(PathName)
       !
       ! Check if a certain file in a given directory exists
       !
-      LOGICAL ThisPathNameExists,PathNameExists
-      TYPE(PathNameType), INTENT(IN) :: PathName
-      INQUIRE(FILE=TRIM(PathAndName(PathName)),EXIST=ThisPathNameExists)
+      logical ThisPathNameExists,PathNameExists
+      type(PathNameType), intent(in) :: PathName
+      inquire(file=trim(PathAndName(PathName)),exist=ThisPathNameExists)
       PathNameExists = ThisPathNameExists
-   END FUNCTION PathNameExists
+   end function PathNameExists
 
 
 
-   SUBROUTINE RemoveCharacter(MyString,MyCharacter)
+   subroutine RemoveCharacter(MyString,MyCharacter)
       !
       ! Remove 1 character completely from a string
       !
-      CHARACTER(*), INTENT(INOUT) :: MyString
-      CHARACTER, INTENT(IN) :: MyCharacter
-      INTEGER :: MyCharacterPos
+      character(*), intent(inout) :: MyString
+      character, intent(in) :: MyCharacter
+      integer :: MyCharacterPos
 
       MyCharacterPos = INDEX(MyString,MyCharacter)
-      DO WHILE ((MyCharacterPos.GT.0).AND.(MyCharacterPos.LE.LEN_TRIM(MyString)))
-         MyString = MyString(1:(MyCharacterPos-1))//MyString((MyCharacterPos+1):LEN_TRIM(MyString))
+      do while ((MyCharacterPos > 0).AND.(MyCharacterPos <= len_trim(MyString)))
+         MyString = MyString(1:(MyCharacterPos-1))//MyString((MyCharacterPos+1):len_trim(MyString))
          MyCharacterPos = INDEX(MyString,MyCharacter)
-      ENDDO
-   END SUBROUTINE RemoveCharacter
+      enddo
+   end subroutine RemoveCharacter
 
 
 
-   SUBROUTINE CutStringInTwo(StringIn,String1,String2,NoSecondString)
+   subroutine CutStringInTwo(StringIn,String1,String2,NoSecondString)
       !
       ! Cut a string in two pieces. The first part is the first non-trivial
       ! substring until either a space or a tab character
       !
-      CHARACTER(*), INTENT(INOUT) :: StringIn
-      CHARACTER(*), INTENT(OUT) :: String1,String2
-      LOGICAL, INTENT(OUT) :: NoSecondString
+      character(*), intent(inout) :: StringIn
+      character(*), intent(out) :: String1,String2
+      logical, intent(out) :: NoSecondString
       !
       ! Local variables
       !
-      INTEGER :: SpacePosition,TabPosition,CutPosition
-      CHARACTER(500) :: DumStr1,DumStr2
+      integer :: SpacePosition,TabPosition,CutPosition
+      character(500) :: DumStr1,DumStr2
       !
       ! Remove leading spaces or tabs
       !
-      IF (DebugLevel.GT.0) WRITE(*,10) '"'//TRIM(StringIn)//'"'
-      10 FORMAT('Cut : StringIn = ',A)
+      if (DebugLevel > 0) write(*,10) '"'//trim(StringIn)//'"'
+      10 format('Cut : StringIn = ',A)
       DumStr1 = StringIn
-      DO WHILE (((DumStr1(1:1).EQ.CHAR(32)).OR.(DumStr1(1:1).EQ.CHAR(9))).AND.(LEN_TRIM(DumStr1).GT.1))
-         DumStr1 = DumStr1(2:LEN_TRIM(DumStr1))
-      ENDDO
-      IF (DebugLevel.GT.0) WRITE(*,11) TRIM(DumStr1)
-      11 FORMAT(' Cut : DumStr1 zonder spaties aan het begin = "',A,'"')
+      do while (((DumStr1(1:1) == CHAR(32)).OR.(DumStr1(1:1) == CHAR(9))).AND.(len_trim(DumStr1) > 1))
+         DumStr1 = DumStr1(2:len_trim(DumStr1))
+      enddo
+      if (DebugLevel > 0) write(*,11) trim(DumStr1)
+      11 format(' Cut : DumStr1 zonder spaties aan het begin = "',A,'"')
       !
       ! Remove trailing tabs
       !
-      DO WHILE ((DumStr1(LEN_TRIM(DumStr1):LEN_TRIM(DumStr1)).EQ.CHAR(9)).AND.(LEN_TRIM(DumStr1).GT.1))
-         DumStr1 = DumStr1(1:(LEN_TRIM(DumStr1)-1))
-      ENDDO
-      IF (DebugLevel.GT.0) WRITE(*,12) TRIM(DumStr1)
-      12 FORMAT(' Cut : DumStr1 zonder spaties aan het eind = "',A,'"')
+      do while ((DumStr1(len_trim(DumStr1):len_trim(DumStr1)) == CHAR(9)).AND.(len_trim(DumStr1) > 1))
+         DumStr1 = DumStr1(1:(len_trim(DumStr1)-1))
+      enddo
+      if (DebugLevel > 0) write(*,12) trim(DumStr1)
+      12 format(' Cut : DumStr1 zonder spaties aan het eind = "',A,'"')
       !
       ! Find a separator: space or tab
       !
       SpacePosition = INDEX(DumStr1,CHAR(32))
       TabPosition = INDEX(DumStr1,CHAR(9))
       CutPosition = SpacePosition
-      IF ((TabPosition.GT.0).AND.(TabPosition.LT.SpacePosition)) CutPosition = TabPosition
+      if ((TabPosition > 0).AND.(TabPosition < SpacePosition)) CutPosition = TabPosition
 
-      NoSecondString = ((CutPosition.EQ.0).OR.(CutPosition.EQ.(LEN_TRIM(DumStr1)+1)))
+      NoSecondString = ((CutPosition == 0).OR.(CutPosition == (len_trim(DumStr1)+1)))
 
-      IF (DebugLevel.GT.0) WRITE(*,20) TRIM(DumStr1),SpacePosition,TabPosition,CutPosition
-      20 FORMAT(' "',A,'" heeft spatie op ',I3,' en tab op ',I3,' dus we gaan knippen op ',I3)
-      IF (.NOT.NoSecondString) THEN
-         DumStr2 = DumStr1((CutPosition+1):LEN_TRIM(DumStr1))
+      if (DebugLevel > 0) write(*,20) trim(DumStr1),SpacePosition,TabPosition,CutPosition
+      20 format(' "',A,'" heeft spatie op ',I3,' en tab op ',I3,' dus we gaan knippen op ',I3)
+      if (.NOT.NoSecondString) then
+         DumStr2 = DumStr1((CutPosition+1):len_trim(DumStr1))
          DumStr1 = DumStr1(1:(CutPosition-1))
-      ENDIF
-      IF (DebugLevel.GT.0) THEN
-         IF (NoSecondString) THEN
-            WRITE(*,31) TRIM(DumStr1)
-            31 FORMAT(' Aan het eind: "',A,'"  en verder niets!')
-         ELSE
-            WRITE(*,30) TRIM(DumStr1),TRIM(DumStr2)
-            30 FORMAT(' Aan het eind: "',A,'"  en  "',A,'"')
-         ENDIF
-      ENDIF
-      String1 = TRIM(DumStr1)
-      IF (.NOT.NoSecondString) String2 = TRIM(DumStr2)
-      IF (DebugLevel.GT.0) WRITE(*,*)
-   END SUBROUTINE CutStringInTwo
+      endif
+      if (DebugLevel > 0) then
+         if (NoSecondString) then
+            write(*,31) trim(DumStr1)
+            31 format(' Aan het eind: "',A,'"  en verder niets!')
+         else
+            write(*,30) trim(DumStr1),trim(DumStr2)
+            30 format(' Aan het eind: "',A,'"  en  "',A,'"')
+         endif
+      endif
+      String1 = trim(DumStr1)
+      if (.NOT.NoSecondString) String2 = trim(DumStr2)
+      if (DebugLevel > 0) write(*,*)
+   end subroutine CutStringInTwo
 
 
 
-   CHARACTER FUNCTION UpCase(Ch)
+   character function UpCase(Ch)
       !
       ! Make a letter upper case
       !
-      CHARACTER, INTENT(IN) :: Ch
-      CHARACTER :: DumChar
-      IF ((ICHAR(Ch).GE.97).AND.(ICHAR(Ch).LE.122)) THEN
+      character, intent(in) :: Ch
+      character :: DumChar
+      if ((ICHAR(Ch) >= 97).AND.(ICHAR(Ch) <= 122)) then
          DumChar = CHAR(ICHAR(Ch)-32)
-      ELSE
+      else
          DumChar = Ch
-      ENDIF
+      endif
       UpCase = DumChar
-   END FUNCTION UpCase
+   end function UpCase
 
 
 
-   CHARACTER FUNCTION LowCase(Ch)
+   character function LowCase(Ch)
       !
       ! Make a letter lower case
       !
-      CHARACTER, INTENT(IN) :: Ch
-      CHARACTER :: DumChar
-      IF ((ICHAR(Ch).GE.65).AND.(ICHAR(Ch).LE.90)) THEN
+      character, intent(in) :: Ch
+      character :: DumChar
+      if ((ICHAR(Ch) >= 65).AND.(ICHAR(Ch) <= 90)) then
          DumChar = CHAR(ICHAR(Ch)+32)
-      ELSE
+      else
          DumChar = Ch
-      ENDIF
+      endif
       LowCase = DumChar
-   END FUNCTION LowCase
+   end function LowCase
 
 
 
-   SUBROUTINE AllUpCase(String)
+   subroutine AllUpCase(String)
       !
       ! Set all letters to capital
       !
-      CHARACTER(*), INTENT(INOUT) :: String
-      INTEGER :: i,StringLength
-      StringLength = LEN_TRIM(String)
-      DO i=1,StringLength
+      character(*), intent(inout) :: String
+      integer :: i,StringLength
+      StringLength = len_trim(String)
+      do i=1,StringLength
          String(i:i) = UpCase(String(i:i))
-      ENDDO
-   END SUBROUTINE AllUpCase
+      enddo
+   end subroutine AllUpCase
 
 
 
-   SUBROUTINE AllLowCase(String)
+   subroutine AllLowCase(String)
       !
       ! Set all letters to lower case
       !
-      CHARACTER(*), INTENT(INOUT) :: String
-      INTEGER :: i,StringLength
-      StringLength = LEN_TRIM(String)
-      DO i=1,StringLength
+      character(*), intent(inout) :: String
+      integer :: i,StringLength
+      StringLength = len_trim(String)
+      do i=1,StringLength
          String(i:i) = LowCase(String(i:i))
-      ENDDO
-   END SUBROUTINE AllLowCase
+      enddo
+   end subroutine AllLowCase
 
 
 
-   SUBROUTINE Capitalize(String)
+   subroutine Capitalize(String)
       !
       ! Set first letter to capital, rest to lower case
       !
-      CHARACTER(*), INTENT(INOUT) :: String
-      INTEGER :: i,StringLength
-      StringLength = LEN_TRIM(String)
+      character(*), intent(inout) :: String
+      integer :: i,StringLength
+      StringLength = len_trim(String)
       String(1:1) = UpCase(String(1:1))
-      DO i=2,StringLength
+      do i=2,StringLength
          String(i:i) = LowCase(String(i:i))
-      ENDDO
-   END SUBROUTINE Capitalize
+      enddo
+   end subroutine Capitalize
 
 
 
-   SUBROUTINE DeCapitalize(String)
+   subroutine DeCapitalize(String)
       !
       ! Set all letters to lower case
       !
-      CHARACTER(*), INTENT(INOUT) :: String
-      INTEGER :: i,StringLength
-      StringLength = LEN_TRIM(String)
-      DO i=1,StringLength
+      character(*), intent(inout) :: String
+      integer :: i,StringLength
+      StringLength = len_trim(String)
+      do i=1,StringLength
          String(i:i) = LowCase(String(i:i))
-      ENDDO
-   END SUBROUTINE DeCapitalize
+      enddo
+   end subroutine DeCapitalize
 
 
 
-   FUNCTION ListModules(SourceFileName)
+   function ListModules(SourceFileName)
       !
       ! Make a list of the modulenames used in a sourcefile
       !
-      CHARACTER(*), INTENT(IN) :: SourceFileName
-      CHARACTER(DefaultLength) :: Commando
-      LOGICAL, PARAMETER :: CrashOnError = .FALSE., DoSilent = .TRUE.
-      LOGICAL :: ListModules,Okay
+      character(*), intent(in) :: SourceFileName
+      character(DefaultLength) :: Commando
+      logical, parameter :: CrashOnError = .FALSE., DoSilent = .TRUE.
+      logical :: ListModules,Okay
       !
       ! Make a list of the MODULES used by the sourcefile
       !
       Okay = FileExists(SourceFileName)
-      IF (Okay) THEN
-         Commando = 'grep -i -w use '//TRIM(SourceFileName)//' > listmodules.tmp'
-         CALL RunShellCommand(Commando,CrashOnError,DoSilent)
-      ENDIF
+      if (Okay) then
+         Commando = 'grep -i -w use '//trim(SourceFileName)//' > listmodules.tmp'
+         call RunShellCommand(Commando,CrashOnError,DoSilent)
+      endif
 
       ListModules = Okay
-   END FUNCTION ListModules
-END MODULE LibUtil
+   end function ListModules
+end module LibUtil

@@ -1,4 +1,4 @@
-MODULE LibDCC
+module LibDCC
    ! ____________________________________________________
    !
    ! Developed For:
@@ -11,62 +11,63 @@ MODULE LibDCC
    ! The Netherlands
    ! ____________________________________________________
    !
-   USE libxmath
-   USE libutil
-   USE libendf
-   use LibENDF, only: RIVMSourcesPath, isGas
-   IMPLICIT NONE
+   use LibENDF, only: RIVMSourcesPath, isGas, &
+      ReadNProcessENDFNuclideSpecs, ReadNuclideSpecs, NuclideSpecs, GetNuclideNumber, NuclideType, MaxNuclides
+   use LibUtil, only: DefaultLength, ScratchFile, &
+      Male, Female, GenderName
+   use LibXMath, only: Float
+   implicit none
 
-   PRIVATE
+   private
 
-   PUBLIC :: InitLibDCC,ReadTissueDCCs,ReadDCCEffectiveDose,ReadGroundDCCs,DCCEffectiveDose,DCCGround,&
+   public :: InitLibDCC,ReadTissueDCCs,ReadDCCEffectiveDose,ReadGroundDCCs,DCCEffectiveDose,DCCGround,&
    & InAir,Age_Adult,DCCInhalation,ReadInhalationDCCs,Inhalation_public_adult,&
    & DCCThyroidInhalation,ReadThyroidInhalationDCCs
 
-   CHARACTER(DefaultLength) :: ProjectPath = './'
+   character(DefaultLength) :: ProjectPath = './'
 
-   CHARACTER(DefaultLength) :: DCCAirSubmersionPath,DCCSoilContaminationPath,DCCWaterImmersionPath,&
+   character(DefaultLength) :: DCCAirSubmersionPath,DCCSoilContaminationPath,DCCWaterImmersionPath,&
    & DCCInhalationPath
 
    logical :: OPTION_NobleGroundShine = .False.
 
-   INTEGER, PARAMETER :: InAir = 1
-   INTEGER, PARAMETER :: InWater = 2
+   integer, parameter :: InAir = 1
+   integer, parameter :: InWater = 2
 
-   INTEGER, PARAMETER :: Tissue_R_marrow   =  1
-   INTEGER, PARAMETER :: Tissue_Colon      =  2
-   INTEGER, PARAMETER :: Tissue_Lungs      =  3
-   INTEGER, PARAMETER :: Tissue_ST_wall    =  4
-   INTEGER, PARAMETER :: Tissue_Breast     =  5
-   INTEGER, PARAMETER :: Tissue_Ovaries    =  6
-   INTEGER, PARAMETER :: Tissue_Testes     =  7
-   INTEGER, PARAMETER :: Tissue_UB_wall    =  8
-   INTEGER, PARAMETER :: Tissue_Oesophagus =  9
-   INTEGER, PARAMETER :: Tissue_Liver      = 10
-   INTEGER, PARAMETER :: Tissue_Thyroid    = 11
-   INTEGER, PARAMETER :: Tissue_Endost_BS  = 12
-   INTEGER, PARAMETER :: Tissue_Brain      = 13
-   INTEGER, PARAMETER :: Tissue_S_glands   = 14
-   INTEGER, PARAMETER :: Tissue_Skin       = 15
-   INTEGER, PARAMETER :: Tissue_Adrenals   = 16
-   INTEGER, PARAMETER :: Tissue_ET         = 17
-   INTEGER, PARAMETER :: Tissue_GB_wall    = 18
-   INTEGER, PARAMETER :: Tissue_Ht_wall    = 19
-   INTEGER, PARAMETER :: Tissue_Kidneys    = 20
-   INTEGER, PARAMETER :: Tissue_Lymph      = 21
-   INTEGER, PARAMETER :: Tissue_Muscle     = 22
-   INTEGER, PARAMETER :: Tissue_O_mucosa   = 23
-   INTEGER, PARAMETER :: Tissue_Pancreas   = 24
-   INTEGER, PARAMETER :: Tissue_Prostate   = 25
-   INTEGER, PARAMETER :: Tissue_SI_wall    = 26
-   INTEGER, PARAMETER :: Tissue_Spleen     = 27
-   INTEGER, PARAMETER :: Tissue_Thymus     = 28
-   INTEGER, PARAMETER :: Tissue_Uterus     = 29
+   integer, parameter :: Tissue_R_marrow   =  1
+   integer, parameter :: Tissue_Colon      =  2
+   integer, parameter :: Tissue_Lungs      =  3
+   integer, parameter :: Tissue_ST_wall    =  4
+   integer, parameter :: Tissue_Breast     =  5
+   integer, parameter :: Tissue_Ovaries    =  6
+   integer, parameter :: Tissue_Testes     =  7
+   integer, parameter :: Tissue_UB_wall    =  8
+   integer, parameter :: Tissue_Oesophagus =  9
+   integer, parameter :: Tissue_Liver      = 10
+   integer, parameter :: Tissue_Thyroid    = 11
+   integer, parameter :: Tissue_Endost_BS  = 12
+   integer, parameter :: Tissue_Brain      = 13
+   integer, parameter :: Tissue_S_glands   = 14
+   integer, parameter :: Tissue_Skin       = 15
+   integer, parameter :: Tissue_Adrenals   = 16
+   integer, parameter :: Tissue_ET         = 17
+   integer, parameter :: Tissue_GB_wall    = 18
+   integer, parameter :: Tissue_Ht_wall    = 19
+   integer, parameter :: Tissue_Kidneys    = 20
+   integer, parameter :: Tissue_Lymph      = 21
+   integer, parameter :: Tissue_Muscle     = 22
+   integer, parameter :: Tissue_O_mucosa   = 23
+   integer, parameter :: Tissue_Pancreas   = 24
+   integer, parameter :: Tissue_Prostate   = 25
+   integer, parameter :: Tissue_SI_wall    = 26
+   integer, parameter :: Tissue_Spleen     = 27
+   integer, parameter :: Tissue_Thymus     = 28
+   integer, parameter :: Tissue_Uterus     = 29
 
-   INTEGER, PARAMETER :: NTissues          = 29
+   integer, parameter :: NTissues          = 29
 
-   CHARACTER(10), PARAMETER, DIMENSION(NTissues) :: TissueName = &
-      & (/'R-marrow  ',&
+   character(10), parameter, dimension(NTissues) :: TissueName = &
+      & ['R-marrow  ',&
       &   'Colon     ',&
       &   'Lungs     ',&
       &   'ST-wall   ',&
@@ -94,29 +95,21 @@ MODULE LibDCC
       &   'SI-wall   ',&
       &   'Spleen    ',&
       &   'Thymus    ',&
-      &   'Uterus    '/)
+      &   'Uterus    ']
 
-   INTEGER, PARAMETER :: Age_Adult   = 1
-   INTEGER, PARAMETER :: Age_15yr    = 2
-   INTEGER, PARAMETER :: Age_10yr    = 3
-   INTEGER, PARAMETER :: Age_5yr     = 4
-   INTEGER, PARAMETER :: Age_1yr     = 5
-   INTEGER, PARAMETER :: Age_Newborn = 6
+   integer, parameter :: Age_Adult   = 1
+   integer, parameter :: Age_15yr    = 2
+   integer, parameter :: Age_10yr    = 3
+   integer, parameter :: Age_5yr     = 4
+   integer, parameter :: Age_1yr     = 5
+   integer, parameter :: Age_Newborn = 6
 
-   INTEGER, PARAMETER :: NDCCAges = 6
+   integer, parameter :: NDCCAges = 6
 
-   CHARACTER(7), PARAMETER, DIMENSION(NDCCAges) :: DCCAgeName = &
-      & (/'Adult  ',&
-      &   '15yr   ',&
-      &   '10yr   ',&
-      &   '5yr    ',&
-      &   '1yr    ',&
-      &   'Newborn'/)
+   integer, parameter :: NGroundDepths = 9
 
-   INTEGER, PARAMETER :: NGroundDepths = 9
-
-   CHARACTER(45), PARAMETER, DIMENSION(NGroundDepths) :: GroundDepthName = &
-      & (/'Planar sources at specific depths/0.5 g.cm-2/',&
+   character(45), parameter, dimension(NGroundDepths) :: GroundDepthName = &
+      & ['Planar sources at specific depths/0.5 g.cm-2/',&
       &   'Exponential sources/0.5 g.cm-2/              ',&
       &   'Exponential sources/1.0 g.cm-2/              ',&
       &   'Exponential sources/2.5 g.cm-2/              ',&
@@ -124,62 +117,50 @@ MODULE LibDCC
       &   'Exponential sources/10.0 g.cm-2/             ',&
       &   'Exponential sources/20.0 g.cm-2/             ',&
       &   'Exponential sources/50.0 g.cm-2/             ',&
-      &   'Exponential sources/100.0 g.cm-2/            '/)
+      &   'Exponential sources/100.0 g.cm-2/            ']
 
-   INTEGER, PARAMETER :: NInhalationDCCs = 8
+   integer, parameter :: NInhalationDCCs = 8
 
-   INTEGER, PARAMETER :: Inhalation_worker_1um     = 1
-   INTEGER, PARAMETER :: Inhalation_worker_5um     = 2
-   INTEGER, PARAMETER :: Inhalation_public_infant  = 3
-   INTEGER, PARAMETER :: Inhalation_public_1_year  = 4
-   INTEGER, PARAMETER :: Inhalation_public_5_year  = 5
-   INTEGER, PARAMETER :: Inhalation_public_10_year = 6
-   INTEGER, PARAMETER :: Inhalation_public_15_year = 7
-   INTEGER, PARAMETER :: Inhalation_public_adult   = 8
+   integer, parameter :: Inhalation_worker_1um     = 1
+   integer, parameter :: Inhalation_worker_5um     = 2
+   integer, parameter :: Inhalation_public_infant  = 3
+   integer, parameter :: Inhalation_public_1_year  = 4
+   integer, parameter :: Inhalation_public_5_year  = 5
+   integer, parameter :: Inhalation_public_10_year = 6
+   integer, parameter :: Inhalation_public_15_year = 7
+   integer, parameter :: Inhalation_public_adult   = 8
 
-   CHARACTER(14), PARAMETER, DIMENSION(NInhalationDCCs) :: InhalationDCCName = &
-      & (/'worker 1um    ',&
-      &   'worker 5um    ',&
-      &   'public infant ',&
-      &   'public 1 year ',&
-      &   'public 5 year ',&
-      &   'public 10 year',&
-      &   'public 15 year',&
-      &   'public adult  '/)
+   type DCCVector
+      real(Float), dimension(MaxNuclides) :: x
+   end type DCCVector
 
-   TYPE DCCVector
-      REAL(Float), DIMENSION(MaxNuclides) :: x
-   END TYPE DCCVector
+   type(DCCVector), dimension(InAir:InWater,Male:Female,NTissues,NDCCAges) :: DCCTissue
+   type(DCCVector), dimension(NGroundDepths,NDCCAges) :: DCCGround
+   type(DCCVector), dimension(NGroundDepths) :: DCCEquivalentDoseGround,DCCKermaRateGround
+   type(DCCVector), dimension(InAir:InWater,NDCCAges) :: DCCEffectiveDose
+   type(DCCVector) :: DCCEquivalentDoseInAir,DCCKermaRateInAir,DCCThyroidInhalation
+   type(DCCVector), dimension(NInhalationDCCs) :: DCCInhalation
 
-   TYPE(DCCVector), DIMENSION(InAir:InWater,Male:Female,NTissues,NDCCAges) :: DCCTissue
-   TYPE(DCCVector), DIMENSION(NGroundDepths,NDCCAges) :: DCCGround
-   TYPE(DCCVector), DIMENSION(NGroundDepths) :: DCCEquivalentDoseGround,DCCKermaRateGround
-   TYPE(DCCVector), DIMENSION(InAir:InWater,NDCCAges) :: DCCEffectiveDose
-   TYPE(DCCVector) :: DCCEquivalentDoseInAir,DCCKermaRateInAir,DCCThyroidInhalation
-   TYPE(DCCVector), DIMENSION(NInhalationDCCs) :: DCCInhalation
+   type(NuclideType), dimension(0:MaxNuclides) :: RegularizedNuclideSpecs
+   real(Float), dimension(MaxNuclides,MaxNuclides) :: RegularizedMotherDaughterMatrix
 
-   REAL(Float) :: BreathingRate = 1.2_Float ! [m3/h] Value can be overruled later
+contains
 
-   TYPE(NuclideType), DIMENSION(0:MaxNuclides) :: RegularizedNuclideSpecs
-   REAL(Float), DIMENSION(MaxNuclides,MaxNuclides) :: RegularizedMotherDaughterMatrix
-
-CONTAINS
-
-   SUBROUTINE InitLibDCC(UseICRP)
+   subroutine InitLibDCC(UseICRP)
       !
       ! Initialize this library
       !
       use LibUtil, only: env_var
 
-      LOGICAL, INTENT(IN) :: UseICRP
+      logical, intent(in) :: UseICRP
 
       character(:), allocatable :: DCCCalcPath
-      REAL(Float) :: tMin
-      INTEGER, PARAMETER :: DebugLevel = 0
+      real(Float) :: tMin
+      integer, parameter :: DebugLevel = 0
 
-      IF (UseICRP) THEN
-         CALL ReadNuclideSpecs(RIVMSourcesPath() // '/ICRP-07.NDX')
-      ELSE
+      if (UseICRP) then
+         call ReadNuclideSpecs(RIVMSourcesPath() // '/ICRP-07.NDX')
+      else
          !
          ! Set shortest halflife that is admitted to the numerical scheme for solving the Bateman equations.
          ! Shorter ones are skipped: the grandmother is directly transformed into the grand-daughter.
@@ -187,229 +168,227 @@ CONTAINS
          !
          tMin = 10._Float ! [s]
 
-         IF (DebugLevel.GT.0) THEN
-            WRITE(*,'(A)') 'Set shortest halflife admitted to the numerical scheme for solving the Bateman equations.'
-            WRITE(*,'(A)') 'Shorter ones are skipped: the grandmother is directly transformed into the grand-daughter.'
-            WRITE(*,'(A)') 'The missing decay steps are added afterwards.'
-            WRITE(*,'(A,F15.5,A)') 'For this run, we choose tMin = ',tMin,' [s]'
-         ENDIF
+         if (DebugLevel > 0) then
+            write(*,'(A)') 'Set shortest halflife admitted to the numerical scheme for solving the Bateman equations.'
+            write(*,'(A)') 'Shorter ones are skipped: the grandmother is directly transformed into the grand-daughter.'
+            write(*,'(A)') 'The missing decay steps are added afterwards.'
+            write(*,'(A,F15.5,A)') 'For this run, we choose tMin = ',tMin,' [s]'
+         endif
 
-         CALL ReadNProcessENDFNuclideSpecs(tMin,RegularizedNuclideSpecs,RegularizedMotherDaughterMatrix)
-      ENDIF
+         call ReadNProcessENDFNuclideSpecs(tMin,RegularizedNuclideSpecs,RegularizedMotherDaughterMatrix)
+      endif
 
       call env_var('COCKTAIL_DCC_ICRP_SJ_DIR', DCCCalcPath)
       if (.not. allocated(DCCCalcPath)) error stop 'need to set environment variable: COCKTAIL_DCC_ICRP_SJ_DIR'
-      DCCAirSubmersionPath = TRIM(DCCCalcPath) // '/Air submersion/'
-      DCCSoilContaminationPath = TRIM(DCCCalcPath) // '/Soil contamination/'
-      DCCWaterImmersionPath = TRIM(DCCCalcPath) // '/Water immersion/'
-      DCCInhalationPath = TRIM(ProjectPath)//'resources/'
-   END SUBROUTINE InitLibDCC
+      DCCAirSubmersionPath = trim(DCCCalcPath) // '/Air submersion/'
+      DCCSoilContaminationPath = trim(DCCCalcPath) // '/Soil contamination/'
+      DCCWaterImmersionPath = trim(DCCCalcPath) // '/Water immersion/'
+      DCCInhalationPath = trim(ProjectPath)//'resources/'
+   end subroutine InitLibDCC
 
-   SUBROUTINE ReadTissueDCCs()
+   subroutine ReadTissueDCCs()
       !
       ! Read tissue- and gender specific DCCs
       ! Attention: This file has only the ICRP nuclides, but the reference in this model may be ENDF,
       ! which has ~ 3 x more nuclides!
       !
-      CHARACTER(DefaultLength) :: FName,ALine
-      INTEGER :: iGender,iLine,jNuclide,iTissue,iAge,iImmersion,NDashLinesFound
-      CHARACTER(10) :: MyTissueName,MyNuclideName
-      LOGICAL :: IsDashLine
+      character(DefaultLength) :: FName,ALine
+      integer :: iGender,iLine,jNuclide,iTissue,iAge,iImmersion,NDashLinesFound
+      character(10) :: MyTissueName,MyNuclideName
+      logical :: IsDashLine
 
-      DO iImmersion = InAir,InWater
-         DO iGender = Male,Female
-            FName = 'Nuclide-specific_EquivalentDose_'//TRIM(GenderName(iGender))//'.txt'
-            IF (iImmersion.EQ.InAir) THEN
-               FName = 'Air_'//TRIM(FName)
-               FName = TRIM(DCCAirSubmersionPath)//TRIM(FName)
-            ELSE
-               FName = 'Water_'//TRIM(FName)
-               FName = TRIM(DCCWaterImmersionPath)//TRIM(FName)
-            ENDIF
-            OPEN(ScratchFile,FILE=FName,FORM='FORMATTED',ACTION='READ')
+      do iImmersion = InAir,InWater
+         do iGender = Male,Female
+            FName = 'Nuclide-specific_EquivalentDose_'//trim(GenderName(iGender))//'.txt'
+            if (iImmersion == InAir) then
+               FName = 'Air_'//trim(FName)
+               FName = trim(DCCAirSubmersionPath)//trim(FName)
+            else
+               FName = 'Water_'//trim(FName)
+               FName = trim(DCCWaterImmersionPath)//trim(FName)
+            endif
+            open(ScratchFile,file=FName,form='FORMATTED',action='READ')
             !
             ! Skip header
             !
             NDashLinesFound = 0
             iLine = 0
 
-            DO WHILE (NDashLinesFound.LT.2)
-               READ(ScratchFile,'(A)') ALine
+            do while (NDashLinesFound < 2)
+               read(ScratchFile,'(A)') ALine
                iLine = iLine + 1
-               IF (ALine(1:1).EQ.'-') NDashLinesFound = NDashLinesFound + 1
-            ENDDO
+               if (ALine(1:1) == '-') NDashLinesFound = NDashLinesFound + 1
+            enddo
             !
             ! Read data for all nuclides
             !
             IsDashLine = .FALSE.
 
-            DO WHILE (.NOT.IsDashLine)
-               DO iTissue = 1,NTissues
-                  READ(ScratchFile,'(A)',END=10) ALine
+            do while (.NOT.IsDashLine)
+               do iTissue = 1,NTissues
+                  read(ScratchFile,'(A)',end=10) ALine
                   iLine = iLine + 1
 
-                  IsDashLine = (INDEX(ALine,'-----').GT.0)
+                  IsDashLine = (INDEX(ALine,'-----') > 0)
 
-                  IF (.NOT.IsDashLine) THEN
+                  if (.NOT.IsDashLine) then
                      !
                      ! Get nuclide and check name
                      !
-                     IF (iTissue.EQ.1) THEN
+                     if (iTissue == 1) then
                         MyNuclideName = ALine(1:7)
                         jNuclide = GetNuclideNumber(MyNuclideName)
-                        IF (jNuclide.EQ.0) THEN
-                           WRITE(*,'(A,I0,A,A)') 'At line ',iLine,' in file '//TRIM(FName),&
+                        if (jNuclide == 0) then
+                           write(*,'(A,I0,A,A)') 'At line ',iLine,' in file '//trim(FName),&
                            & ' : found nuclide '//MyNuclideName//', but I cannot give it a number... Exiting!!'
-                           CALL EXIT()
-                        ENDIF
-                     ENDIF ! First organ
+                           call exit()
+                        endif
+                     endif ! First organ
                      !
                      ! Get and check tissue name
                      !
                      MyTissueName = ALine(9:18)
-                     IF (MyTissueName.NE.TissueName(iTissue)) THEN
-                        WRITE(*,'(A,I0,A)') 'At line ',iLine,&
+                     if (MyTissueName /= TissueName(iTissue)) then
+                        write(*,'(A,I0,A)') 'At line ',iLine,&
                         & ' : expected tissue '//TissueName(iTissue)//', but found '//MyTissueName//'! Exiting!!'
-                        CALL EXIT()
-                     ENDIF
+                        call exit()
+                     endif
                      !
                      ! Read values
                      !
-                     READ(ALine(25:DefaultLength),*) (DCCTissue(iImmersion,iGender,iTissue,iAge)%x(jNuclide),iAge=1,NDCCAges)
-                  ENDIF ! this is not a dashline
-               ENDDO ! loop over tissues
-               READ(ScratchFile,*) ! Skip line with dashes
+                     read(ALine(25:DefaultLength),*) (DCCTissue(iImmersion,iGender,iTissue,iAge)%x(jNuclide),iAge=1,NDCCAges)
+                  endif ! this is not a dashline
+               enddo ! loop over tissues
+               read(ScratchFile,*) ! Skip line with dashes
                iLine = iLine + 1
-            ENDDO ! loop over nuclides
+            enddo ! loop over nuclides
 
-            10    CONTINUE
+            10    continue
 
-            CLOSE(ScratchFile)
-         ENDDO ! loop over gender
-      ENDDO ! loop over in air and in water
-   END SUBROUTINE ReadTissueDCCs
+            close(ScratchFile)
+         enddo ! loop over gender
+      enddo ! loop over in air and in water
+   end subroutine ReadTissueDCCs
 
 
 
-   SUBROUTINE ReadDCCEffectiveDose()
+   subroutine ReadDCCEffectiveDose()
       !
       ! Read effective dose DCCs
       ! Attention: This file has only the ICRP nuclides, but the reference in this model may be ENDF,
       ! which has ~ 3 x more nuclides!
       !
-      CHARACTER(DefaultLength) :: FName,ALine
-      INTEGER :: iLine,jNuclide,iAge,NDashLinesFound,iImmersion
-      CHARACTER(10) :: MyNuclideName
-      LOGICAL :: IsDashLine
+      character(DefaultLength) :: FName,ALine
+      integer :: iLine,jNuclide,iAge,NDashLinesFound,iImmersion
+      character(10) :: MyNuclideName
+      logical :: IsDashLine
 
-      INTEGER, PARAMETER :: DebugLevel = 0
-
-      DO iImmersion = InAir,InWater
+      do iImmersion = InAir,InWater
          FName = 'Nuclide-specific_EffectiveDose.txt'
-         IF (iImmersion.EQ.InAir) THEN
-            FName = 'Air_'//TRIM(FName)
-            FName = TRIM(DCCAirSubmersionPath)//TRIM(FName)
-         ELSE
-            FName = 'Water_'//TRIM(FName)
-            FName = TRIM(DCCWaterImmersionPath)//TRIM(FName)
-         ENDIF
+         if (iImmersion == InAir) then
+            FName = 'Air_'//trim(FName)
+            FName = trim(DCCAirSubmersionPath)//trim(FName)
+         else
+            FName = 'Water_'//trim(FName)
+            FName = trim(DCCWaterImmersionPath)//trim(FName)
+         endif
 
-         OPEN(ScratchFile,FILE=FName,FORM='FORMATTED',ACTION='READ')
+         open(ScratchFile,file=FName,form='FORMATTED',action='READ')
          !
          ! Skip header
          !
          NDashLinesFound = 0
          iLine = 0
 
-         DO WHILE (NDashLinesFound.LT.2)
-            READ(ScratchFile,'(A)') ALine
+         do while (NDashLinesFound < 2)
+            read(ScratchFile,'(A)') ALine
             iLine = iLine + 1
-            IF (ALine(1:1).EQ.'-') NDashLinesFound = NDashLinesFound + 1
-         ENDDO
+            if (ALine(1:1) == '-') NDashLinesFound = NDashLinesFound + 1
+         enddo
          !
          ! Read data for all nuclides
          !
-         DO
-            READ(ScratchFile,'(A)',END=10) ALine
+         do
+            read(ScratchFile,'(A)',end=10) ALine
             iLine = iLine + 1
 
-            IsDashLine = (INDEX(ALine,'-----').GT.0)
+            IsDashLine = (INDEX(ALine,'-----') > 0)
 
-            IF (.NOT.IsDashLine) THEN
+            if (.NOT.IsDashLine) then
                !
                ! Get nuclide and check name
                !
                MyNuclideName = ALine(1:7)
                jNuclide = GetNuclideNumber(MyNuclideName)
-               IF (jNuclide.EQ.0) THEN
-                  WRITE(*,'(A,I0,A,A)') 'At line ',iLine,' in file '//TRIM(FName),&
+               if (jNuclide == 0) then
+                  write(*,'(A,I0,A,A)') 'At line ',iLine,' in file '//trim(FName),&
                   & ' : found nuclide '//MyNuclideName//', but I cannot give it a number... Exiting!!'
-                  CALL EXIT()
-               ENDIF
+                  call exit()
+               endif
                !
                ! Read values
                !
-               IF (iImmersion.EQ.InAir) THEN
-                  READ(ALine(18:DefaultLength),*) (DCCEffectiveDose(iImmersion,iAge)%x(jNuclide),iAge=1,NDCCAges),&
+               if (iImmersion == InAir) then
+                  read(ALine(18:DefaultLength),*) (DCCEffectiveDose(iImmersion,iAge)%x(jNuclide),iAge=1,NDCCAges),&
                      & DCCEquivalentDoseInAir%x(jNuclide),DCCKermaRateInAir%x(jNuclide)
-               ELSE
-                  READ(ALine(18:DefaultLength),*) (DCCEffectiveDose(iImmersion,iAge)%x(jNuclide),iAge=1,NDCCAges)
-               ENDIF
-            ENDIF ! not a dash line
-         ENDDO ! loop over nuclides
+               else
+                  read(ALine(18:DefaultLength),*) (DCCEffectiveDose(iImmersion,iAge)%x(jNuclide),iAge=1,NDCCAges)
+               endif
+            endif ! not a dash line
+         enddo ! loop over nuclides
 
-         10  CONTINUE
+         10  continue
 
-         CLOSE(ScratchFile)
-      ENDDO ! loop over air and water
-   END SUBROUTINE ReadDCCEffectiveDose
+         close(ScratchFile)
+      enddo ! loop over air and water
+   end subroutine ReadDCCEffectiveDose
 
 
 
-   SUBROUTINE ReadGroundDCCs()
+   subroutine ReadGroundDCCs()
       !
       ! Read ground DCCs
       !
-      CHARACTER(DefaultLength) :: FName,ALine
-      INTEGER :: iLine,jNuclide,iGroundDepth,iAge,DumLine, iSkip
-      CHARACTER(10) :: MyNuclideName
-      LOGICAL :: IsDashLine
+      character(DefaultLength) :: FName,ALine
+      integer :: iLine,jNuclide,iGroundDepth,iAge,iSkip
+      character(10) :: MyNuclideName
+      logical :: IsDashLine
 
-      DO iGroundDepth = 1,NGroundDepths
-         FName = TRIM(GroundDepthName(iGroundDepth))//'Soil_Nuclide-specific_EffectiveDose.txt'
-         FName = TRIM(DCCSoilContaminationPath)//TRIM(FName)
-         OPEN(ScratchFile,FILE=FName,FORM='FORMATTED',ACTION='READ')
+      do iGroundDepth = 1,NGroundDepths
+         FName = trim(GroundDepthName(iGroundDepth))//'Soil_Nuclide-specific_EffectiveDose.txt'
+         FName = trim(DCCSoilContaminationPath)//trim(FName)
+         open(ScratchFile,file=FName,form='FORMATTED',action='READ')
          !
          ! Skip header 10 lines
          !
          do iSkip = 1,10
-            READ(ScratchFile,*)
+            read(ScratchFile,*)
          enddo
          iLine = 10
          !
          ! Read data for all nuclides
          !
-         DO
-            READ(ScratchFile,'(A)',END=10) ALine
+         do
+            read(ScratchFile,'(A)',end=10) ALine
             iLine = iLine + 1
 
-            IsDashLine = (INDEX(ALine,'-----').GT.0)
+            IsDashLine = (INDEX(ALine,'-----') > 0)
 
-            IF (.NOT.IsDashLine) THEN
+            if (.NOT.IsDashLine) then
                !
                ! Get nuclide and check name
                !
                MyNuclideName = ALine(1:7)
                jNuclide = GetNuclideNumber(MyNuclideName)
-               IF (jNuclide.EQ.0) THEN
-                  WRITE(*,'(A,I0,A,A)') 'At line ',iLine,' in file '//TRIM(FName),&
+               if (jNuclide == 0) then
+                  write(*,'(A,I0,A,A)') 'At line ',iLine,' in file '//trim(FName),&
                   & ' : found nuclide '//MyNuclideName//', but I cannot give it a number... Exiting!!'
-                  CALL EXIT()
-               ENDIF
+                  call exit()
+               endif
                !
                ! Read values
                !
-               READ(ALine(9:DefaultLength),*) (DCCGround(iGroundDepth,iAge)%x(jNuclide),iAge=1,NDCCAges),&
+               read(ALine(9:DefaultLength),*) (DCCGround(iGroundDepth,iAge)%x(jNuclide),iAge=1,NDCCAges),&
                & DCCEquivalentDoseGround(iGroundDepth)%x(jNuclide),DCCKermaRateGround(iGroundDepth)%x(jNuclide)
                !
                ! check if it is a noble gas and if they are supposed to have groundshine
@@ -420,96 +399,96 @@ CONTAINS
                   DCCKermaRateGround(:)%x(jNuclide) = 0._Float
                endif
 
-            ENDIF ! not a dash line
-         ENDDO ! loop over nuclides
+            endif ! not a dash line
+         enddo ! loop over nuclides
 
-         10  CONTINUE
+         10  continue
 
-         CLOSE(ScratchFile)
-      ENDDO ! loop over in air and in water
-   END SUBROUTINE ReadGroundDCCs
+         close(ScratchFile)
+      enddo ! loop over in air and in water
+   end subroutine ReadGroundDCCs
 
 
 
-   SUBROUTINE ReadInhalationDCCs()
+   subroutine ReadInhalationDCCs()
       !
       ! Read inhalation DCCs
       !
-      CHARACTER(DefaultLength) :: FName,ALine
-      INTEGER :: iLine,iNuclide,DumLine,iInhalationDCC
-      CHARACTER(10) :: MyNuclideName
+      character(DefaultLength) :: FName,ALine
+      integer :: iLine,iNuclide,iInhalationDCC
+      character(10) :: MyNuclideName
 
       FName = 'CoVeGa_v63_voorRapport_Inhalation.prn'
-      FName = TRIM(DCCInhalationPath)//TRIM(FName)
-      OPEN(ScratchFile,FILE=FName,FORM='FORMATTED',ACTION='READ')
+      FName = trim(DCCInhalationPath)//trim(FName)
+      open(ScratchFile,file=FName,form='FORMATTED',action='READ')
       !
       ! Skip header
       !
-      READ(ScratchFile,*)
+      read(ScratchFile,*)
       !
       ! Read data for all nuclides
       !
-      DO iLine = 2,1253
-         READ(ScratchFile,'(A)') ALine
+      do iLine = 2,1253
+         read(ScratchFile,'(A)') ALine
          !
          ! Get nuclide and check name
          !
-         READ(ALine,*) MyNuclideName
+         read(ALine,*) MyNuclideName
          iNuclide = GetNuclideNumber(MyNuclideName)
-         IF (iNuclide.EQ.0) THEN
-            WRITE(*,'(A,I0,A,A)') 'At line ',iLine,' in file '//TRIM(FName),&
+         if (iNuclide == 0) then
+            write(*,'(A,I0,A,A)') 'At line ',iLine,' in file '//trim(FName),&
             & ' : found nuclide '//MyNuclideName//', but I cannot give it a number... Exiting!!'
-            CALL EXIT()
-         ENDIF
+            call exit()
+         endif
          !
          ! Read values in Sv/Bq
          !
-         READ(ALine(58:DefaultLength),*) (DCCInhalation(iInhalationDCC)%x(iNuclide),iInhalationDCC=1,NInhalationDCCs)
+         read(ALine(58:DefaultLength),*) (DCCInhalation(iInhalationDCC)%x(iNuclide),iInhalationDCC=1,NInhalationDCCs)
 
-      ENDDO ! loop over lines in file
+      enddo ! loop over lines in file
 
-      CLOSE(ScratchFile)
-   END SUBROUTINE ReadInhalationDCCs
+      close(ScratchFile)
+   end subroutine ReadInhalationDCCs
 
 
 
-   SUBROUTINE ReadThyroidInhalationDCCs()
+   subroutine ReadThyroidInhalationDCCs()
       !
       ! Read inhalation DCCs
       !
-      CHARACTER(DefaultLength) :: FName,ALine
-      INTEGER :: iLine,iNuclide,DumLine
-      CHARACTER(10) :: MyNuclideName
-      REAL(Float) :: Dum
+      character(DefaultLength) :: FName,ALine
+      integer :: iLine,iNuclide
+      character(10) :: MyNuclideName
+      real(Float) :: Dum
 
       FName = RIVMSourcesPath() // '/dccunix.dat'
-      OPEN(ScratchFile,FILE=FName,FORM='FORMATTED',ACTION='READ')
+      open(ScratchFile,file=FName,form='FORMATTED',action='READ')
       !
       ! Skip header
       !
-      READ(ScratchFile,*)
+      read(ScratchFile,*)
       !
       ! Read data for all nuclides
       !
-      DO iLine = 2,247
-         READ(ScratchFile,'(A)') ALine
+      do iLine = 2,247
+         read(ScratchFile,'(A)') ALine
          !
          ! Get nuclide and check name
          !
-         READ(ALine,*) MyNuclideName
+         read(ALine,*) MyNuclideName
          iNuclide = GetNuclideNumber(MyNuclideName)
-         IF (iNuclide.EQ.0) THEN
-            WRITE(*,'(A,I0,A,A)') 'At line ',iLine,' in file '//TRIM(FName),&
+         if (iNuclide == 0) then
+            write(*,'(A,I0,A,A)') 'At line ',iLine,' in file '//trim(FName),&
             & ' : found nuclide '//MyNuclideName//', but I cannot give it a number... Skipping nuclide!!'
-         ELSE
+         else
             !
             ! Read values in Sv/Bq
             !
-            READ(ALine(9:DefaultLength),*) Dum,DCCThyroidInhalation%x(iNuclide)
-         ENDIF
+            read(ALine(9:DefaultLength),*) Dum,DCCThyroidInhalation%x(iNuclide)
+         endif
 
-      ENDDO ! loop over lines in file
+      enddo ! loop over lines in file
 
-      CLOSE(ScratchFile)
-   END SUBROUTINE ReadThyroidInhalationDCCs
-END MODULE LibDCC
+      close(ScratchFile)
+   end subroutine ReadThyroidInhalationDCCs
+end module LibDCC

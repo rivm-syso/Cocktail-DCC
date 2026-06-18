@@ -2,9 +2,9 @@ Nuclides ICRP-107 Used dataset: Worker, 5   EXT NUCL   Worker, 1 ?m  Worker, 5 ?
        H-3            4.10E-11                           4.10E-11      4.10E-11      1.20E-09      1.00E-09      6.30E-10      3.80E-10      2.80E-10      2.60E-10           Al DCs in units of Sv/Bq
        Be-7           4.60E-11                           5.20E-11      4.60E-11      2.80E-10      2.40E-10      1.40E-10      9.60E-11      6.80E-11      5.50E-11
       Be-10           1.90E-08                           3.20E-08      1.90E-08      9.90E-08      9.10E-08      6.10E-08      4.20E-08      3.70E-08      3.50E-08           Values taken from file (pasted as values):
-       C-10           0.00E+00                           0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00           N:\Projecten\SamenwerkingBelV\Werksessie_nov2020\DCCs\Inh_
+       C-10           0.00E+00                           0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00
        C-11           3.20E-12                           3.20E-12      3.20E-12      1.60E-10      1.10E-10      5.10E-11      3.30E-11      2.20E-11      1.80E-11           Nov. 23, 2020; 5:05 PM; 1,112 kB
-       C-14           5.80E-10                           5.80E-10      5.80E-10      1.90E-08      1.70E-08      1.10E-08      7.40E-09      6.40E-09      5.80E-09           Correction TvD on June 12, 2021: Inhalation DCs for Member
+       C-14           5.80E-10                           5.80E-10      5.80E-10      1.90E-08      1.70E-08      1.10E-08      7.40E-09      6.40E-09      5.80E-09
        N-13           0.00E+00                           0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00           Column B is the selected column of data for the input file
        N-16           0.00E+00                           0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00
        O-14           0.00E+00                           0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00
@@ -14,7 +14,7 @@ Nuclides ICRP-107 Used dataset: Worker, 5   EXT NUCL   Worker, 1 ?m  Worker, 5 ?
        F-18           9.30E-11                           6.00E-11      9.30E-11      4.20E-10      3.10E-10      1.50E-10      1.00E-10      7.30E-11      5.90E-11
       Ne-19           0.00E+00                           0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00
       Ne-24           0.00E+00                           0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00           EXTENDED NUCLIDE LIST (EXTRA DATA FOR ADULTS ONLY!):
-      Na-22           2.00E-09                           1.30E-09      2.00E-09      9.70E-09      7.30E-09      3.80E-09      2.40E-09      1.50E-09      1.30E-09           From Missing_nuclides_2.xlsx
+      Na-22           2.00E-09                           1.30E-09      2.00E-09      9.70E-09      7.30E-09      3.80E-09      2.40E-09      1.50E-09      1.30E-09
       Na-24           5.30E-10                           2.90E-10      5.30E-10      2.30E-09      1.80E-09      9.30E-10      5.70E-10      3.40E-10      2.70E-10           WORKER DCs maximum values (Sv/Bq):
       Mg-27           0.00E+00                           0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00      0.00E+00                           INHALATION                 1/4/21 INH work
       Mg-28           1.70E-09                           1.20E-09      1.70E-09      7.30E-09      7.20E-09      3.50E-09      2.30E-09      1.50E-09      1.20E-09           MISSING NUCLIDE 1 micron     5 micron      val.CMO
@@ -1255,9 +1255,9 @@ Nuclides ICRP-107 Used dataset: Worker, 5   EXT NUCL   Worker, 1 ?m  Worker, 5 ?
 
 
 
-en_Ing\DC_InhIng_v8.xlsx
 
-s of Public for nuclide S-35 (see: DC_InhIng_v9corr.xlsx from June 12, 2021; 5:09 PM)
+
+
  (selected from TAB Selection)
 
 
